@@ -10,33 +10,73 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CarePlanRouteImport } from './routes/care-plan'
+import { Route as CopilotRouteImport } from './routes/copilot'
+import { Route as DoctorRouteImport } from './routes/doctor'
+import { Route as HealthRouteImport } from './routes/health'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CarePlanRoute = CarePlanRouteImport.update({
+  id: '/care-plan',
+  path: '/care-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CopilotRoute = CopilotRouteImport.update({
+  id: '/copilot',
+  path: '/copilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DoctorRoute = DoctorRouteImport.update({
+  id: '/doctor',
+  path: '/doctor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/care-plan': typeof CarePlanRoute
+  '/copilot': typeof CopilotRoute
+  '/doctor': typeof DoctorRoute
+  '/health': typeof HealthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/care-plan': typeof CarePlanRoute
+  '/copilot': typeof CopilotRoute
+  '/doctor': typeof DoctorRoute
+  '/health': typeof HealthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/care-plan': typeof CarePlanRoute
+  '/copilot': typeof CopilotRoute
+  '/doctor': typeof DoctorRoute
+  '/health': typeof HealthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/care-plan' | '/copilot' | '/doctor' | '/health'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/care-plan' | '/copilot' | '/doctor' | '/health'
+  id: '__root__' | '/' | '/care-plan' | '/copilot' | '/doctor' | '/health'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CarePlanRoute: typeof CarePlanRoute
+  CopilotRoute: typeof CopilotRoute
+  DoctorRoute: typeof DoctorRoute
+  HealthRoute: typeof HealthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +88,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/care-plan': {
+      id: '/care-plan'
+      path: '/care-plan'
+      fullPath: '/care-plan'
+      preLoaderRoute: typeof CarePlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/copilot': {
+      id: '/copilot'
+      path: '/copilot'
+      fullPath: '/copilot'
+      preLoaderRoute: typeof CopilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/doctor': {
+      id: '/doctor'
+      path: '/doctor'
+      fullPath: '/doctor'
+      preLoaderRoute: typeof DoctorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CarePlanRoute: CarePlanRoute,
+  CopilotRoute: CopilotRoute,
+  DoctorRoute: DoctorRoute,
+  HealthRoute: HealthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
