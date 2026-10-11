@@ -1,0 +1,828 @@
+{
+ "nav": {
+  "main": "Main navigation",
+  "overview": "Overview",
+  "health": "My Health",
+  "copilot": "AI Copilot",
+  "doctor": "Doctor Visit",
+  "carePlan": "My Care Plan",
+  "overviewShort": "Overview",
+  "healthShort": "Health",
+  "copilotShort": "Copilot",
+  "doctorShort": "Doctor",
+  "carePlanShort": "Care Plan"
+ },
+ "common": {
+  "cancel": "Cancel",
+  "date": "Date",
+  "time": "Time",
+  "save": "Save",
+  "edit": "Edit",
+  "remove": "Remove",
+  "undo": "Undo",
+  "yes": "Yes",
+  "no": "No",
+  "today": "Today",
+  "you": "You",
+  "sample": "Sample",
+  "sampleData": "Sample data",
+  "includesSample": "Includes sample data",
+  "error": "Sorry, something went wrong. Please try again.",
+  "fictionalPatient": "Fictional demo patient",
+  "demoBanner": "Demonstration prototype · all patient data is fictional",
+  "lastDays": "Last {{n}} days",
+  "skipToContent": "Skip to content",
+  "sex": {
+   "female": "Female",
+   "male": "Male"
+  }
+ },
+ "status": {
+  "in": "In demo range",
+  "high": "Above demo range",
+  "low": "Below demo range"
+ },
+ "severity": {
+  "alert": "Alert",
+  "watch": "Watch",
+  "info": "Information"
+ },
+ "context": {
+  "fasting": "Fasting (before breakfast)",
+  "before_meal": "Before a meal",
+  "after_meal": "2 hours after a meal",
+  "bedtime": "Bedtime",
+  "random": "Other / random"
+ },
+ "category": {
+  "glucose": "Glucose",
+  "meal": "Meal",
+  "activity": "Activity",
+  "symptom": "Symptom",
+  "medication": "Medication",
+  "note": "Note"
+ },
+ "actions": {
+  "recordGlucose": "Record glucose",
+  "askCopilot": "Ask AI Copilot",
+  "viewCarePlan": "View my care plan",
+  "prepareReport": "Prepare doctor report"
+ },
+ "validation": {
+  "valueRequired": "Please enter your glucose reading.",
+  "valueNumber": "Please enter a number.",
+  "valueRange": "Enter a value between 1.1–33.3 mmol/L (20–600 mg/dL).",
+  "dateInvalid": "Please choose a valid date and time.",
+  "dateFuture": "The time can't be in the future.",
+  "duplicate": "A reading with the same value and time already exists.",
+  "describe": "Please describe what you'd like to log.",
+  "tooLong": "Please keep this under 200 characters."
+ },
+ "glucose": {
+  "value": "Glucose reading",
+  "unit": "Unit",
+  "context": "Context",
+  "whenTaken": "When was this taken?",
+  "note": "Note (optional)",
+  "notePh": "e.g. late dinner",
+  "moreDetails": "Add symptoms, meal, activity or medication (optional)",
+  "symptoms": "Symptoms",
+  "symptomsPh": "e.g. feeling tired",
+  "meal": "Meal",
+  "mealPh": "e.g. nasi lemak",
+  "activity": "Activity",
+  "activityPh": "e.g. 20 min walk",
+  "medication": "Medication context",
+  "medicationPh": "e.g. took Metformin at 8 am",
+  "save": "Save reading",
+  "saved": "Reading saved. Your history, chart and reports are updated.",
+  "savedLow": "Reading saved. This is below the demo low threshold — if you feel shaky, sweaty or confused, follow your clinic's low-glucose advice or call 999.",
+  "savedVeryHigh": "Reading saved. This is very high — if you feel very unwell, vomiting or drowsy, seek urgent care (999).",
+  "recordTitle": "Record a glucose reading",
+  "enteredAs": "entered as {{v}} {{u}}"
+ },
+ "chart": {
+  "empty": "No readings in this period yet.",
+  "aria": "Glucose chart with {{n}} recorded readings in mmol/L",
+  "band": "Demo reference range {{lo}}–{{hi}} mmol/L (not a personal target)",
+  "low": "Demo low threshold {{v}}",
+  "postMeal": "Demo after-meal limit {{v}}"
+ },
+ "urgent": {
+  "title": "Possible urgent situation",
+  "body": "If you feel very unwell, confused, faint, have chest pain or trouble breathing, call 999 or go to the nearest emergency department now. Don't wait for a caregiver to respond.",
+  "review": "Guidance text pending clinician review."
+ },
+ "overview": {
+  "morning": "Good morning",
+  "afternoon": "Good afternoon",
+  "evening": "Good evening",
+  "summaryOk": "No repeated out-of-range pattern in your recent records.",
+  "summaryWatch": "Some recent readings are worth reviewing — see your insight below.",
+  "summarySafety": "A reading needs attention — please read the guidance below.",
+  "latest": "Latest reading",
+  "vsDemo": "vs demo reference range",
+  "stale": "Your last reading was {{when}}. Consider recording a new one.",
+  "noReadings": "No readings yet.",
+  "trend": "{{n}}-day glucose trend",
+  "range": "Time range",
+  "days": "{{n}} days",
+  "insight": "Smart health insight",
+  "morningInsight": "Your morning glucose readings were above the configured reference range ({{high}} mmol/L) on {{above}} of the last {{total}} recorded mornings.",
+  "notEnoughMornings": "Not enough morning readings yet for an insight.",
+  "viewSupporting": "View supporting readings",
+  "supportingTitle": "Supporting readings",
+  "morningRule": "Rule: last {{n}} recorded fasting readings compared with the demo reference {{high}} mmol/L.",
+  "limitations": "Limitations",
+  "limitationList": [
+   "Uses demo thresholds, not your personal targets.",
+   "Shows what was recorded, not why it changed.",
+   "Days without readings are not counted."
+  ],
+  "allPatterns": "See all patterns",
+  "recommended": "Recommended next step",
+  "stepOk": "Keep logging at your agreed times so patterns can be checked.",
+  "stepWatch": "Keep recording your morning readings, and add this to your questions for your next visit.",
+  "stepSafety": "Contact your clinic about this reading. If you feel unwell, seek urgent care (999).",
+  "todayActions": "Today's health actions",
+  "glucoseLogged": "Glucose logged",
+  "readingsToday": "{{n}} reading(s) today",
+  "noneToday": "Not yet today",
+  "nextMed": "Next medication",
+  "checkIn": "Daily check-in",
+  "checkInDone": "Completed",
+  "checkInPending": "Not done yet",
+  "followUp": "Next doctor follow-up",
+  "disclaimer": "Insights come from simple, transparent rules applied to your records using demo thresholds. They show what changed — not why — and are not a diagnosis."
+ },
+ "patterns": {
+  "labels": {
+   "rule": "Rule",
+   "sufficiency": "Data",
+   "sufficient": "Enough data.",
+   "insufficient": "Limited data.",
+   "next": "Next step",
+   "evidenceCount": "{{n}} supporting reading(s)",
+   "demoThresholds": "demo thresholds"
+  },
+  "safety-low": {
+   "title": "Low readings recorded: {{n}}",
+   "summary": "A reading below {{hypo}} mmol/L was recorded in the last 7 days.",
+   "rule": "Any reading below {{hypo}} mmol/L in the last 7 days.",
+   "sufficiency": "",
+   "next": "Follow your clinic's low-glucose advice. If unwell, call 999."
+  },
+  "safety-high": {
+   "title": "Very high readings recorded: {{n}}",
+   "summary": "A reading above {{high}} mmol/L was recorded in the last 7 days.",
+   "rule": "Any reading above {{high}} mmol/L in the last 7 days.",
+   "sufficiency": "",
+   "next": "If you feel very unwell, seek urgent care (999). Contact your clinic."
+  },
+  "repeated-fasting": {
+   "title": "Morning readings above range on several days",
+   "summary": "{{n}} of {{total}} fasting readings in the last 7 days were above {{high}} mmol/L.",
+   "rule": "At least {{min}} fasting readings above {{high}} mmol/L within 7 days.",
+   "sufficiency": "",
+   "next": "Keep recording and discuss at your next visit."
+  },
+  "repeated-postmeal": {
+   "title": "Evening / after-meal readings above range",
+   "summary": "{{n}} after-meal or bedtime readings in the last 7 days were above {{high}} mmol/L.",
+   "rule": "At least {{min}} after-meal readings above {{high}} mmol/L within 7 days.",
+   "sufficiency": "",
+   "next": "Note meals around these readings and discuss with your doctor."
+  },
+  "baseline-shift": {
+   "title": "Fasting average higher than your usual",
+   "summary": "Recent fasting average {{recent}} mmol/L vs earlier {{base}} mmol/L (+{{diff}}).",
+   "rule": "7-day fasting average at least {{shift}} mmol/L above the previous 3 weeks (needs ≥{{min}} earlier readings).",
+   "sufficiency": "{{nb}} earlier and {{nr}} recent readings.",
+   "next": "Add this to your questions for the doctor."
+  },
+  "baseline-insufficient": {
+   "title": "Not enough data for a personal baseline yet",
+   "summary": "Found {{nb}} earlier and {{nr}} recent fasting readings.",
+   "rule": "Needs at least {{min}} earlier and 3 recent fasting readings.",
+   "sufficiency": "We can't compare with your usual levels yet.",
+   "next": "Keep recording fasting readings."
+  },
+  "insufficient-data": {
+   "title": "Few readings this week",
+   "summary": "Only {{n}} reading(s) in the last 7 days.",
+   "rule": "Needs at least 3 readings in 7 days.",
+   "sufficiency": "Patterns can't be checked reliably.",
+   "next": "Record readings at your agreed times."
+  },
+  "data-gap": {
+   "title": "Days without readings: {{n}}",
+   "summary": "No readings were recorded on these days. This is not treated as a health change.",
+   "rule": "Checks each of the last 7 full days for at least one reading.",
+   "sufficiency": "Patterns may be less reliable.",
+   "next": "Try to record at least once a day."
+  },
+  "unusual-entry": {
+   "title": "Unusual entries to check",
+   "summary": "Some readings changed by more than 8 mmol/L within an hour — possibly an entry or unit error.",
+   "rule": "Consecutive readings within 1 hour differing by more than 8 mmol/L.",
+   "sufficiency": "",
+   "next": "Check these entries are correct."
+  }
+ },
+ "health": {
+  "subtitle": "Record readings and see how they change over time.",
+  "tabs": {
+   "glucose": "Glucose",
+   "log": "Log activity",
+   "timeline": "Timeline",
+   "patterns": "Patterns"
+  },
+  "history": "Glucose history",
+  "recent": "Recent readings",
+  "addReading": "Add a reading",
+  "baseline": "Your fasting baseline",
+  "baselineEarlier": "Earlier average",
+  "baselineEarlierN": "{{n}} readings, 8–28 days ago",
+  "baselineRecent": "Last 7 days",
+  "baselineRecentN": "{{n}} readings",
+  "baselineInsufficient": "Not enough readings yet to calculate your usual level.",
+  "category": "Category",
+  "logTitle": "Log something",
+  "what": "What",
+  "details": "Details (optional)",
+  "when": "When",
+  "saveTimeline": "Save to timeline",
+  "logSaved": "{{cat}} saved to your timeline.",
+  "medNoteHint": "Medication notes are your own records. A day without a log doesn't mean a dose was missed.",
+  "allCategories": "All categories",
+  "timelineEmpty": "Nothing recorded in this period.",
+  "patternsIntro": "Each observation uses a fixed, reviewable rule on your records with demo thresholds. Not a diagnosis.",
+  "noPatterns": "No patterns detected.",
+  "ph": {
+   "meal": "e.g. Nasi lemak, half portion",
+   "activity": "e.g. Brisk walk, 30 min",
+   "symptom": "e.g. Feeling dizzy",
+   "medication": "e.g. Took Metformin late",
+   "note": "e.g. Busy week at work"
+  }
+ },
+ "med": {
+  "reminder": "Medication reminder",
+  "medication": "Medication",
+  "statusLabel": "Status",
+  "instructions": "Prescription instructions",
+  "notes": "Notes",
+  "noneScheduled": "No medication scheduled.",
+  "inAppOnly": "In-app reminders work while the app is open. Nothing is sent when the browser is closed.",
+  "markTaken": "Mark as taken",
+  "markSkipped": "Mark as skipped",
+  "remindLater": "Remind me later",
+  "remindIn": "Remind in",
+  "minutes": "{{n}} min",
+  "until": "until {{time}}",
+  "actualTime": "Actual time",
+  "selfReported": "Self-reported records: they show what you recorded, not confirmed medication-taking.",
+  "today": "Today's doses",
+  "schedules": "My medication schedules",
+  "add": "Add medication",
+  "edit": "Edit medication",
+  "prescribedOnly": "Enter only what your doctor prescribed. This app never prescribes or changes doses.",
+  "empty": "No medication added yet.",
+  "name": "Medication name",
+  "dose": "Prescribed dose",
+  "unit": "Unit",
+  "times": "Scheduled time",
+  "addTime": "Add time",
+  "frequency": "Frequency",
+  "start": "Start date",
+  "end": "End date (optional)",
+  "from": "from {{d}}",
+  "paused": "Paused",
+  "pause": "Pause",
+  "resume": "Resume",
+  "confirmRemove": "Remove {{name}}?",
+  "history": "Medication history",
+  "weekly": "Last 7 days (self-reported)",
+  "scheduled": "Scheduled",
+  "action": "Recorded action",
+  "scheduledAt": "scheduled {{time}}",
+  "removedMed": "Removed medication",
+  "open": "Open",
+  "notifyBody": "{{name}} at {{time}}",
+  "freq": {
+   "daily": "Daily",
+   "weekly": "Weekly"
+  },
+  "status": {
+   "scheduled": "Scheduled",
+   "taken": "Taken",
+   "skipped": "Skipped",
+   "not_logged": "Not logged",
+   "postponed": "Postponed",
+   "pending": "Pending"
+  },
+  "err": {
+   "name": "Please enter the medication name.",
+   "dose": "Please enter a valid dose.",
+   "time": "Please enter valid times.",
+   "start": "Please choose a start date.",
+   "end": "End date must be after start date."
+  },
+  "toast": {
+   "taken": "{{name}} recorded as taken.",
+   "skipped": "{{name}} recorded as skipped.",
+   "postponed": "We'll remind you in {{n}} minutes.",
+   "saved": "Medication saved.",
+   "paused": "Schedule paused.",
+   "resumed": "Schedule resumed.",
+   "removed": "Medication removed."
+  }
+ },
+ "care": {
+  "subtitle": "Doctor-agreed goals, daily guide, medication and progress.",
+  "tabs": {
+   "goals": "My Goals",
+   "guide": "Daily Care Guide",
+   "medication": "Medication",
+   "progress": "My Progress",
+   "caregiver": "Caregiver"
+  },
+  "goalsNotice": "Goals are set by your doctor. AI suggestions never change them. These demo goals are simulated.",
+  "goalFrom": "Goal from {{name}}",
+  "simulatedDoctor": "Simulated doctor",
+  "start": "Start",
+  "target": "Target",
+  "followUp": "Follow-up",
+  "progress": "Progress",
+  "daysOf": "{{done}} of {{total}} days",
+  "feedback": "Doctor feedback",
+  "completedOn": "Completed {{d}}",
+  "completed": "Completed",
+  "goalDone": "Goal marked as completed.",
+  "markGoalDone": "Mark goal as completed",
+  "checkInTitle": "Today's check-in",
+  "ynp": {
+   "yes": "Yes",
+   "partly": "Partly",
+   "no": "No"
+  },
+  "wb": {
+   "1": "Very bad",
+   "2": "Bad",
+   "3": "OK",
+   "4": "Good",
+   "5": "Very good"
+  },
+  "ci": {
+   "goal": "Did you follow your agreed goal?",
+   "glucose": "Did you record glucose?",
+   "autoGlucose": "A reading was found for today.",
+   "med": "Did you log your medication?",
+   "activity": "Did you do your activity?",
+   "wellbeing": "How are you feeling?",
+   "difficulties": "Any difficulties?",
+   "reflection": "How did today go? (optional)",
+   "needGoal": "Please answer the goal question.",
+   "saved": "Check-in saved. Progress updated.",
+   "submit": "Complete check-in",
+   "update": "Update check-in",
+   "done": "Today's check-in is complete"
+  }
+ },
+ "meals": {
+  "generalNotice": "General education only — not a clinically personalised meal plan. Ask a dietitian for advice for you.",
+  "prefNotice": "Filtered by preferences you entered. Still general education, not a clinical meal plan.",
+  "weekTitle": "7-day care guide",
+  "slot": {
+   "breakfast": "Breakfast",
+   "lunch": "Lunch",
+   "dinner": "Dinner",
+   "snack": "Snack"
+  },
+  "swap": "Replace",
+  "activity": "Activity idea",
+  "medSummary": "Medication",
+  "agreedGoal": "Agreed goal",
+  "allergyNote": "You noted allergies ({{a}}). Always check ingredients.",
+  "eduTitle": "Learn about eating well",
+  "prefsTitle": "My meal preferences (optional)",
+  "prefsHint": "We only use what you tell us. We never guess medical diet restrictions.",
+  "prefsSaved": "Preferences saved.",
+  "prefs": {
+   "preferences": "Food preferences",
+   "allergies": "Allergies",
+   "restrictions": "Dietary restrictions",
+   "budget": "Budget",
+   "cuisine": "Preferred cuisine",
+   "vegetarian": "Vegetarian"
+  },
+  "budget": {
+   "any": "Any",
+   "low": "Low",
+   "medium": "Medium"
+  },
+  "cuisine": {
+   "any": "Any",
+   "malay": "Malay",
+   "chinese": "Chinese",
+   "indian": "Indian"
+  },
+  "edu": {
+   "balanced": {
+    "title": "Balanced meals (suku-suku separuh)",
+    "body": "Half the plate vegetables, a quarter protein (fish, chicken, tofu, eggs), a quarter carbohydrates (rice, noodles, bread)."
+   },
+   "carbs": {
+    "title": "Carbohydrate choices",
+    "body": "Wholegrain options like brown rice, wholemeal bread, oats and chapati are often discussed as better choices than refined white rice or white bread."
+   },
+   "portion": {
+    "title": "Portion awareness",
+    "body": "Try a smaller rice portion, ask for 'nasi separuh', and fill up on vegetables."
+   },
+   "drinks": {
+    "title": "Sugary drinks",
+    "body": "Choose plain water, 'kosong' or 'kurang manis' drinks instead of teh tarik, sirap or soft drinks."
+   },
+   "timing": {
+    "title": "Meal timing",
+    "body": "Regular meal times can help, especially if you take diabetes medication. Ask your doctor about late dinners."
+   },
+   "labels": {
+    "title": "Nutrition labels",
+    "body": "Check 'Jumlah Gula / Total sugar' and carbohydrate per serving on packaged foods. Look for the Healthier Choice logo."
+   }
+  },
+  "options": {
+   "wholemealEgg": {
+    "name": "Wholemeal bread & boiled egg",
+    "desc": "With unsweetened tea or kopi-o kosong and a small fruit portion."
+   },
+   "oatsNuts": {
+    "name": "Oats with nuts",
+    "desc": "Plain oats with a few nuts, no added sugar."
+   },
+   "thosaiDhal": {
+    "name": "Thosai with dhal",
+    "desc": "One thosai with dhal, plain drink."
+   },
+   "nasiLemakSmall": {
+    "name": "Nasi lemak (small portion)",
+    "desc": "Half rice, egg, cucumber, little sambal; skip fried sides."
+   },
+   "chickenPorridge": {
+    "name": "Chicken porridge",
+    "desc": "Small bowl with lean chicken and vegetables."
+   },
+   "brownRiceFish": {
+    "name": "Brown rice, grilled fish & vegetables",
+    "desc": "A balanced plate following the suku-suku separuh idea."
+   },
+   "nasiCampur": {
+    "name": "Nasi campur (smart choice)",
+    "desc": "Half rice, two vegetable dishes and one non-fried protein."
+   },
+   "yongTauFoo": {
+    "name": "Yong tau foo (soup)",
+    "desc": "Choose vegetables and tofu, clear soup, fewer fried items."
+   },
+   "chapatiDhal": {
+    "name": "Chapati with dhal & vegetables",
+    "desc": "Wholemeal chapati with dhal and sabzi."
+   },
+   "steamedChicken": {
+    "name": "Steamed chicken with vegetables",
+    "desc": "Skinless steamed chicken, small rice, greens."
+   },
+   "vegSoupTofu": {
+    "name": "Clear vegetable soup with tofu",
+    "desc": "With a small portion of rice or noodles."
+   },
+   "ikanBakar": {
+    "name": "Ikan bakar with ulam",
+    "desc": "Grilled fish, ulam and a small portion of rice."
+   },
+   "chapatiVeg": {
+    "name": "Chapati with vegetable curry",
+    "desc": "Less oil and coconut milk."
+   },
+   "clearSoupChicken": {
+    "name": "Clear chicken soup",
+    "desc": "With vegetables and a small portion of rice."
+   },
+   "fruitGuava": {
+    "name": "Guava or apple (1 portion)",
+    "desc": "A palm-sized fruit portion."
+   },
+   "nuts": {
+    "name": "A small handful of unsalted nuts",
+    "desc": "About 1 tablespoon."
+   },
+   "yogurt": {
+    "name": "Plain yoghurt",
+    "desc": "Unsweetened, small cup."
+   },
+   "wholegrainCrackers": {
+    "name": "Wholegrain crackers",
+    "desc": "2–3 pieces with a plain drink."
+   }
+  }
+ },
+ "activity": {
+  "title": "Activity guide",
+  "walk": {
+   "name": "Gentle walking",
+   "desc": "10–30 minutes at a comfortable pace, e.g. after dinner."
+  },
+  "stretch": {
+   "name": "Light stretching",
+   "desc": "Slow stretches for arms, legs and back."
+  },
+  "lowImpact": {
+   "name": "Low-impact activity",
+   "desc": "Cycling slowly, swimming or tai chi."
+  },
+  "chair": {
+   "name": "Chair-based exercise",
+   "desc": "Seated leg lifts and arm movements, good for limited mobility."
+  },
+  "cautionTitle": "Before you start",
+  "cautions": [
+   "These are not safe for everyone — ask your doctor first.",
+   "If you take insulin or sulphonylureas, you may be at risk of low glucose; carry a sugary snack.",
+   "Stop if you feel dizzy, shaky, short of breath or have chest pain.",
+   "Wear comfortable shoes and check your feet."
+  ]
+ },
+ "progress": {
+  "checkIns": "Check-ins (7 days)",
+  "glucoseDays": "Days with glucose",
+  "activityDays": "Activity days",
+  "medTaken": "Doses recorded taken",
+  "wellbeing": "Wellbeing (last 7 days)",
+  "goals": "Goal progress",
+  "barriers": "Reported difficulties"
+ },
+ "cg": {
+  "simulatedNotice": "Simulated caregiver mode for demonstration. There is no real login, so these controls do not provide secure access. No SMS, email or WhatsApp is sent.",
+  "enable": "Enable caregiver mode",
+  "enableHint": "Share selected information with people you approve.",
+  "name": "Name",
+  "relationship": "Relationship",
+  "contact": "Contact (optional)",
+  "shareTitle": "What may they see?",
+  "share": {
+   "status": "General health status",
+   "readings": "Selected glucose readings",
+   "medication": "Medication logging status",
+   "carePlan": "Care-plan progress",
+   "alerts": "Pattern alerts"
+  },
+  "notFullHistory": "Your full health history is never shared automatically.",
+  "categoriesTitle": "Alerts they may receive",
+  "cat": {
+   "out_of_range": "Repeated out-of-range readings",
+   "baseline_change": "Change from usual levels",
+   "safety": "Possibly urgent reading",
+   "support_request": "Patient asks for support"
+  },
+  "consentText": "I give explicit consent to share the selected information with this caregiver. I can revoke this at any time.",
+  "err": {
+   "name": "Please enter name and relationship.",
+   "consent": "Consent is required."
+  },
+  "toast": {
+   "saved": "Caregiver saved.",
+   "revoked": "Access for {{name}} revoked.",
+   "ack": "Alert acknowledged.",
+   "support": "Support request added to the caregiver's notification centre (simulated)."
+  },
+  "consentGiven": "Consent given {{d}}",
+  "revokedOn": "Access revoked {{d}}",
+  "sharing": "Sharing",
+  "nothing": "Nothing",
+  "review": "Review permissions",
+  "revoke": "Revoke access",
+  "restore": "Restore access",
+  "add": "Add caregiver",
+  "supportLabel": "Message to your caregiver (optional)",
+  "supportPh": "e.g. Can you call me this evening?",
+  "supportDefault": "I would like some support today.",
+  "supportBtn": "Ask caregiver for support",
+  "supportDisabled": "Enable caregiver mode and allow support requests in Settings.",
+  "askTitle": "Ask for support",
+  "manageInSettings": "Manage caregivers and consent in Settings (gear icon).",
+  "centre": "Caregiver notification centre",
+  "viewAs": "View as",
+  "centreNotice": "Caregiver view (simulated). Alerts follow fixed rules and your consent. Alerts do not replace emergency services.",
+  "modeOff": "Caregiver mode is off.",
+  "noCaregiver": "No approved caregiver.",
+  "viewingAs": "Viewing as {{name}} ({{rel}}) · Patient: {{patient}}",
+  "noAlerts": "No alerts.",
+  "sev": {
+   "info": "Informational",
+   "urgent": "Possibly urgent"
+  },
+  "explain": {
+   "out_of_range": "Multiple recent glucose readings were outside the patient's configured reference range. Please review the shared information and follow the patient's agreed care instructions.",
+   "baseline_change": "The patient's recent fasting average is higher than their usual level. Please review and encourage them to discuss it with their doctor.",
+   "safety": "A reading outside the demo safety threshold was recorded. Urgent-care guidance was shown to the patient immediately."
+  },
+  "noEvidenceShared": "Readings are not shared with this caregiver.",
+  "simulatedDelivery": "Simulated in-app alert — not delivered by SMS/email.",
+  "acknowledge": "Acknowledge",
+  "acknowledgedAt": "Acknowledged {{d}}",
+  "notAcknowledged": "Not acknowledged"
+ },
+ "notif": {
+  "title": "Notifications",
+  "empty": "Nothing new.",
+  "caregiverAlerts": "{{n}} new caregiver alert(s)",
+  "viewPatterns": "View patterns",
+  "viewCaregiver": "Caregiver centre"
+ },
+ "settings": {
+  "title": "Settings",
+  "subtitle": "Language, accessibility, caregivers and privacy.",
+  "general": "General",
+  "caregiver": "Caregiver",
+  "privacy": "Privacy",
+  "language": "Language",
+  "elderly": "Elderly-friendly mode",
+  "elderlyHint": "Larger text and buttons, higher contrast, less clutter.",
+  "notifications": "Browser notifications",
+  "notifyLimit": "Only shown while the app is open; no background delivery.",
+  "enableNotifications": "Allow notifications",
+  "perm": {
+   "granted": "Notifications are allowed.",
+   "denied": "Notifications are blocked. You'll still see in-app reminders.",
+   "default": "Not yet allowed.",
+   "unsupported": "This browser doesn't support notifications. In-app reminders still work."
+  },
+  "demoData": "Demo data",
+  "demoDataHint": "Restore the fictional patient's sample records.",
+  "reset": "Reset demo data",
+  "resetConfirm": "Reset all demo data?",
+  "resetDone": "Demo data reset."
+ },
+ "privacy": {
+  "storage": {
+   "title": "Where data is stored",
+   "body": "All data stays in this browser (local storage). Nothing is sent to a server."
+  },
+  "consent": {
+   "title": "Your consent",
+   "body": "Caregivers only see what you choose. Revoking stops sharing immediately."
+  },
+  "noAuth": {
+   "title": "Demo limitations",
+   "body": "There are no real accounts, so this prototype cannot secure access. Use fictional data only."
+  },
+  "pdpa": {
+   "title": "PDPA",
+   "body": "Designed with Malaysia's Personal Data Protection Act in mind; full legal compliance has not been reviewed."
+  },
+  "ai": {
+   "title": "AI Copilot",
+   "body": "Demo responses only. No data is sent to an AI service."
+  }
+ },
+ "copilot": {
+  "subtitle": "Diabetes education and help understanding your records.",
+  "demoTitle": "Demo assistant — no AI or medical-source service is connected yet.",
+  "demoBody": "Answers are pre-written demo responses using your records. It can't diagnose, prescribe or change medication. For chest pain, fainting, confusion or other urgent symptoms, call 999.",
+  "shareRecords": "Allow the Copilot to use my recorded data",
+  "empty": "How can I help today?",
+  "tryOne": "Try one of these questions.",
+  "suggestions": [
+   "Can you explain my recent glucose trend?",
+   "What should I ask my doctor?",
+   "What are some diabetes-friendly Malaysian meals?",
+   "What medication is scheduled today?"
+  ],
+  "loading": "Preparing a demo answer…",
+  "placeholder": "Type your question…",
+  "send": "Send",
+  "kind": {
+   "safety": "Safety message",
+   "personal": "Based on your records",
+   "education": "General diabetes education"
+  },
+  "demoResponse": "Demo response",
+  "supporting": "Supporting readings ({{n}})",
+  "sources": "Sources",
+  "noSources": "No sources were retrieved — the medical-reference service isn't connected in this demo. Please confirm with your healthcare team.",
+  "r": {
+   "urgent": "These symptoms may need urgent attention. Please don't rely on this app. Call 999 or go to the nearest emergency department, or contact your clinic immediately.",
+   "noPrescribe": "I can't recommend starting, stopping or changing medication or doses. Please discuss this with your doctor or pharmacist.",
+   "trendIntro": "Here's what your recorded data shows (rule-based monitoring, not a diagnosis):",
+   "noPattern": "No repeated out-of-range pattern in the last 7 days.",
+   "morning": "Your morning readings were above {{high}} mmol/L on {{above}} of the last {{total}} recorded mornings.",
+   "noBaseline": "There isn't enough earlier data to compare with your usual levels.",
+   "trendOutro": "Late dinners and late nights were also logged on some days. These happened around the same time; the records don't prove one caused the other. Your doctor can help interpret this.",
+   "medIntro": "Your prescribed schedule for today (from your own records):",
+   "noMeds": "No medication scheduled today.",
+   "medOutro": "I can't change your medication. Ask your doctor about any concerns.",
+   "doctorIntro": "Based on your records, you might ask:",
+   "doctorQs": [
+    "My morning readings have been higher — what could be contributing?",
+    "Are my target ranges right for me?",
+    "Should I change my dinner or sleep times?",
+    "When should I contact the clinic between visits?"
+   ],
+   "doctorOutro": "You'll find these on the Doctor Visit report too.",
+   "goalIntro": "Your doctor-agreed goals:",
+   "goalOutro": "Complete your daily check-in on My Care Plan.",
+   "mealIntro": "General ideas often discussed in diabetes education (not personalised):",
+   "mealTips": [
+    "Use the 'suku-suku separuh' plate: half vegetables, a quarter protein, a quarter carbs.",
+    "Choose brown rice or a smaller rice portion.",
+    "Ikan bakar, clear soups and tofu are lighter than deep-fried dishes.",
+    "Ask for 'kurang manis' or plain drinks."
+   ],
+   "mealOutro": "A dietitian can tailor this to you.",
+   "terms": "HbA1c reflects average glucose over about 2–3 months. Fasting glucose is measured before eating in the morning. Your doctor decides your personal targets.",
+   "fallback": "I'm a demo assistant. I can explain your recent glucose trend, list today's medication schedule, prepare doctor questions and share general Malaysian meal ideas."
+  }
+ },
+ "report": {
+  "subtitle": "Your consultation report, ready to share or print.",
+  "period": "Report period",
+  "print": "Print / Save PDF",
+  "header": "Pre-consultation summary · DEMO",
+  "profile": "{{age}} y · {{sex}} · {{type}} diabetes ({{years}} y)",
+  "periodLabel": "Period",
+  "visit": "Visit",
+  "legend": "Fictional patient. Tags show the source: Recorded fact · Patient statement · Rule-detected · AI-generated (demo) · Doctor-entered. Nothing here is a diagnosis.",
+  "tag": {
+   "recorded": "Recorded",
+   "patient": "Patient statement",
+   "rule": "Rule-detected",
+   "ai": "AI-generated · demo",
+   "doctor": "Doctor",
+   "suggested": "Suggested"
+  },
+  "s": {
+   "summary": "Patient summary",
+   "glucose": "Glucose review",
+   "medication": "Medication summary",
+   "lifestyle": "Lifestyle summary",
+   "carePlan": "Care plan",
+   "caregiver": "Caregiver alert history",
+   "explanation": "Plain-language explanation",
+   "questions": "Questions for the doctor",
+   "notes": "Doctor notes"
+  },
+  "available": "Available records",
+  "avail": {
+   "readings": "{{n}} glucose readings",
+   "logs": "{{n}} meal/activity/symptom logs",
+   "meds": "{{n}} past medication doses",
+   "checkins": "{{n}} daily check-ins"
+  },
+  "missingTitle": "Missing information",
+  "missing": {
+   "gaps": "Some days have no glucose readings.",
+   "baseline": "Not enough data for a personal baseline.",
+   "meds": "{{n}} doses have no record (unconfirmed — not the same as missed).",
+   "meals": "No meals logged."
+  },
+  "readings": "Readings",
+  "average": "Average",
+  "range": "Range",
+  "fastingAvg": "Fasting avg (7d)",
+  "medNote": "Patient-entered records, not confirmed adherence. 'Not logged' means unconfirmed.",
+  "nothing": "Nothing logged in this period.",
+  "reflections": "Patient reflections",
+  "followedDays": "goal followed on {{n}} of {{total}} check-in days",
+  "followUpStatus": "Next follow-up: {{d}}",
+  "noAlerts": "No consented caregiver alerts in this period.",
+  "alertNote": "Only alerts the patient consented to share.",
+  "explainShift": "Morning readings have been higher recently than earlier. Late nights and late dinners were also logged on some of these days. These occurred around the same time; the records do not show that one caused the other.",
+  "explainNone": "Readings in this period look broadly similar to earlier records based on available data.",
+  "explainNote": "Template-generated demo text. Not reviewed by a clinician; no sources retrieved.",
+  "q": {
+   "repeated-fasting": "What could be contributing to my higher morning readings?",
+   "repeated-postmeal": "My after-dinner readings are often high — what should I look at?",
+   "baseline-shift": "My fasting average has gone up — should anything change?",
+   "safety-low": "I had a low reading — what should I do if it happens again?",
+   "safety-high": "I had a very high reading — when should I seek help?",
+   "meds": "I sometimes don't log or skip doses — how important is the timing?",
+   "targets": "Are my target ranges right for me?",
+   "contact": "When should I contact the clinic between visits?"
+  },
+  "addQuestion": "Add a question…",
+  "regenerate": "Regenerate questions",
+  "simulatedClinician": "Simulated clinician input — not an authenticated doctor account.",
+  "simulated": "simulated",
+  "assessment": "Assessment",
+  "plan": "Plan",
+  "followUpGoal": "Follow-up goal",
+  "followUpGoalPh": "e.g. Walk 20 minutes after dinner 3 times a week",
+  "saveNote": "Save doctor note",
+  "noteEmpty": "Please write a note first.",
+  "noteSaved": "Doctor note saved.",
+  "noteSavedGoal": "Note saved and goal added to My Care Plan.",
+  "goalFromVisit": "Agreed at the doctor visit."
+ }
+}
