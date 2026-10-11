@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { addDays, format, subDays } from "date-fns";
+import { format, subDays } from "date-fns";
 import { useState } from "react";
 import { ArrowRight, CalendarCheck, CalendarClock, ClipboardList, Droplet, Lightbulb, MessageCircleQuestion, Pill, Plus, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
 
 function Overview() {
   const { data } = useStore();
-  const { t, fmt, elderly } = useI18n();
+  const { t, tl, fmt, elderly } = useI18n();
   const [open, setOpen] = useState(false);
   const [range, setRange] = useState(7);
   if (!data) return <PageLoading />;
@@ -45,7 +45,7 @@ function Overview() {
   const top = findings.find((f) => f.severity !== "info");
   const morning = morningSummary(data.readings, th, now);
   const today = format(now, "yyyy-MM-dd");
-  const loggedToday = data.readings.filter((r) => r.timestamp.slice(0, 10) === today || format(new Date(r.timestamp), "yyyy-MM-dd") === today).length;
+  const loggedToday = data.readings.filter((r) => format(new Date(r.timestamp), "yyyy-MM-dd") === today).length;
   const checkIn = data.checkIns.find((c) => c.date === today);
   const nextDose = nextReminder(data.medications, data.medEvents, now);
   const hour = now.getHours();
@@ -130,7 +130,7 @@ function Overview() {
                 <EvidenceTable readings={[...morning.evidence].reverse()} t={th} />
                 <div className="space-y-2 rounded-lg bg-secondary p-3 text-sm">
                   <p className="font-semibold">{t("overview.limitations")}</p>
-                  <ul className="list-disc space-y-1 pl-5">{useLimitations().map((x) => <li key={x}>{x}</li>)}</ul>
+                  <ul className="list-disc space-y-1 pl-5">{tl("overview.limitationList").map((x) => <li key={x}>{x}</li>)}</ul>
                 </div>
                 <Link to="/health" search={{ tab: "patterns" }} className="text-sm font-medium text-primary">{t("overview.allPatterns")} →</Link>
               </DialogContent>
@@ -161,14 +161,8 @@ function Overview() {
       </div>
 
       <p className="text-xs text-muted-foreground">{t("overview.disclaimer")}</p>
-      <span className="hidden">{format(addDays(now, 0), "yyyy")}</span>
     </div>
   );
-}
-
-function useLimitations() {
-  const { tl } = useI18n();
-  return tl("overview.limitationList");
 }
 
 function ActionTile({ icon: Icon, label, value, done }: { icon: typeof Droplet; label: string; value: string; done?: boolean }) {
