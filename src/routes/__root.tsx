@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { PrefsProvider } from "../lib/i18n";
 import { StoreProvider } from "@/lib/store";
 import { AppShell } from "@/components/AppShell";
 import { Toaster } from "@/components/ui/sonner";
@@ -117,12 +118,14 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StoreProvider>
-        <AppShell>
-          <Outlet />
-        </AppShell>
-        <Toaster position="top-center" richColors />
-      </StoreProvider>
+      <PrefsProvider>
+        <StoreProvider>
+          <AppShell>
+            <Outlet />
+          </AppShell>
+          <Toaster position="top-center" richColors />
+        </StoreProvider>
+      </PrefsProvider>
     </QueryClientProvider>
   );
 }

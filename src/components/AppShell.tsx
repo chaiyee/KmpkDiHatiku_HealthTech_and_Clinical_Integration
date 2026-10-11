@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Bell, CalendarCheck, HeartPulse, LayoutDashboard, MessageCircleQuestion, Stethoscope } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ const NAV = [
 function ReminderWatcher() {
   const { data } = useStore();
   const { t, fmt } = useI18n();
+  const navigate = useNavigate();
   const shown = useRef(new Set<string>());
   const ref = useRef(data);
   ref.current = data;
@@ -38,7 +39,7 @@ function ReminderWatcher() {
         if (shown.current.has(k)) continue;
         shown.current.add(k);
         const body = t("med.notifyBody", { name: `${dose.schedule.name} ${dose.schedule.dose} ${dose.schedule.unit}`, time: fmt.hhmm(dose.time) });
-        toast(t("med.reminder"), { description: body, duration: 15000, action: { label: t("med.open"), onClick: () => (window.location.href = "/care-plan?tab=medication") } });
+        toast(t("med.reminder"), { description: body, duration: 15000, action: { label: t("med.open"), onClick: () => void navigate({ to: "/care-plan", search: { tab: "medication" } }) } });
         browserNotify(t("med.reminder"), body);
       }
     };
@@ -48,7 +49,7 @@ function ReminderWatcher() {
       clearTimeout(first);
       clearInterval(id);
     };
-  }, [t, fmt]);
+  }, [t, fmt, navigate]);
   return null;
 }
 
