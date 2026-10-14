@@ -56,6 +56,8 @@ interface Store {
   saveCaregiver: (settings: CaregiverSettings) => void;
   revokeCaregiver: () => void;
   acknowledgeCaregiver: (id: string) => void;
+  /** Guardian demo check-in: records the feeling once per day; "unwell"/"help" may create one simulated safety alert per day if consent allows. */
+  guardianCheckIn: (feeling: "okay" | "unwell" | "help") => { alerted: boolean };
   saveEmergency: (info: EmergencyInfo) => void;
 }
 
@@ -172,6 +174,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       saveCaregiver: (settings) => update((d) => ({ ...d, caregiver: settings })),
       revokeCaregiver: () => update((d) => ({ ...d, caregiver: { ...(d.caregiver ?? DEFAULT_CAREGIVER), shareRepeated: false, shareSafety: false } })),
       acknowledgeCaregiver: (id) => update((d) => ({ ...d, caregiverAlerts: (d.caregiverAlerts ?? []).map((alert) => alert.id === id && !alert.acknowledgedAt && sharingAllows(d.caregiver, alert.category) ? { ...alert, acknowledgedAt: new Date().toISOString() } : alert) })),
+      guardianCheckIn: (feeling) => {
+        const alerted = feeling !== "okay" && !!data && sharingAllows(data.caregiver, "safety");
+        update((d) => {
+          const now = new Date();
+          const day = localDay(now);
+          const titles = { okay: "Feeling okay (Guardian check-in)", unwell: "Feeling unwell (Guardian check-in)", help: "Needs help (Guardian check-in)" } as const;
+          const title = titles[feeling];
+          // Replay-safe: one log per feeling per day.
+          const logs = d.logs.some((l) => l.title === title && localDay(new Date(l.timestamp)) === day) ? d.logs
+            : [...d.logs, { id: uid(), source: "user" as const, timestamp: now.toISOString(), category: "symptom" as const, title, detail: "Simulated Guardian Mode demo" }];
+          let caregiverAlerts = d.caregiverAlerts ?? [];
+          if (feeling !== "okay" && sharingAllows(d.caregiver, "safety")) {
+            const id = `guardian-${feeling}-${day}`;
+            if (!caregiverAlerts.some((a) => a.id === id)) {
+              const evidence = d.readings.filter((r) => r.source === "device").sort((a, b) => b.timestamp.localeCompare(a.timestamp)).slice(0, 3);
+              caregiverAlerts = [{ id, category: "safety" as const, title: feeling === "help" ? "Patient asked for help (Guardian check-in)" : "Patient reported feeling unwell (Guardian check-in)",
+                summary: "Reported during the simulated Guardian Mode check-in after a repeated high fasting pattern.", rule: "Patient-reported symptom with safety-alert sharing consent",
+                evidence: evidence.map((r) => ({ ...r })), thresholds: { ...d.thresholds }, createdAt: now.toISOString() }, ...caregiverAlerts];
+            }
+          }
+          return { ...d, logs, caregiverAlerts };
+        });
+        return { alerted };
+      },
       saveEmergency: (info) => update((d) => ({ ...d, emergency: info })),
       saveMedication: (schedule) => update((d) => {
         const id = schedule.id ?? uid();
