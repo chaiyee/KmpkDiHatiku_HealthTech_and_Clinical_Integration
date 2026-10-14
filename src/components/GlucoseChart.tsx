@@ -1,56 +1,86 @@
-import { CartesianGrid, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import type { GlucoseContext, GlucoseReading, Thresholds } from "@/lib/types";
-import { useI18n } from "@/lib/i18n";
+import { useLanguage } from "@/lib/i18n";
 
-// Only recorded points are drawn; gaps between days are not interpolated into fake readings
-// (the line connects recorded points only, each shown as a dot).
-export function GlucoseChart({ readings, t: th, height = 260 }: { readings: GlucoseReading[]; t: Thresholds; height?: number }) {
-  const { t, fmt } = useI18n();
+import { CartesianGrid, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import type { GlucoseReading, Thresholds } from "@/lib/types";
+import { CONTEXT_LABELS } from "@/lib/types";
+
+type DotGroup = "fasting" | "after_meal" | "other";
+const DOT_COLORS: Record<DotGroup, string> = {
+  fasting: "var(--color-primary)",
+  after_meal: "#f59e0b",
+  other: "var(--color-muted-foreground)",
+};
+const DOT_LABELS: Record<DotGroup, string> = {
+  fasting: "Fasting",
+  after_meal: "After meal",
+  other: "Other",
+};
+function groupFor(context: GlucoseReading["context"]): DotGroup {
+  if (context === "fasting") return "fasting";
+  if (context === "after_meal") return "after_meal";
+  return "other";
+}
+
+export function GlucoseChart({ readings, t, height = 260 }: { readings: GlucoseReading[]; t: Thresholds; height?: number }) {
+  const { t: tr, format } = useLanguage();
   if (!readings.length) {
     return (
       <div className="flex items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground" style={{ height }}>
-        {t("chart.empty")}
-      </div>
+        {tr("No readings in this period yet.")}</div>
     );
   }
   const data = [...readings]
     .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
     .map((r) => ({ x: new Date(r.timestamp).getTime(), value: r.value, context: r.context }));
-  const max = Math.max(14, Math.ceil(Math.max(...data.map((d) => d.value)) + 1));
+  const values = data.map((d) => d.value);
+  const lowestValue = Math.min(...values);
+  const highestValue = Math.max(...values);
+  const yMin = Math.min(2, lowestValue - 1);
+  const yMax = Math.max(14, highestValue + 1);
   return (
-    <div>
-      <div style={{ height }} role="img" aria-label={t("chart.aria", { n: data.length })}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-            <CartesianGrid stroke="var(--color-border)" vertical={false} />
-            <ReferenceArea y1={th.hypo} y2={th.fastingHigh} fill="var(--color-success)" fillOpacity={0.08} />
-            <ReferenceLine y={th.hypo} stroke="var(--color-destructive)" strokeDasharray="4 4" />
-            <ReferenceLine y={th.postMealHigh} stroke="var(--color-warning)" strokeDasharray="4 4" />
-            <XAxis
-              dataKey="x"
-              type="number"
-              scale="time"
-              domain={["dataMin", "dataMax"]}
-              tickFormatter={(v: number) => fmt.dayMonth(new Date(v))}
-              tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }}
-              stroke="var(--color-border)"
-              minTickGap={24}
-            />
-            <YAxis domain={[2, max]} tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} stroke="var(--color-border)" />
-            <Tooltip
-              labelFormatter={(v) => fmt.dateTime(new Date(v as number))}
-              formatter={(v: number, _n, p) => [`${v} mmol/L`, t(`context.${(p.payload as { context: GlucoseContext }).context}`)]}
-              contentStyle={{ borderRadius: 8, border: "1px solid var(--color-border)" }}
-            />
-            <Line type="linear" dataKey="value" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 3, fill: "var(--color-primary)" }} isAnimationActive={false} />
-          </LineChart>
-        </ResponsiveContainer>
+    <div style={{ height }} role="img" aria-label={tr("Glucose readings chart in mmol/L")}>
+      <ResponsiveContainer width="100%" height="85%">
+        <LineChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+          <CartesianGrid stroke="var(--color-border)" vertical={false} />
+          <ReferenceArea y1={t.hypo} y2={t.fastingHigh} fill="var(--color-success)" fillOpacity={0.08} />
+          <ReferenceLine y={t.postMealHigh} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: tr("After-meal limit"), position: "insideTopRight", fontSize: 11, fill: "#f59e0b" }} />
+          <XAxis
+            dataKey="x"
+            type="number"
+            scale="time"
+            domain={["dataMin", "dataMax"]}
+            tickFormatter={(v) => format(new Date(v), "d MMM")}
+            tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }}
+            stroke="var(--color-border)"
+          />
+          <YAxis domain={[yMin, yMax]} tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }} stroke="var(--color-border)" />
+          <Tooltip
+            labelFormatter={(v) => format(new Date(v as number), "EEE d MMM, h:mm a")}
+            formatter={(v: number, _n, p) => [`${v} mmol/L`, tr(CONTEXT_LABELS[(p.payload as { context: keyof typeof CONTEXT_LABELS }).context])]}
+            contentStyle={{ borderRadius: 8, border: "1px solid var(--color-border)" }}
+          />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke="var(--color-primary)"
+            strokeWidth={2}
+            dot={(props: { cx?: number; cy?: number; payload?: { context: GlucoseReading["context"] }; key?: string }) => {
+              const { cx, cy, payload, key } = props;
+              const group = groupFor(payload?.context ?? "random");
+              return <circle key={key} cx={cx} cy={cy} r={4} fill={DOT_COLORS[group]} stroke="var(--color-background)" strokeWidth={1} />;
+            }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-1 text-xs text-muted-foreground">
+        {(Object.keys(DOT_LABELS) as DotGroup[]).map((g) => (
+          <span key={g} className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: DOT_COLORS[g] }} />
+            {tr(DOT_LABELS[g])}
+          </span>
+        ))}
       </div>
-      <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-        <span><span className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-success/20 align-middle" />{t("chart.band", { lo: th.hypo, hi: th.fastingHigh })}</span>
-        <span><span className="mr-1 inline-block w-4 border-t-2 border-dashed border-destructive align-middle" />{t("chart.low", { v: th.hypo })}</span>
-        <span><span className="mr-1 inline-block w-4 border-t-2 border-dashed border-warning align-middle" />{t("chart.postMeal", { v: th.postMealHigh })}</span>
-      </p>
+      <p className="sr-only">{tr("Shaded band shows the demo reference range")}{" "}{t.hypo}–{t.fastingHigh} mmol/L.</p>
     </div>
   );
 }

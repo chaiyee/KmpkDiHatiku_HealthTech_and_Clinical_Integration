@@ -58,7 +58,7 @@
   --color-danger-soft: var(--danger-soft);
   --color-navy: var(--navy);
   --color-navy-foreground: var(--navy-foreground);
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", ui-sans-serif, system-ui, sans-serif;
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -157,7 +157,25 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0;
   }
+}
+
+main p, main h1, main h2, main h3, main li, main td, nav a, button {
+  overflow-wrap: anywhere;
+}
+main .tracking-tight { letter-spacing: 0; }
+main [data-slot="card-header"], main .flex-row.space-y-0 { flex-wrap: wrap; gap: 0.75rem; }
+input, textarea { min-width: 0; }
+@media (max-width: 767px) {
+  button, [role="combobox"], [role="tab"] { min-height: 44px; }
+  main .h-12:not(.w-12) { height: auto; min-height: 48px; }
+  main button { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+  main .text-xs { font-size: 0.8125rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
 
 @media print {
@@ -166,14 +184,6 @@
   .print-full { margin: 0 !important; padding: 0 !important; max-width: none !important; }
 }
 
-/* Elderly-friendly mode: larger text & targets, stronger contrast. Everything is rem-based, so scaling the root scales the UI. */
-html.elderly { font-size: 19px; }
-html.elderly body { font-size: 1.05rem; line-height: 1.6; }
-html.elderly {
-  --muted-foreground: oklch(0.36 0.04 250);
-  --border: oklch(0.8 0.02 220);
-  --input: oklch(0.7 0.02 220);
-}
-html.elderly button, html.elderly [role="tab"] { min-height: 2.75rem; }
-html.elderly .elderly-hide { display: none !important; }
-:focus-visible { outline: 3px solid var(--color-ring); outline-offset: 2px; }
+.tour-highlight { outline: 3px solid hsl(var(--primary)); outline-offset: 3px; border-radius: 0.5rem; animation: tour-pulse 1.6s ease-in-out infinite; }
+@keyframes tour-pulse { 0%, 100% { outline-offset: 2px; } 50% { outline-offset: 6px; } }
+@media (prefers-reduced-motion: reduce) { .tour-highlight { animation: none; } }

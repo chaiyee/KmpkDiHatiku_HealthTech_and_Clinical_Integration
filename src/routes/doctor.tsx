@@ -1,279 +1,307 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { addDays, format, subDays } from "date-fns";
-import { useState, type ReactNode } from "react";
-import { Plus, Printer, RotateCcw, Trash2 } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { addDays, parseISO, subDays } from "date-fns";
+import { useEffect, useState } from "react";
+import { Printer, ClipboardCheck, Stethoscope, CalendarCheck, ArrowRight, LockKeyhole } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { GlucoseChart } from "@/components/GlucoseChart";
-import { DoseStatusBadge } from "@/components/medication";
 import { EvidenceTable, PageLoading } from "@/components/common";
 import { useStore } from "@/lib/store";
-import { useI18n } from "@/lib/i18n";
 import { detectPatterns, fastingBaseline } from "@/lib/patterns";
-import { dosesForDate } from "@/lib/medications";
-import { isActive } from "@/lib/caregiver";
+import { CATEGORY_LABELS } from "@/lib/types";
+import type { ReactNode } from "react";
+import { visibleCaregiverAlerts, SIMULATION_NOTICE, URGENT_NOTICE } from "@/lib/caregiver";
+import { CaregiverAlertDetails } from "@/components/CaregiverSupport";
+import { localDay, statusFor, WEEKDAYS } from "@/lib/medications";
+import { ConsultationBrief } from "@/components/ConsultationBrief";
 
 export const Route = createFileRoute("/doctor")({
   head: () => ({
     meta: [
-      { title: "Doctor Visit Report · DiaMonitor Copilot" },
-      { name: "description", content: "A printable consultation report from recorded glucose, medication logs, care-plan progress and consented caregiver alerts." },
-      { property: "og:title", content: "Doctor Visit Report · DiaMonitor Copilot" },
-      { property: "og:description", content: "A printable consultation report built from the patient's recorded data." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { title: "Doctor Visit Report · DiaMonitor Copilot" },
+      { name: "description", content: "A concise, printable consultation report built from the patient's recorded data." },
+      { property: "og:title", content: "Doctor Visit Report · DiaMonitor Copilot" },
+      { property: "og:description", content: "A concise, printable consultation report built from the patient's recorded data." },
     ],
   }),
   component: DoctorPage,
 });
 
-type Tag = "recorded" | "patient" | "rule" | "ai" | "doctor" | "suggested";
-
-function Section({ n, title, tag, children }: { n: string; title: string; tag: Tag[]; children: ReactNode }) {
-  const { t } = useI18n();
+function Section({ n, title, tag, children }: { n: number; title: string; tag: string; children: ReactNode }) {
+  const { t: tr, format } = useLanguage();
   return (
-    <section className="break-inside-avoid border-t py-5">
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <h2 className="text-base font-semibold text-navy">{n}. {title}</h2>
-        {tag.map((x) => <span key={x} className="rounded border px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t(`report.tag.${x}`)}</span>)}
-      </div>
-      {children}
-    </section>
+    <details open={n === 1 || n === 6} className="break-inside-avoid border-t py-4">
+      <summary className="min-h-12 cursor-pointer content-center text-navy marker:text-primary">
+      <span className="inline-flex flex-wrap items-center gap-2">
+        <span className="text-base font-semibold text-navy">{title}</span>
+        <span className="rounded border px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{tag}</span>
+      </span></summary>
+      <div className="pt-3">{children}</div>
+    </details>
   );
 }
 
 function DoctorPage() {
-  const { data, addDoctorNote, setDoctorQuestions, addGoal } = useStore();
-  const { t, fmt } = useI18n();
-  const [range, setRange] = useState("14");
-  const [assessment, setAssessment] = useState("");
-  const [plan, setPlan] = useState("");
+  const { t: tr, format } = useLanguage();
+  const { data, demoDoctor, setDemoDoctor, saveQuestions, saveDoctorResponse, removeQuestion, toggleDiscussed } = useStore();
+  const [range, setRange] = useState("7");
+  const [notes, setNotes] = useState("");
+  const [questions, setQuestions] = useState("");
+  const [feedback, setFeedback] = useState("");
   const [goal, setGoal] = useState("");
-  const [newQ, setNewQ] = useState("");
+  const [explanation, setExplanation] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [followUpDate, setFollowUpDate] = useState("");
+  useEffect(() => {
+    if (!data) return;
+    setQuestions(data.consultationQuestions ?? "");
+    setFeedback(data.carePlan.doctorFeedback); setGoal(data.carePlan.goal);
+    setExplanation(data.carePlan.explanation); setInstructions(data.followUpInstructions ?? "");
+    setFollowUpDate(format(new Date(data.carePlan.followUpDate), "yyyy-MM-dd\'T\'HH:mm"));
+  }, [data?.consultationQuestions, data?.carePlan, data?.followUpInstructions, demoDoctor]);
+  useEffect(() => { if (data) setNotes(data.doctorNotes); }, [data?.doctorNotes]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!data) return <PageLoading />;
   const now = new Date();
   const since = subDays(now, Number(range));
-  const inPeriod = (iso: string) => new Date(iso) >= since && new Date(iso) <= now;
-  const th = data.thresholds;
-  const readings = data.readings.filter((r) => inPeriod(r.timestamp)).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  const logs = data.logs.filter((l) => inPeriod(l.timestamp)).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  const findings = detectPatterns(data.readings, th, now);
-  const b = fastingBaseline(data.readings, th, now);
+  const t = data.thresholds;
+  const readings = data.readings.filter((r) => new Date(r.timestamp) >= since).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const logs = data.logs.filter((l) => new Date(l.timestamp) >= since).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const findings = detectPatterns(data.readings, t, now).filter((f) => f.evidence.length || f.uncertainty);
+  const b = fastingBaseline(data.readings, t, now);
   const vals = readings.map((r) => r.value);
-  const avg = vals.length ? fmt.number(vals.reduce((a, c) => a + c, 0) / vals.length) : "—";
+  const avg = vals.length ? (vals.reduce((a, c) => a + c, 0) / vals.length).toFixed(1) : "—";
+  const inRangeCount = readings.filter((r) => r.value >= t.hypo && r.value <= t.postMealHigh).length;
+  const inRangePct = readings.length ? Math.round((inRangeCount / readings.length) * 100) : null;
+  const meds = logs.filter((l) => l.category === "medication");
+  const medDays = new Set(meds.map((m) => format(new Date(m.timestamp), "yyyy-MM-dd"))).size;
   const p = data.patient;
-  const days = Array.from({ length: Number(range) }, (_, i) => format(subDays(now, i), "yyyy-MM-dd"));
-  const doses = days.flatMap((d) => dosesForDate(data.medications, data.medEvents, d, now)).filter((d) => d.status !== "scheduled");
-  const count = (s: string) => doses.filter((d) => d.status === s).length;
-  const checkIns = data.checkIns.filter((c) => days.includes(c.date));
-  const consentedCaregivers = data.caregivers.filter((c) => isActive(c) && c.share.alerts);
-  const alerts = data.caregiverAlerts.filter((a) => inPeriod(a.createdAt) && consentedCaregivers.some((c) => c.id === a.caregiverId));
-  const missing: string[] = [];
-  if (findings.some((f) => f.id === "data-gap")) missing.push(t("report.missing.gaps"));
-  if (!b.sufficient) missing.push(t("report.missing.baseline"));
-  if (count("not_logged")) missing.push(t("report.missing.meds", { n: count("not_logged") }));
-  if (!logs.some((l) => l.category === "meal")) missing.push(t("report.missing.meals"));
-
-  const generatedQs = [
-    ...findings.filter((f) => f.severity !== "info").map((f) => t(`report.q.${f.id}`)),
-    count("skipped") + count("not_logged") > 0 ? t("report.q.meds") : "",
-    t("report.q.targets"),
-    t("report.q.contact"),
-  ].filter((x) => x && !x.startsWith("report.q."));
-  const questions = data.doctorQuestions ?? generatedQs;
-  const editQ = (q: string[]) => setDoctorQuestions(q);
+  const schedules = data.medicationSchedules ?? [];
+  const statuses = (data.medicationStatuses ?? []).filter((status) => status.date >= localDay(since) && status.date <= localDay(now));
+  const plan = data.carePlan;
+  const planDays = Array.from({ length: plan.durationDays }, (_, index) => localDay(addDays(parseISO(plan.startDate), index)));
+  const completed = data.checkIns.filter((checkIn) => checkIn.completed && planDays.includes(checkIn.date)).length;
+  const reflections = data.checkIns.filter((checkIn) => checkIn.reflection && checkIn.date >= localDay(since) && checkIn.date <= localDay(now));
+  const caregiverAlerts = visibleCaregiverAlerts(data).filter((alert) => new Date(alert.createdAt) >= since && new Date(alert.createdAt) <= now);
+  const medicationLabels = { taken: "Taken", skipped: "Skipped", later: "Remind Later" };
 
   return (
     <div className="mx-auto max-w-4xl">
       <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-navy">{t("nav.doctor")}</h1>
-          <p className="text-muted-foreground">{t("report.subtitle")}</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-navy">{tr("Doctor Visit")}</h1>
+          <p className="text-muted-foreground">{tr("Your consultation report, ready to share or print.")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Select value={range} onValueChange={setRange}>
-            <SelectTrigger className="h-11 w-40" aria-label={t("report.period")}><SelectValue /></SelectTrigger>
-            <SelectContent>{["7", "14", "30"].map((d) => <SelectItem key={d} value={d}>{t("common.lastDays", { n: d })}</SelectItem>)}</SelectContent>
+            <SelectTrigger className="h-11 w-40" aria-label={tr("Report period")}><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">{tr("Last 7 days")}</SelectItem>
+              <SelectItem value="14">{tr("Last 14 days")}</SelectItem>
+              <SelectItem value="30">{tr("Last 30 days")}</SelectItem>
+            </SelectContent>
           </Select>
-          <Button className="h-11" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />{t("report.print")}</Button>
+          <Button className="h-11" onClick={() => {
+            const sections = Array.from(document.querySelectorAll("article details"));
+            const closed = sections.filter((section) => !section.hasAttribute("open"));
+            sections.forEach((section) => section.setAttribute("open", ""));
+            const restore = () => { closed.forEach((section) => section.removeAttribute("open")); };
+            window.addEventListener("afterprint", restore, { once: true }); window.print();
+          }}><Printer className="mr-2 h-4 w-4" />{tr("Print / Save PDF")}</Button>
         </div>
       </div>
 
-      <article className="rounded-xl border-2 border-navy/15 bg-card p-5 shadow-sm md:p-8">
+      <div className="no-print mb-5 space-y-2 rounded-lg border bg-secondary p-4">
+        <div className="flex flex-wrap gap-2" role="group" aria-label={tr("Consultation mode")}>
+          <Button variant={!demoDoctor ? "default" : "outline"} aria-pressed={!demoDoctor} onClick={() => setDemoDoctor(false)}><LockKeyhole />{tr("Patient Mode")}</Button>
+          <Button variant={demoDoctor ? "default" : "outline"} aria-pressed={demoDoctor} onClick={() => setDemoDoctor(true)}><Stethoscope />{tr("Demo Doctor Mode")}</Button>
+        </div>
+        <p className="text-sm text-muted-foreground">{tr("Simulation only. No sign-in or secure access control. Doctor feedback is not verified.")}</p>
+      </div>
+      <article className="bg-card p-4 md:p-6">
         <header className="flex flex-wrap items-start justify-between gap-4 rounded-lg bg-navy p-4 text-navy-foreground">
           <div>
-            <p className="text-xs uppercase tracking-wider opacity-80">{t("report.header")}</p>
-            <p className="mt-1 text-xl font-semibold">{p.name} <span className="text-sm font-normal opacity-80">({p.id})</span></p>
-            <p className="text-sm opacity-90">{t("report.profile", { age: p.age, sex: t(`common.sex.${p.sex}`), type: p.diabetesType, years: p.yearsSinceDiagnosis })}</p>
+            <p className="text-xs uppercase tracking-wider opacity-80">{tr("Pre-consultation summary · DEMO")}</p>
+            <p className="mt-1 text-xl font-semibold">{p.name}</p>
+            <p className="text-sm opacity-90">{p.age} {tr("y ·")}{" "}{tr(p.sex)} · {tr(p.diabetesType)} ({p.yearsSinceDiagnosis} {tr("y)")}</p>
           </div>
           <div className="text-sm opacity-90 sm:text-right">
-            <p>{t("report.periodLabel")}: {fmt.dayMonth(since)} – {fmt.long(now)}</p>
-            <p>{t("report.visit")}: {fmt.dateTime(p.nextVisit)}</p>
-            <p>{p.doctor} · {p.clinic}</p>
+            <p>{tr("Period:")}{" "}{format(since, "d MMM")} – {format(now, "d MMM yyyy")}</p>
+            <p>{tr("Visit:")}{" "}{format(new Date(p.nextVisit), "d MMM yyyy, h:mm a")}</p>
+            <p>{tr(p.doctor)}</p>
           </div>
         </header>
-        <p className="mt-3 text-xs text-muted-foreground">{t("report.legend")}</p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          {tr("Fictional patient. Legend:")}{" "}<b>{tr("Recorded")}</b> {tr("= entered by patient ·")}{" "}<b>{tr("Rule-detected")}</b> {tr("= deterministic rules, demo thresholds ·")}{" "}<b>{tr("AI-generated")}</b> {tr("= explanatory text (demo, not verified). Nothing here is a diagnosis.")}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{tr("Medication statuses and reflections are patient-reported, not verified. Doctor feedback is simulated. Caregiver notifications are simulated and not externally delivered.")}</p>
+        {findings.some((finding) => finding.kind === "safety") && <p className="mt-3 rounded-md bg-danger-soft p-3 text-sm text-destructive">{tr(URGENT_NOTICE)}</p>}
+        <ConsultationBrief data={data} since={since} now={now} />
 
-        <Section n="A" title={t("report.s.summary")} tag={["recorded"]}>
-          <div className="grid gap-3 text-sm sm:grid-cols-2">
-            <div className="rounded-lg border p-3">
-              <p className="font-medium">{t("report.available")}</p>
-              <ul className="mt-1 list-disc pl-5">
-                <li>{t("report.avail.readings", { n: readings.length })}</li>
-                <li>{t("report.avail.logs", { n: logs.length })}</li>
-                <li>{t("report.avail.meds", { n: doses.length })}</li>
-                <li>{t("report.avail.checkins", { n: checkIns.length })}</li>
-              </ul>
-            </div>
-            <div className="rounded-lg border p-3">
-              <p className="font-medium">{t("report.missingTitle")}</p>
-              {missing.length ? <ul className="mt-1 list-disc pl-5">{missing.map((m) => <li key={m}>{m}</li>)}</ul> : <p className="mt-1 text-muted-foreground">—</p>}
-            </div>
-          </div>
-        </Section>
-
-        <Section n="B" title={t("report.s.glucose")} tag={["recorded", "rule"]}>
-          <div className="mb-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+        <h2 className="mt-6 mb-4 flex items-center gap-2 text-xl font-semibold text-navy"><ClipboardCheck className="h-5 w-5 text-primary" />{tr("Before Your Visit")}</h2>
+        <div className="no-print mb-4 grid gap-2 sm:grid-cols-3">
+          {["Review recent readings", "Bring your medication list", "Write your questions"].map((text) => <label key={text} className="flex min-h-12 items-center gap-3 rounded-lg border p-3"><input type="checkbox" className="h-5 w-5 accent-primary" />{tr(text)}</label>)}
+        </div>
+        <Section n={1} title={tr("Glucose overview")} tag={tr("Recorded")}>
+          <div className="mb-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-6">
             {[
-              [t("report.readings"), String(readings.length)],
-              [t("report.average"), `${avg} mmol/L`],
-              [t("report.range"), vals.length ? `${fmt.number(Math.min(...vals))}–${fmt.number(Math.max(...vals))}` : "—"],
-              [t("report.fastingAvg"), b.recentMean ? `${b.recentMean} mmol/L` : "—"],
-            ].map(([k, v]) => <div key={k} className="rounded-lg border p-3"><p className="text-muted-foreground">{k}</p><p className="font-semibold">{v}</p></div>)}
-          </div>
-          <GlucoseChart readings={readings} t={th} height={220} />
-          <div className="mt-4 space-y-4">
-            {findings.filter((f) => f.evidence.length || !f.sufficient).map((f) => (
-              <div key={f.id} className="text-sm">
-                <p className="font-semibold">{t(`patterns.${f.id}.title`, f.params)}</p>
-                <p>{t(`patterns.${f.id}.summary`, f.params)}</p>
-                <p className="mb-2 text-xs text-muted-foreground">{t("patterns.labels.rule")}: {t(`patterns.${f.id}.rule`, f.params)}</p>
-                <EvidenceTable readings={f.evidence} t={th} />
-              </div>
+              [tr("Readings"), String(readings.length)],
+              [tr("Average"), `${avg} mmol/L`],
+              [tr("Lowest"), vals.length ? `${Math.min(...vals).toFixed(1)} mmol/L` : "—"],
+              [tr("Highest"), vals.length ? `${Math.max(...vals).toFixed(1)} mmol/L` : "—"],
+              [tr("Within range"), inRangePct !== null ? `${inRangePct}%` : "—"],
+              [tr("Fasting avg (7d)"), b.recentMean ? `${b.recentMean} mmol/L` : "—"],
+            ].map(([k, v]) => (
+              <div key={tr(k ?? "")} className="rounded-lg border p-3"><p className="text-muted-foreground">{tr(k ?? "")}</p><p className="font-semibold">{v}</p></div>
             ))}
           </div>
+          <p className="mb-4 text-xs text-muted-foreground">{tr("\"Within range\" is the share of these discrete sample readings between the demo low and after-meal thresholds. It is not continuous-monitoring Time-in-Range and may not reflect the whole day.")}</p>
+          <GlucoseChart readings={readings} t={t} height={220} />
         </Section>
 
-        <Section n="C" title={t("report.s.medication")} tag={["recorded", "patient"]}>
-          <ul className="mb-3 list-disc pl-5 text-sm">
-            {data.medications.map((m) => <li key={m.id}>{m.name} {m.dose} {m.unit} · {m.times.map(fmt.hhmm).join(", ")} · {t(`med.freq.${m.frequency}`)}{m.paused ? ` · ${t("med.paused")}` : ""}{m.instructions ? ` — ${m.instructions}` : ""}</li>)}
-          </ul>
-          <div className="mb-2 flex flex-wrap gap-2 text-sm">
-            {(["taken", "skipped", "postponed", "not_logged"] as const).map((s) => <span key={s} className="flex items-center gap-1"><DoseStatusBadge status={s} /> {count(s)}</span>)}
-          </div>
-          <p className="text-xs text-muted-foreground">{t("report.medNote")}</p>
+        <Section n={2} title={tr("Detected patterns")} tag={tr("Rule-detected")}>
+          <p className="mb-3 text-xs text-muted-foreground">{tr("Detected patterns use the existing 7-day monitoring window, regardless of report period.")}</p>
+          {findings.length === 0 ? <p className="text-sm text-muted-foreground">{tr("No patterns detected.")}</p> : (
+            <div className="space-y-4">
+              {findings.map((f) => (
+                <div key={f.id} className="text-sm">
+                  <p className="font-semibold">{tr(f.title)}</p>
+                  <p>{tr(f.summary)}</p>
+                  <p className="mb-2 text-xs text-muted-foreground">{tr("Rule:")}{" "}{tr(f.rule)}{f.uncertainty ? ` · ${tr(f.uncertainty)}` : ""}</p>
+                  <EvidenceTable readings={f.evidence} t={t} />
+                </div>
+              ))}
+            </div>
+          )}
         </Section>
 
-        <Section n="D" title={t("report.s.lifestyle")} tag={["patient"]}>
-          {logs.length === 0 ? <p className="text-sm text-muted-foreground">{t("report.nothing")}</p> : (
+        <Section n={3} title={tr("Symptoms & lifestyle context")} tag={tr("Recorded")}>
+          {logs.filter((l) => l.category !== "medication").length === 0 ? <p className="text-sm text-muted-foreground">{tr("Nothing logged in this period.")}</p> : (
             <table className="w-full text-sm">
               <tbody>
-                {logs.map((l) => (
+                {logs.filter((l) => l.category !== "medication").map((l) => (
                   <tr key={l.id} className="border-b last:border-0">
-                    <td className="w-36 py-1.5 align-top text-muted-foreground">{fmt.dateTime(l.timestamp)}</td>
-                    <td className="w-28 py-1.5 align-top">{t(`category.${l.category}`)}</td>
-                    <td className="py-1.5">{l.title}{l.detail ? ` — ${l.detail}` : ""}</td>
+                    <td className="w-32 py-1.5 text-muted-foreground">{format(new Date(l.timestamp), "d MMM, h:mm a")}</td>
+                    <td className="w-24 py-1.5">{tr(CATEGORY_LABELS[l.category])}</td>
+                    <td className="py-1.5">{l.source === "sample" ? tr(l.title) : l.title}{l.detail ? ` — ${l.source === "sample" ? tr(l.detail) : l.detail}` : ""}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
-          {checkIns.some((c) => c.reflection) && (
-            <div className="mt-3 text-sm">
-              <p className="font-medium">{t("report.reflections")}</p>
-              <ul className="list-disc pl-5">{checkIns.filter((c) => c.reflection).map((c) => <li key={c.date}>{fmt.date(c.date)}: “{c.reflection}”</li>)}</ul>
-            </div>
-          )}
         </Section>
 
-        <Section n="E" title={t("report.s.carePlan")} tag={["recorded", "patient"]}>
-          <ul className="space-y-2 text-sm">
-            {data.goals.map((g) => {
-              const followed = checkIns.filter((c) => c.followedGoal === "yes").length;
-              return (
-                <li key={g.id} className="rounded-lg border p-3">
-                  <p className="font-medium">{g.description}</p>
-                  <p className="text-muted-foreground">{g.creatorName} · {fmt.date(g.startDate)} – {fmt.date(g.targetDate)} · {g.completedAt ? t("care.completed") : t("report.followedDays", { n: followed, total: checkIns.length })}</p>
+        <Section n={4} title={tr("Medication records")} tag={tr("Patient-reported")}>
+          <p className="text-sm">{meds[0] ? tr("{title}: recorded on {days} of {range} days.", { title: meds[0].source === "sample" ? tr(meds[0].title) : meds[0].title, days: medDays, range }) : tr("No medication records in this period.")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{tr("These are patient-entered records, not confirmed adherence. A day without a record does not mean a dose was missed.")}</p>
+          <h3 className="mt-4 font-semibold">{tr("Medication schedules")}</h3>
+          {!schedules.length && <p className="mt-2 text-sm text-muted-foreground">{tr("No medication scheduled.")}</p>}
+          <ul className="mt-2 space-y-2 text-sm">{schedules.map((schedule) => {
+            const status = statusFor(data.medicationStatuses ?? [], schedule.id, localDay(now));
+            return <li key={schedule.id}>
+            <p className="font-medium">{schedule.name} · {schedule.dose} {schedule.unit}</p>
+            <p className="text-muted-foreground">{schedule.time} · {schedule.days.length === 7 ? tr("Daily") : schedule.days.map((day) => tr(WEEKDAYS[day] ?? "")).join(", ")}</p>
+            <p>{tr("Today's medication status")}: {schedule.days.includes(now.getDay()) ? tr(status ? medicationLabels[status.status] : "Not Logged") : tr("Not scheduled today")}</p>
+          </li>; })}</ul>
+          <h3 className="mt-4 font-semibold">{tr("Self-reported medication history")}</h3>
+          {!statuses.length && <p className="mt-2 text-sm text-muted-foreground">{tr("No self-reported medication statuses in this period.")}</p>}
+          <ul className="mt-2 space-y-2 text-sm">{statuses.map((status) => <li key={`${status.scheduleId}-${status.date}`}>
+            {schedules.find((schedule) => schedule.id === status.scheduleId)?.name ?? tr("Medication record")} · {format(parseISO(status.date), "d MMM yyyy")} · {tr({ taken: "Taken", skipped: "Skipped", later: "Delayed" }[status.status])}{status.reason && <> · {tr("Reason")}: {tr(status.reason)}</>}{status.note && <> · “{status.note}”</>}
+            <span className="block text-xs text-muted-foreground">{tr("Reported at")}: {format(new Date(status.updatedAt), "d MMM yyyy, HH:mm")}</span>
+          </li>)}</ul>
+        </Section>
+
+        <Section n={5} title={tr("Plain-language explanation")} tag={tr("AI-generated · demo")}>
+          <p className="text-sm">
+            {findings.some((f) => f.kind === "baseline_shift" && f.severity === "watch")
+              ? tr("Morning readings have been higher this week than earlier. Late nights and late, heavier dinners were also logged on some of these days. These occurred around the same time; the records do not show that one caused the other.")
+              : tr("Readings in this period look broadly similar to earlier records based on the available data.")}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{tr("Template-generated demo text. Not reviewed by a clinician; no sources retrieved.")}</p>
+        </Section>
+
+        <Section n={6} title={tr("Questions and concerns")} tag={tr("Patient-reported")}>
+          <div className="no-print mb-4 space-y-3">
+            <Label htmlFor="visit-questions">{tr("Your questions and concerns")}</Label>
+            <Textarea id="visit-questions" value={questions} onChange={(e) => setQuestions(e.target.value)} rows={3} className="text-base" maxLength={5000} />
+            <Button onClick={() => { saveQuestions(questions.trim()); toast.success(tr("Questions saved.")); }}>{tr("Save questions")}</Button>
+          </div>
+          <p className="mb-3 whitespace-pre-wrap">{data.consultationQuestions || tr("No questions recorded yet.")}</p>
+          <h3 className="mb-2 font-medium">{tr("Saved questions from Copilot")}</h3>
+          {(data.pinnedQuestions ?? []).length ? (
+            <ul className="mb-4 space-y-2">
+              {(data.pinnedQuestions ?? []).map((q) => (
+                <li key={q.id} className="flex flex-wrap items-center gap-2 rounded-lg border p-3">
+                  <span className={`flex-1 ${q.discussed ? "text-muted-foreground line-through" : ""}`}>{tr(q.text)}</span>
+                  <span className="no-print flex gap-2">
+                    <Button variant="outline" className="min-h-11" onClick={() => toggleDiscussed(q.id)}>{q.discussed ? tr("Mark not discussed") : tr("Mark discussed")}</Button>
+                    <Button variant="ghost" className="min-h-11" onClick={() => { removeQuestion(q.id); toast.success(tr("Question removed.")); }}>{tr("Remove")}</Button>
+                  </span>
                 </li>
-              );
-            })}
-          </ul>
-          {checkIns.some((c) => c.difficulties) && (
-            <div className="mt-3 text-sm">
-              <p className="font-medium">{t("progress.barriers")}</p>
-              <ul className="list-disc pl-5">{checkIns.filter((c) => c.difficulties).map((c) => <li key={c.date}>{fmt.date(c.date)}: {c.difficulties}</li>)}</ul>
-            </div>
-          )}
-          <p className="mt-2 text-sm">{t("report.followUpStatus", { d: fmt.dateTime(p.nextVisit) })}</p>
-        </Section>
-
-        <Section n="F" title={t("report.s.caregiver")} tag={["rule"]}>
-          {alerts.length === 0 ? <p className="text-sm text-muted-foreground">{t("report.noAlerts")}</p> : (
-            <ul className="space-y-1 text-sm">
-              {alerts.map((a) => (
-                <li key={a.id}>{fmt.dateTime(a.createdAt)} · {t(`cg.cat.${a.category}`)} · {t(`cg.sev.${a.severity}`)} · {a.status === "acknowledged" ? t("cg.acknowledgedAt", { d: fmt.dateTime(a.acknowledgedAt!) }) : t("cg.notAcknowledged")}</li>
               ))}
             </ul>
-          )}
-          <p className="mt-1 text-xs text-muted-foreground">{t("report.alertNote")}</p>
-        </Section>
-
-        <Section n="G" title={t("report.s.explanation")} tag={["ai"]}>
-          <p className="text-sm">{findings.some((f) => f.id === "baseline-shift" || f.id === "repeated-fasting") ? t("report.explainShift") : t("report.explainNone")}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{t("report.explainNote")}</p>
-        </Section>
-
-        <Section n="H" title={t("report.s.questions")} tag={["suggested"]}>
-          <ul className="space-y-2">
-            {questions.map((q, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <span className="mt-2.5 text-sm">•</span>
-                <Input value={q} aria-label={`${t("report.s.questions")} ${i + 1}`} onChange={(e) => editQ(questions.map((x, j) => (j === i ? e.target.value : x)))} className="h-10 border-transparent text-sm print:border-0 focus:border-input" />
-                <Button variant="ghost" size="icon" className="no-print h-10 w-10 shrink-0" aria-label={t("common.remove")} onClick={() => editQ(questions.filter((_, j) => j !== i))}><Trash2 className="h-4 w-4" /></Button>
-              </li>
-            ))}
+          ) : <p className="mb-4 text-sm text-muted-foreground">{tr("No saved questions yet. Use \"Add to Doctor Visit Questions\" in the Copilot.")}</p>}
+          <h3 className="mb-2 font-medium">{tr("Questions the patient may want to discuss")}</h3>
+          <ul className="list-disc space-y-1 pl-5 text-sm">
+            <li>{tr("What could be contributing to my higher morning readings?")}</li>
+            <li>{tr("Are my target ranges right for me?")}</li>
+            <li>{tr("Should late dinners or sleep timing be something I work on?")}</li>
+            <li>{tr("When should I contact the clinic between visits?")}</li>
           </ul>
-          <div className="no-print mt-2 flex gap-2">
-            <Input value={newQ} onChange={(e) => setNewQ(e.target.value)} placeholder={t("report.addQuestion")} className="h-10" maxLength={300} />
-            <Button variant="outline" className="h-10" onClick={() => { if (newQ.trim()) { editQ([...questions, newQ.trim()]); setNewQ(""); } }}><Plus className="h-4 w-4" /></Button>
-            {data.doctorQuestions && <Button variant="ghost" className="h-10" onClick={() => setDoctorQuestions(null)} aria-label={t("report.regenerate")}><RotateCcw className="h-4 w-4" /></Button>}
-          </div>
         </Section>
 
-        <Section n="I" title={t("report.s.notes")} tag={["doctor"]}>
-          <p className="mb-3 rounded-lg border border-warning/40 bg-warning-soft p-2 text-xs">{t("report.simulatedClinician")}</p>
-          {data.doctorNotes.map((n) => (
-            <div key={n.id} className="mb-3 rounded-lg border p-3 text-sm">
-              <p className="text-xs text-muted-foreground">{fmt.dateTime(n.createdAt)} · {n.author}{n.simulated ? ` · ${t("report.simulated")}` : ""}</p>
-              {n.assessment && <p><span className="font-medium">{t("report.assessment")}:</span> {n.assessment}</p>}
-              {n.plan && <p><span className="font-medium">{t("report.plan")}:</span> {n.plan}</p>}
-              {n.followUpGoal && <p><span className="font-medium">{t("report.followUpGoal")}:</span> {n.followUpGoal}</p>}
-            </div>
-          ))}
-          <div className="no-print grid gap-3">
-            <div><Label htmlFor="dn-a">{t("report.assessment")}</Label><Textarea id="dn-a" rows={2} value={assessment} onChange={(e) => setAssessment(e.target.value)} className="mt-1.5 text-sm" /></div>
-            <div><Label htmlFor="dn-p">{t("report.plan")}</Label><Textarea id="dn-p" rows={2} value={plan} onChange={(e) => setPlan(e.target.value)} className="mt-1.5 text-sm" /></div>
-            <div><Label htmlFor="dn-g">{t("report.followUpGoal")}</Label><Input id="dn-g" value={goal} onChange={(e) => setGoal(e.target.value)} className="mt-1.5 h-11 text-sm" placeholder={t("report.followUpGoalPh")} /></div>
-            <Button
-              className="h-11 justify-self-start"
-              onClick={() => {
-                if (!assessment.trim() && !plan.trim() && !goal.trim()) return toast.error(t("report.noteEmpty"));
-                addDoctorNote({ author: `${p.doctor}`, simulated: true, assessment: assessment.trim(), plan: plan.trim(), followUpGoal: goal.trim() || undefined });
-                if (goal.trim()) {
-                  const today = format(now, "yyyy-MM-dd");
-                  addGoal({ description: goal.trim(), explanation: plan.trim() || t("report.goalFromVisit"), createdBy: "doctor", creatorName: p.doctor, startDate: today, targetDate: format(addDays(now, 13), "yyyy-MM-dd"), followUpDate: addDays(now, 28).toISOString(), simulated: true });
-                }
-                toast.success(goal.trim() ? t("report.noteSavedGoal") : t("report.noteSaved"));
-                setAssessment(""); setPlan(""); setGoal("");
-              }}
-            >
-              {t("report.saveNote")}
-            </Button>
+        <section className="mt-5 border-t border-primary/30 py-5">
+          <h2 className="mb-3 flex items-center gap-2 text-xl font-semibold text-navy"><Stethoscope className="h-5 w-5 text-primary" />{tr("Doctor's Feedback")}</h2>
+          <p className="mb-3 text-sm text-muted-foreground">{tr(p.doctor)} · {tr(data.doctorResponseAt ? "Demo doctor response · not verified" : "Simulated demo feedback")}{data.doctorResponseAt && ` · ${format(new Date(data.doctorResponseAt), "d MMM yyyy, HH:mm")}`}</p>
+          <div className="space-y-4 border-l-4 border-primary pl-4">
+            <div><h3 className="font-semibold">{tr("Clinician review notes")}</h3><p className="mt-1 whitespace-pre-wrap">{data.doctorNotes || tr("No doctor feedback recorded yet.")}</p></div>
+            <div><h3 className="font-semibold">{tr("Doctor feedback")}</h3><p className="mt-1 whitespace-pre-wrap">{tr(plan.doctorFeedback) || tr("No doctor feedback recorded yet.")}</p></div>
           </div>
+          {demoDoctor && <form className="no-print mt-5 space-y-4 rounded-lg border border-warning/40 bg-warning-soft p-4" onSubmit={(e) => {
+            e.preventDefault(); if (!demoDoctor) return;
+            const date = new Date(followUpDate);
+            if (!goal.trim() || !Number.isFinite(date.getTime())) return;
+            saveDoctorResponse({ notes: notes.trim(), feedback: feedback.trim(), goal: goal.trim(), explanation: explanation.trim(), followUpInstructions: instructions.trim(), followUpDate: date.toISOString() });
+            toast.success(tr("Demo doctor response saved."));
+          }}>
+            <h3 className="font-semibold">{tr("Demo Doctor Mode")} · {tr("Simulation")}</h3>
+            {[
+              ["doctor-notes", "Clinician review notes", notes, setNotes],
+              ["doctor-feedback", "Doctor feedback", feedback, setFeedback],
+              ["doctor-goal", "Doctor's goal", goal, setGoal],
+              ["doctor-explanation", "Goal explanation", explanation, setExplanation],
+              ["doctor-follow-up", "Follow-up instructions", instructions, setInstructions],
+            ].map(([id, label, value, setter]) => <div key={String(id)}><Label htmlFor={String(id)}>{tr(String(label))}</Label><Textarea id={String(id)} className="mt-1.5 text-base" rows={2} value={String(value)} onChange={(e) => { if (typeof setter === "function") setter(e.target.value); }} required={id === "doctor-goal"} maxLength={5000} /></div>)}
+            <div><Label htmlFor="follow-up-date">{tr("Follow-up date")}</Label><Input id="follow-up-date" type="datetime-local" required className="mt-1.5 h-12" value={followUpDate} onChange={(e) => setFollowUpDate(e.target.value)} /></div>
+            <Button type="submit" className="min-h-12">{tr("Save demo doctor response")}</Button>
+          </form>}
+        </section>
+        <section className="border-t py-5">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-navy"><CalendarCheck className="h-5 w-5 text-primary" />{tr("After Your Visit")}</h2>
+          <h3 className="font-semibold">{tr("Doctor's goal")}</h3>
+          <p className="mt-2 whitespace-pre-wrap">{tr(plan.goal)}</p>
+          <p className="mt-2 text-muted-foreground">{tr(plan.explanation)}</p>
+          <p className="mt-4 text-sm">{tr("Progress")}: {completed} {tr("of")} {plan.durationDays} {tr("days")}</p>
+          <Progress className="mt-2 h-3" value={plan.durationDays ? completed / plan.durationDays * 100 : 0} />
+          <h3 className="mt-4 font-semibold">{tr("Follow-up instructions")}</h3>
+          <p className="mt-2 whitespace-pre-wrap">{data.followUpInstructions || tr("No follow-up instructions recorded yet.")}</p>
+          <p className="mt-3">{tr("Follow-up:")} {format(new Date(plan.followUpDate), "d MMM yyyy, HH:mm")}</p>
+          <Button asChild className="no-print mt-4 min-h-12"><Link to="/care-plan">{tr("View My Care Plan")}<ArrowRight /></Link></Button>
+        </section>
+        <Section n={8} title={tr("Patient reflections")} tag={tr("Patient-reported")}>
+          {!reflections.length && <p className="text-muted-foreground">{tr("No patient reflections in this period.")}</p>}
+          <ul className="space-y-2">{reflections.map((checkIn) => <li key={checkIn.date}>{format(parseISO(checkIn.date), "d MMM yyyy")} · {checkIn.reflection}</li>)}</ul>
+        </Section>
+        <Section n={9} title={tr("Caregiver alert history · simulated")} tag={tr("Rule-detected · simulated")}>
+          <p className="mb-3 text-xs text-muted-foreground">{tr(SIMULATION_NOTICE)}</p>
+          {!caregiverAlerts.length && <p className="text-sm text-muted-foreground">{tr("No permitted caregiver alerts in this report period.")}</p>}
+          <div className="space-y-5">{caregiverAlerts.slice(0, 10).map((alert) => <CaregiverAlertDetails key={alert.id} alert={alert} report />)}</div>
         </Section>
       </article>
     </div>
