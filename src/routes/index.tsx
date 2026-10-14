@@ -2,7 +2,7 @@ import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { startOfDay, subDays } from "date-fns";
 import { useState } from "react";
-import { ArrowRight, CalendarClock, Lightbulb, MessageCircleQuestion, Plus } from "lucide-react";
+import { ArrowRight, CalendarClock, ChevronDown, Lightbulb, MessageCircleQuestion, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -114,15 +114,8 @@ function Overview() {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-lg">{tr("7-day glucose trend")}</CardTitle>
-            <SampleBadge>{tr("Includes sample data")}</SampleBadge>
-          </CardHeader>
-          <CardContent><GlucoseChart readings={week} t={t} /></CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
+      {findings.some((finding) => finding.kind === "safety") && <p role="alert" className="rounded-lg border border-destructive bg-danger-soft p-3 text-sm font-medium text-destructive">{tr("For potentially urgent symptoms, seek medical assistance immediately; call 999 in Malaysia if needed. Do not wait for caregiver acknowledgement. Follow your clinic's agreed instructions.")}</p>}
+      <Card>
           <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Lightbulb className="h-5 w-5 text-primary" />{tr("Key insight")}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {top ? <FindingCard f={top} t={t} compact /> : <p className="text-muted-foreground">{tr("No patterns detected.")}</p>}
@@ -140,14 +133,23 @@ function Overview() {
               {tr("See supporting records")}<ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </CardContent>
-        </Card>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        {findings.some((finding) => finding.kind === "safety") && <span className="mb-3 block font-medium text-destructive">{tr("For potentially urgent symptoms, seek medical assistance immediately; call 999 in Malaysia if needed. Do not wait for caregiver acknowledgement. Follow your clinic's agreed instructions.")}</span>}
-        {tr("Insights come from simple, transparent rules applied to your records using demo thresholds. They show what changed — not why — and are not a diagnosis.")}</p>
-      <FastingForecastCard readings={data.readings} thresholds={t} now={now} nextVisit={new Date(data.patient.nextVisit)} />
-      <PersonalInsights compact now={now} />
+      </Card>
       <CaregiverAlerts overview />
+      <details className="group rounded-lg border bg-card p-4">
+        <summary className="flex min-h-11 cursor-pointer items-center gap-2 text-lg font-semibold text-navy"><ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" />{tr("More details: trend, forecast and insights")}</summary>
+        <div className="mt-4 space-y-4">
+          <Card>
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-lg">{tr("7-day glucose trend")}</CardTitle>
+              <SampleBadge>{tr("Includes sample data")}</SampleBadge>
+            </CardHeader>
+            <CardContent><GlucoseChart readings={week} t={t} /></CardContent>
+          </Card>
+          <FastingForecastCard readings={data.readings} thresholds={t} now={now} nextVisit={new Date(data.patient.nextVisit)} />
+          <PersonalInsights compact now={now} />
+        </div>
+      </details>
+      <p className="text-xs text-muted-foreground">{tr("Insights come from simple, transparent rules applied to your records using demo thresholds. They show what changed — not why — and are not a diagnosis.")}</p>
     </div>
   );
 }
