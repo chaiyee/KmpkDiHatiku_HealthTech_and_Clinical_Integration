@@ -1,94 +1,56 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useLanguage, type Language } from "@/lib/i18n";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Bell, CalendarCheck, HeartPulse, LayoutDashboard, MessageCircleQuestion, Stethoscope } from "lucide-react";
-import { useEffect, useRef, type ReactNode } from "react";
-import { toast } from "sonner";
+import type { ReactNode } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
-import { LANGS, useI18n } from "@/lib/i18n";
+import { toast } from "sonner";
+import { SCENARIO_LABELS, type DemoScenario } from "@/lib/sample-data";
+import { supabase } from "@/integrations/supabase/client";
 import { detectPatterns } from "@/lib/patterns";
-import { dueReminders } from "@/lib/medications";
-import { browserNotify } from "@/lib/notifications";
-import type { Lang } from "@/lib/types";
 import { BrandMark } from "./BrandMark";
-import { SettingsSheet } from "./SettingsSheet";
+import { MedicationNotice } from "./MedicationNotice";
 
 const NAV = [
-  { to: "/", key: "nav.overview", icon: LayoutDashboard },
-  { to: "/health", key: "nav.health", icon: HeartPulse },
-  { to: "/copilot", key: "nav.copilot", icon: MessageCircleQuestion },
-  { to: "/doctor", key: "nav.doctor", icon: Stethoscope },
-  { to: "/care-plan", key: "nav.carePlan", icon: CalendarCheck },
+  { to: "/", label: "Overview", icon: LayoutDashboard },
+  { to: "/health", label: "My Health", icon: HeartPulse },
+  { to: "/copilot", label: "AI Copilot", icon: MessageCircleQuestion },
+  { to: "/doctor", label: "Doctor Visit", icon: Stethoscope },
+  { to: "/care-plan", label: "My Care Plan", icon: CalendarCheck },
 ] as const;
 
-/** In-app medication reminders while the app is open (no background delivery). */
-function ReminderWatcher() {
-  const { data } = useStore();
-  const { t, fmt } = useI18n();
-  const navigate = useNavigate();
-  const shown = useRef(new Set<string>());
-  const ref = useRef(data);
-  ref.current = data;
-  useEffect(() => {
-    const check = () => {
-      const d = ref.current;
-      if (!d) return;
-      for (const dose of dueReminders(d.medications, d.medEvents, new Date())) {
-        const k = `${dose.key}|${dose.event?.id ?? ""}`;
-        if (shown.current.has(k)) continue;
-        shown.current.add(k);
-        const body = t("med.notifyBody", { name: `${dose.schedule.name} ${dose.schedule.dose} ${dose.schedule.unit}`, time: fmt.hhmm(dose.time) });
-        toast(t("med.reminder"), { description: body, duration: 15000, action: { label: t("med.open"), onClick: () => void navigate({ to: "/care-plan", search: { tab: "medication" } }) } });
-        browserNotify(t("med.reminder"), body);
-      }
-    };
-    const first = setTimeout(check, 1500);
-    const id = setInterval(check, 30_000);
-    return () => {
-      clearTimeout(first);
-      clearInterval(id);
-    };
-  }, [t, fmt, navigate]);
-  return null;
-}
-
 export function AppShell({ children }: { children: ReactNode }) {
+  const { t: tr, format, formatDistanceToNow, language, setLanguage } = useLanguage();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const { data } = useStore();
-  const { t, lang, setLang, elderly } = useI18n();
+  const { data, resetDemo, loadScenario, userEmail, syncState } = useStore();
   const findings = data ? detectPatterns(data.readings, data.thresholds).filter((f) => f.severity !== "info") : [];
-  const newAlerts = data?.caregiverAlerts.filter((a) => a.status === "new").length ?? 0;
   const initials = data?.patient.name.split(" ").map((p) => p[0]).join("") ?? "";
 
   return (
-    <div className="min-h-dvh md:flex">
-      <ReminderWatcher />
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-background focus:p-2">
-        {t("common.skipToContent")}
-      </a>
-      <aside className="no-print hidden w-64 shrink-0 flex-col border-r bg-sidebar md:sticky md:top-0 md:flex md:h-dvh">
+    <div className="min-h-screen md:flex">
+      <aside className="no-print hidden w-64 shrink-0 flex-col border-r bg-sidebar md:flex md:sticky md:top-0 md:h-screen">
         <div className="flex items-center gap-2 px-5 py-6">
           <BrandMark />
           <div>
             <p className="font-semibold leading-tight text-navy">DiaMonitor</p>
-            <p className="text-xs text-muted-foreground">Copilot</p>
+            <p className="text-xs text-muted-foreground">{tr("Copilot")}</p>
           </div>
         </div>
-        <nav className="flex-1 space-y-1 px-3" aria-label={t("nav.main")}>
-          {NAV.map(({ to, key, icon: Icon }) => {
+        <nav className="flex-1 space-y-1 px-3">
+          {NAV.map(({ to, label, icon: Icon }) => {
             const active = to === "/" ? path === "/" : path.startsWith(to);
             return (
               <Link
                 key={to}
                 to={to}
-                aria-current={active ? "page" : undefined}
                 className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-[15px] font-medium transition-colors ${
                   active ? "bg-sidebar-accent text-primary" : "text-sidebar-foreground hover:bg-muted"
                 }`}
               >
-                <Icon className="h-5 w-5 shrink-0" />
-                <span className="min-w-0">{t(key)}</span>
+                <Icon className="h-5 w-5" />
+                {tr(label)}
               </Link>
             );
           })}
@@ -96,84 +58,128 @@ export function AppShell({ children }: { children: ReactNode }) {
         {data && (
           <div className="m-3 rounded-xl border p-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy text-sm font-semibold text-navy-foreground">{initials}</div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy text-sm font-semibold text-navy-foreground">
+                {initials}
+              </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{data.patient.name}</p>
-                <p className="text-xs text-muted-foreground">{t("common.fictionalPatient")}</p>
+                <p className="text-xs text-muted-foreground">{tr("Fictional demo patient")}</p>
               </div>
+            </div>
+            <div className="mt-2">
+              <p className="mb-1 text-xs font-medium text-muted-foreground">{tr("Demo scenario")}</p>
+              <Select onValueChange={(v) => { loadScenario(v as DemoScenario); toast.success(tr("Scenario loaded: {name}", { name: tr(SCENARIO_LABELS[v as DemoScenario]) })); }}>
+                <SelectTrigger className="h-11 w-full text-xs" aria-label={tr("Demo scenario")}><SelectValue placeholder={tr("Choose a scenario")} /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(SCENARIO_LABELS) as DemoScenario[]).map((key) => (
+                    <SelectItem key={key} value={key}>{tr(SCENARIO_LABELS[key])}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="ghost" size="sm" className="mt-2 w-full text-xs" onClick={resetDemo}>
+              {tr("Reset demo data")}</Button>
+            <div className="mt-2 border-t pt-2 text-xs">
+              {userEmail ? (
+                <>
+                  <p className="truncate text-muted-foreground">{userEmail}</p>
+                  <p className="text-muted-foreground">{syncState === "error" ? tr("Not saved to account") : syncState === "syncing" ? tr("Saving…") : tr("Saved to your account")}</p>
+                  <Button variant="ghost" size="sm" className="mt-1 w-full text-xs" onClick={() => supabase.auth.signOut()}>{tr("Sign out")}</Button>
+                </>
+              ) : (
+                <Button asChild variant="outline" size="sm" className="w-full text-xs"><Link to="/auth">{tr("Sign in to save online")}</Link></Button>
+              )}
             </div>
           </div>
         )}
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="no-print sticky top-0 z-20 flex items-center justify-between gap-2 border-b bg-background/95 px-4 py-3 backdrop-blur md:px-8">
+        <header className="no-print sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b bg-background/95 px-4 py-3 backdrop-blur md:px-8">
           <div className="flex items-center gap-2 md:hidden">
             <BrandMark />
             <span className="font-semibold text-navy">DiaMonitor</span>
           </div>
-          <p className="hidden text-sm text-muted-foreground md:block">{t("common.demoBanner")}</p>
+          <p className="hidden text-sm text-muted-foreground md:block">
+            {tr("Demonstration prototype · all patient data is fictional")}</p>
           <div className="flex items-center gap-2">
-            <Select value={lang} onValueChange={(v) => setLang(v as Lang)}>
-              <SelectTrigger className="h-10 w-[92px] sm:w-[150px]" aria-label={t("settings.language")}>
-                <SelectValue />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" className="h-11 w-11 md:hidden" aria-label={tr("Demo scenario")}>
+                  <LayoutDashboard className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-64">
+                <p className="mb-2 text-sm font-semibold">{tr("Demo scenario")}</p>
+                <Select onValueChange={(v) => { loadScenario(v as DemoScenario); toast.success(tr("Scenario loaded: {name}", { name: tr(SCENARIO_LABELS[v as DemoScenario]) })); }}>
+                  <SelectTrigger className="h-11 w-full text-sm" aria-label={tr("Demo scenario")}><SelectValue placeholder={tr("Choose a scenario")} /></SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(SCENARIO_LABELS) as DemoScenario[]).map((key) => (
+                      <SelectItem key={key} value={key}>{tr(SCENARIO_LABELS[key])}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button variant="ghost" size="sm" className="mt-2 w-full text-xs" onClick={resetDemo}>{tr("Reset demo data")}</Button>
+              </PopoverContent>
+            </Popover>
+            <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
+              <SelectTrigger className="h-11 w-[112px] sm:w-[145px]" aria-label={tr("Language")}>
+                <SelectValue>{language === "en" ? "English (EN)" : language === "ms" ? "BM" : "中文"}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {LANGS.map((l) => (
-                  <SelectItem key={l.code} value={l.code} lang={l.code}>
-                    <span className="sm:hidden">{l.short}</span>
-                    <span className="hidden sm:inline">{l.label}</span>
-                  </SelectItem>
-                ))}
+                <SelectItem value="en">English (EN)</SelectItem>
+                <SelectItem value="ms">Bahasa Melayu (BM)</SelectItem>
+                <SelectItem value="zh">中文</SelectItem>
               </SelectContent>
             </Select>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="relative h-10 w-10" aria-label={t("notif.title")}>
+                <Button variant="outline" size="icon" className="relative h-11 w-11" aria-label={tr("Notifications")}>
                   <Bell className="h-5 w-5" />
-                  {findings.length + newAlerts > 0 && (
+                  {findings.length > 0 && (
                     <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning text-[11px] font-semibold text-primary-foreground">
-                      {findings.length + newAlerts}
+                      {findings.length}
                     </span>
                   )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="end" className="w-80">
-                <p className="mb-2 text-sm font-semibold">{t("notif.title")}</p>
-                {findings.length === 0 && newAlerts === 0 ? (
-                  <p className="text-sm text-muted-foreground">{t("notif.empty")}</p>
+                <p className="mb-2 text-sm font-semibold">{tr("Notifications")}</p>
+                {findings.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{tr("Nothing new.")}</p>
                 ) : (
                   <ul className="space-y-2">
                     {findings.map((f) => (
-                      <li key={f.id} className="rounded-md bg-muted p-2 text-sm">{t(`patterns.${f.id}.title`, f.params)}</li>
+                      <li key={f.id} className="rounded-md bg-muted p-2 text-sm">
+                        {tr(f.title)}
+                      </li>
                     ))}
-                    {newAlerts > 0 && <li className="rounded-md bg-accent p-2 text-sm">{t("notif.caregiverAlerts", { n: newAlerts })}</li>}
                   </ul>
                 )}
-                <div className="mt-3 flex flex-col gap-1">
-                  <Link to="/health" search={{ tab: "patterns" }} className="text-sm font-medium text-primary">{t("notif.viewPatterns")} →</Link>
-                  <Link to="/care-plan" search={{ tab: "caregiver" }} className="text-sm font-medium text-primary">{t("notif.viewCaregiver")} →</Link>
-                </div>
+                <Link to="/health" search={{ tab: "patterns" }} className="mt-3 block text-sm font-medium text-primary">
+                  {tr("View patterns →")}</Link>
               </PopoverContent>
             </Popover>
-            <SettingsSheet />
           </div>
         </header>
-        <main id="main" className="print-full mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-10">{children}</main>
+        <MedicationNotice />
+        <main className="print-full mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-10">{children}</main>
       </div>
 
-      <nav className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-background md:hidden" aria-label={t("nav.main")}>
-        {NAV.map(({ to, key, icon: Icon }) => {
+      <nav className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-background md:hidden">
+        {NAV.map(({ to, label, icon: Icon }) => {
           const active = to === "/" ? path === "/" : path.startsWith(to);
           return (
             <Link
               key={to}
               to={to}
-              aria-current={active ? "page" : undefined}
-              className={`flex min-h-16 flex-col items-center justify-center gap-1 px-0.5 text-center font-medium leading-tight ${elderly ? "text-[12px]" : "text-[11px]"} ${active ? "text-primary" : "text-muted-foreground"}`}
+                aria-current={active ? "page" : undefined}
+              className={`flex min-h-20 flex-col items-center justify-center gap-1 px-0 py-2 text-center text-[13px] leading-tight font-medium [overflow-wrap:normal] ${
+                active ? "text-primary" : "text-muted-foreground"
+              }`}
             >
-              <Icon className="h-5 w-5 shrink-0" />
-              <span className="line-clamp-2">{t(`${key}Short`)}</span>
+              <Icon className="h-5 w-5" />
+              {tr(label)}
             </Link>
           );
         })}

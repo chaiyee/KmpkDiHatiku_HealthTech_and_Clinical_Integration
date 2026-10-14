@@ -10,9 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CarePlanRouteImport } from './routes/care-plan'
+import { Route as CaregiverRouteImport } from './routes/caregiver'
 import { Route as CopilotRouteImport } from './routes/copilot'
 import { Route as DoctorRouteImport } from './routes/doctor'
+import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as HealthRouteImport } from './routes/health'
 
 const IndexRoute = IndexRouteImport.update({
@@ -20,9 +23,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CarePlanRoute = CarePlanRouteImport.update({
   id: '/care-plan',
   path: '/care-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaregiverRoute = CaregiverRouteImport.update({
+  id: '/caregiver',
+  path: '/caregiver',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CopilotRoute = CopilotRouteImport.update({
@@ -35,6 +48,11 @@ const DoctorRoute = DoctorRouteImport.update({
   path: '/doctor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmergencyRoute = EmergencyRouteImport.update({
+  id: '/emergency',
+  path: '/emergency',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
@@ -43,39 +61,76 @@ const HealthRoute = HealthRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/care-plan': typeof CarePlanRoute
+  '/caregiver': typeof CaregiverRoute
   '/copilot': typeof CopilotRoute
   '/doctor': typeof DoctorRoute
+  '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/care-plan': typeof CarePlanRoute
+  '/caregiver': typeof CaregiverRoute
   '/copilot': typeof CopilotRoute
   '/doctor': typeof DoctorRoute
+  '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/care-plan': typeof CarePlanRoute
+  '/caregiver': typeof CaregiverRoute
   '/copilot': typeof CopilotRoute
   '/doctor': typeof DoctorRoute
+  '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/care-plan' | '/copilot' | '/doctor' | '/health'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/care-plan'
+    | '/caregiver'
+    | '/copilot'
+    | '/doctor'
+    | '/emergency'
+    | '/health'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/care-plan' | '/copilot' | '/doctor' | '/health'
-  id: '__root__' | '/' | '/care-plan' | '/copilot' | '/doctor' | '/health'
+  to:
+    | '/'
+    | '/auth'
+    | '/care-plan'
+    | '/caregiver'
+    | '/copilot'
+    | '/doctor'
+    | '/emergency'
+    | '/health'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/care-plan'
+    | '/caregiver'
+    | '/copilot'
+    | '/doctor'
+    | '/emergency'
+    | '/health'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   CarePlanRoute: typeof CarePlanRoute
+  CaregiverRoute: typeof CaregiverRoute
   CopilotRoute: typeof CopilotRoute
   DoctorRoute: typeof DoctorRoute
+  EmergencyRoute: typeof EmergencyRoute
   HealthRoute: typeof HealthRoute
 }
 
@@ -88,11 +143,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/care-plan': {
       id: '/care-plan'
       path: '/care-plan'
       fullPath: '/care-plan'
       preLoaderRoute: typeof CarePlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/caregiver': {
+      id: '/caregiver'
+      path: '/caregiver'
+      fullPath: '/caregiver'
+      preLoaderRoute: typeof CaregiverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/copilot': {
@@ -109,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DoctorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/emergency': {
+      id: '/emergency'
+      path: '/emergency'
+      fullPath: '/emergency'
+      preLoaderRoute: typeof EmergencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/health': {
       id: '/health'
       path: '/health'
@@ -121,9 +197,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   CarePlanRoute: CarePlanRoute,
+  CaregiverRoute: CaregiverRoute,
   CopilotRoute: CopilotRoute,
   DoctorRoute: DoctorRoute,
+  EmergencyRoute: EmergencyRoute,
   HealthRoute: HealthRoute,
 }
 export const routeTree = rootRouteImport

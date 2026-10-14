@@ -10,9 +10,12 @@
 <!-- LOVABLE:END -->
 
 # Architecture rules
+- Preserve the uploaded five-route application, shared browser storage keys and translation provider; this is an improvement of the existing prototype, not a new application.
+- The existing Daily Care Guide uses seven predefined Monday–Sunday entries and existing translated suggestions, independent of doctor goals; educational browsing must not change clinical plans.
+- Use the existing medication scheduling and consent-aware caregiver functions without external services; unlogged medication is not a missed dose and caregiver sharing remains a local simulation.
 
-- All pages read one shared `AppData` via `useStore()` (src/lib/store.tsx); never duplicate sample data per page — keeps charts, report and insights consistent.
-- Storage is isolated in store.tsx load/save (localStorage for now) so a backend can replace it without touching pages.
-- Pattern detection lives in src/lib/patterns.ts as deterministic rules with tests; never let an LLM decide safety alerts.
-- AI chat goes through src/lib/copilot-service.ts only; it must return demo-labelled answers and never fabricated sources until a real retrieval service is wired in.
-- Store-dependent UI renders after client hydration (store starts null) to avoid SSR/locale date mismatches.
+- Consultation doctor editing is a volatile, default-off simulation flag in the existing store with guarded doctor mutators, not authentication or a persisted user role; this prevents ordinary patient-mode edits without claiming security.
+- Store consultation questions, response timestamps and follow-up instructions as optional fields in the existing demo record; retain all legacy keys, goals, check-ins and educational guide entries for compatibility.
+- The doctor report uses native expandable sections that are opened temporarily for printing so collapsed on-screen content remains in the full report.
+- Copilot-pinned consultation questions are an optional pinnedQuestions list in the existing demo record, kept separate from the free-text consultationQuestions for backward compatibility.
+- Patient records stay in localStorage for the no-account demo; when signed in, the whole AppData record is synced as one JSON row per user in public.patient_data (owner-only RLS), pulled on sign-in and upserted after changes.
