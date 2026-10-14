@@ -27,7 +27,8 @@ export function guardianReadings(now: Date) {
 
 export function ConnectedHealth() {
   const { t: tr, format } = useLanguage();
-  const { data, addDeviceReadings, addLog } = useStore();
+  const { data, addDeviceReadings, guardianCheckIn } = useStore();
+  const [alerted, setAlerted] = useState(false);
   const [cgm, setCgm] = useState<Device>({ connected: true, lastSync: null });
   const [watch, setWatch] = useState<Device>({ connected: true, lastSync: null });
   const [vitals, setVitals] = useState({ hr: 74, steps: 3120, sleep: 6.8 });
@@ -64,7 +65,7 @@ export function ConnectedHealth() {
     setFeeling(f);
     setStep(4);
     if (f === "help") setUrgent(true);
-    if (f !== "okay") addLog({ timestamp: new Date().toISOString(), category: "symptom", title: f === "help" ? "Needs help (Guardian check-in)" : "Feeling unwell (Guardian check-in)", detail: "Simulated Guardian Mode demo" });
+    setAlerted(guardianCheckIn(f).alerted);
   };
 
   const findings = detectPatterns(data.readings, t).filter((f) => f.kind === "repeated_high" || f.kind === "baseline_shift");
@@ -146,11 +147,13 @@ export function ConnectedHealth() {
               </>
             )}
             {step === 4 && feeling && (
-              <div className="rounded-md bg-muted p-3 text-sm">
-                <p>4. {feeling === "help" ? tr("Urgent safety guidance is shown above.") : feeling === "unwell" ? tr("Your symptom was recorded. Consider contacting your clinic.") : tr("Thanks. The pattern stays in your records for your doctor.")}</p>
-                {feeling !== "help" && (shares
-                  ? <p className="mt-2 font-medium">{tr("SIMULATED caregiver notification created for {name}. Nothing was actually sent.", { name: cg?.name || tr("your caregiver") })}</p>
-                  : <p className="mt-2">{tr("Not shared with a caregiver, following your sharing preferences.")} <Link to="/care-plan" className="underline">{tr("Change preferences")}</Link></p>)}
+              <div className="space-y-2 rounded-md bg-muted p-3 text-sm">
+                <p>4. {feeling === "help" ? tr("Urgent safety guidance is shown above.") : feeling === "unwell" ? tr("Your symptom was recorded. Consider contacting your clinic.") : tr("Thanks. Your check-in was recorded. No extra caregiver alert was created because of this answer. The pattern stays in your records for your doctor.")}</p>
+                {feeling === "okay" && <p className="text-muted-foreground">{tr("If a dangerous reading arrives or you start to feel unwell, safety guidance will still appear immediately.")}</p>}
+                {feeling !== "okay" && (alerted
+                  ? <p className="font-medium">5. {tr("SIMULATED caregiver alert saved for {name}. Nothing was actually sent — no SMS, WhatsApp or notification.", { name: cg?.name || tr("your caregiver") })} <Link to="/caregiver" className="underline">{tr("View caregiver history")}</Link></p>
+                  : <p>5. {tr("Not shared with a caregiver, following your sharing preferences.")} <Link to="/care-plan" className="underline">{tr("Change preferences")}</Link></p>)}
+                <Button variant="outline" onClick={runGuardian}>{tr("Replay demo")}</Button>
               </div>
             )}
           </div>
