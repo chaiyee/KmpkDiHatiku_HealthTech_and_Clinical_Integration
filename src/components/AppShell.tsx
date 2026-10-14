@@ -1,9 +1,22 @@
 import { useLanguage, type Language } from "@/lib/i18n";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Bell, CalendarCheck, HeartPulse, LayoutDashboard, MessageCircleQuestion, Stethoscope } from "lucide-react";
+import {
+  Bell,
+  CalendarCheck,
+  HeartPulse,
+  LayoutDashboard,
+  MessageCircleQuestion,
+  Stethoscope,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
 import { toast } from "sonner";
@@ -14,19 +27,55 @@ import { BrandMark } from "./BrandMark";
 import { MedicationNotice } from "./MedicationNotice";
 
 const NAV = [
-  { to: "/", label: "Overview", icon: LayoutDashboard },
-  { to: "/health", label: "My Health", icon: HeartPulse },
-  { to: "/copilot", label: "AI Copilot", icon: MessageCircleQuestion },
-  { to: "/doctor", label: "Doctor Visit", icon: Stethoscope },
-  { to: "/care-plan", label: "My Care Plan", icon: CalendarCheck },
+  {
+    to: "/",
+    label: "Overview",
+    short: "Home",
+    description: "Your day at a glance",
+    icon: LayoutDashboard,
+  },
+  {
+    to: "/health",
+    label: "My Health",
+    short: "Health",
+    description: "Readings, logs and trends",
+    icon: HeartPulse,
+  },
+  {
+    to: "/copilot",
+    label: "AI Copilot",
+    short: "Copilot",
+    description: "Understand your records",
+    icon: MessageCircleQuestion,
+  },
+  {
+    to: "/doctor",
+    label: "Doctor Visit",
+    short: "Visit",
+    description: "Prepare for your appointment",
+    icon: Stethoscope,
+  },
+  {
+    to: "/care-plan",
+    label: "My Care Plan",
+    short: "Care",
+    description: "Medication and daily check-in",
+    icon: CalendarCheck,
+  },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t: tr, format, formatDistanceToNow, language, setLanguage } = useLanguage();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { data, resetDemo, loadScenario, userEmail, syncState } = useStore();
-  const findings = data ? detectPatterns(data.readings, data.thresholds).filter((f) => f.severity !== "info") : [];
-  const initials = data?.patient.name.split(" ").map((p) => p[0]).join("") ?? "";
+  const findings = data
+    ? detectPatterns(data.readings, data.thresholds).filter((f) => f.severity !== "info")
+    : [];
+  const initials =
+    data?.patient.name
+      .split(" ")
+      .map((p) => p[0])
+      .join("") ?? "";
 
   return (
     <div className="min-h-screen md:flex">
@@ -39,18 +88,26 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
         <nav className="flex-1 space-y-1 px-3">
-          {NAV.map(({ to, label, icon: Icon }) => {
+          {NAV.map(({ to, label, description, icon: Icon }) => {
             const active = to === "/" ? path === "/" : path.startsWith(to);
             return (
               <Link
                 key={to}
                 to={to}
+                aria-current={active ? "page" : undefined}
                 className={`flex min-h-12 items-center gap-3 rounded-lg px-3 text-[15px] font-medium transition-colors ${
-                  active ? "bg-sidebar-accent text-primary" : "text-sidebar-foreground hover:bg-muted"
+                  active
+                    ? "bg-sidebar-accent text-primary"
+                    : "text-sidebar-foreground hover:bg-muted"
                 }`}
               >
                 <Icon className="h-5 w-5" />
-                {tr(label)}
+                <span>
+                  <span className="block">{tr(label)}</span>
+                  <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                    {tr(description)}
+                  </span>
+                </span>
               </Link>
             );
           })}
@@ -66,28 +123,64 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <p className="text-xs text-muted-foreground">{tr("Fictional demo patient")}</p>
               </div>
             </div>
-            <div className="mt-2">
-              <p className="mb-1 text-xs font-medium text-muted-foreground">{tr("Demo scenario")}</p>
-              <Select onValueChange={(v) => { loadScenario(v as DemoScenario); toast.success(tr("Scenario loaded: {name}", { name: tr(SCENARIO_LABELS[v as DemoScenario]) })); }}>
-                <SelectTrigger className="h-11 w-full text-xs" aria-label={tr("Demo scenario")}><SelectValue placeholder={tr("Choose a scenario")} /></SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(SCENARIO_LABELS) as DemoScenario[]).map((key) => (
-                    <SelectItem key={key} value={key}>{tr(SCENARIO_LABELS[key])}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button variant="ghost" size="sm" className="mt-2 w-full text-xs" onClick={resetDemo}>
-              {tr("Reset demo data")}</Button>
+            <details className="mt-3 border-t pt-2">
+              <summary className="min-h-11 cursor-pointer py-2 text-xs font-medium text-muted-foreground">
+                {tr("Demo tools")}
+              </summary>
+              <div className="mt-2">
+                <p className="mb-1 text-xs font-medium text-muted-foreground">
+                  {tr("Demo scenario")}
+                </p>
+                <Select
+                  onValueChange={(v) => {
+                    loadScenario(v as DemoScenario);
+                    toast.success(
+                      tr("Scenario loaded: {name}", {
+                        name: tr(SCENARIO_LABELS[v as DemoScenario]),
+                      }),
+                    );
+                  }}
+                >
+                  <SelectTrigger className="h-11 w-full text-xs" aria-label={tr("Demo scenario")}>
+                    <SelectValue placeholder={tr("Choose a scenario")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(SCENARIO_LABELS) as DemoScenario[]).map((key) => (
+                      <SelectItem key={key} value={key}>
+                        {tr(SCENARIO_LABELS[key])}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button variant="ghost" size="sm" className="mt-2 w-full text-xs" onClick={resetDemo}>
+                {tr("Reset demo data")}
+              </Button>
+            </details>
             <div className="mt-2 border-t pt-2 text-xs">
               {userEmail ? (
                 <>
                   <p className="truncate text-muted-foreground">{userEmail}</p>
-                  <p className="text-muted-foreground">{syncState === "error" ? tr("Not saved to account") : syncState === "syncing" ? tr("Saving…") : tr("Saved to your account")}</p>
-                  <Button variant="ghost" size="sm" className="mt-1 w-full text-xs" onClick={() => supabase.auth.signOut()}>{tr("Sign out")}</Button>
+                  <p className="text-muted-foreground">
+                    {syncState === "error"
+                      ? tr("Not saved to account")
+                      : syncState === "syncing"
+                        ? tr("Saving…")
+                        : tr("Saved to your account")}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-1 w-full text-xs"
+                    onClick={() => supabase.auth.signOut()}
+                  >
+                    {tr("Sign out")}
+                  </Button>
                 </>
               ) : (
-                <Button asChild variant="outline" size="sm" className="w-full text-xs"><Link to="/auth">{tr("Sign in to save online")}</Link></Button>
+                <Button asChild variant="outline" size="sm" className="w-full text-xs">
+                  <Link to="/auth">{tr("Sign in to save online")}</Link>
+                </Button>
               )}
             </div>
           </div>
@@ -101,30 +194,58 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="font-semibold text-navy">DiaMonitor</span>
           </div>
           <p className="hidden text-sm text-muted-foreground md:block">
-            {tr("Demonstration prototype · all patient data is fictional")}</p>
+            {tr("Demonstration prototype · all patient data is fictional")}
+          </p>
           <div className="flex items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="h-11 w-11 md:hidden" aria-label={tr("Demo scenario")}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-11 w-11 md:hidden"
+                  aria-label={tr("Demo scenario")}
+                >
                   <LayoutDashboard className="h-5 w-5" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="start" className="w-64">
                 <p className="mb-2 text-sm font-semibold">{tr("Demo scenario")}</p>
-                <Select onValueChange={(v) => { loadScenario(v as DemoScenario); toast.success(tr("Scenario loaded: {name}", { name: tr(SCENARIO_LABELS[v as DemoScenario]) })); }}>
-                  <SelectTrigger className="h-11 w-full text-sm" aria-label={tr("Demo scenario")}><SelectValue placeholder={tr("Choose a scenario")} /></SelectTrigger>
+                <Select
+                  onValueChange={(v) => {
+                    loadScenario(v as DemoScenario);
+                    toast.success(
+                      tr("Scenario loaded: {name}", {
+                        name: tr(SCENARIO_LABELS[v as DemoScenario]),
+                      }),
+                    );
+                  }}
+                >
+                  <SelectTrigger className="h-11 w-full text-sm" aria-label={tr("Demo scenario")}>
+                    <SelectValue placeholder={tr("Choose a scenario")} />
+                  </SelectTrigger>
                   <SelectContent>
                     {(Object.keys(SCENARIO_LABELS) as DemoScenario[]).map((key) => (
-                      <SelectItem key={key} value={key}>{tr(SCENARIO_LABELS[key])}</SelectItem>
+                      <SelectItem key={key} value={key}>
+                        {tr(SCENARIO_LABELS[key])}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="ghost" size="sm" className="mt-2 w-full text-xs" onClick={resetDemo}>{tr("Reset demo data")}</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 w-full text-xs"
+                  onClick={resetDemo}
+                >
+                  {tr("Reset demo data")}
+                </Button>
               </PopoverContent>
             </Popover>
             <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
               <SelectTrigger className="h-11 w-[112px] sm:w-[145px]" aria-label={tr("Language")}>
-                <SelectValue>{language === "en" ? "English (EN)" : language === "ms" ? "BM" : "中文"}</SelectValue>
+                <SelectValue>
+                  {language === "en" ? "English (EN)" : language === "ms" ? "BM" : "中文"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="en">English (EN)</SelectItem>
@@ -134,7 +255,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Select>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className="relative h-11 w-11" aria-label={tr("Notifications")}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="relative h-11 w-11"
+                  aria-label={tr("Notifications")}
+                >
                   <Bell className="h-5 w-5" />
                   {findings.length > 0 && (
                     <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning text-[11px] font-semibold text-primary-foreground">
@@ -156,30 +282,37 @@ export function AppShell({ children }: { children: ReactNode }) {
                     ))}
                   </ul>
                 )}
-                <Link to="/health" search={{ tab: "patterns" }} className="mt-3 block text-sm font-medium text-primary">
-                  {tr("View patterns →")}</Link>
+                <Link
+                  to="/health"
+                  search={{ tab: "patterns" }}
+                  className="mt-3 block text-sm font-medium text-primary"
+                >
+                  {tr("View patterns →")}
+                </Link>
               </PopoverContent>
             </Popover>
           </div>
         </header>
         <MedicationNotice />
-        <main className="print-full mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-10">{children}</main>
+        <main className="print-full mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-10">
+          {children}
+        </main>
       </div>
 
       <nav className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-background md:hidden">
-        {NAV.map(({ to, label, icon: Icon }) => {
+        {NAV.map(({ to, short, icon: Icon }) => {
           const active = to === "/" ? path === "/" : path.startsWith(to);
           return (
             <Link
               key={to}
               to={to}
-                aria-current={active ? "page" : undefined}
+              aria-current={active ? "page" : undefined}
               className={`flex min-h-20 flex-col items-center justify-center gap-1 px-0 py-2 text-center text-[13px] leading-tight font-medium [overflow-wrap:normal] ${
                 active ? "text-primary" : "text-muted-foreground"
               }`}
             >
               <Icon className="h-5 w-5" />
-              {tr(label)}
+              {tr(short)}
             </Link>
           );
         })}

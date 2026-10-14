@@ -71,13 +71,13 @@
 
 :root {
   --radius: 0.875rem;
-  --background: oklch(0.985 0.004 195);
+  --background: oklch(0.98 0.009 255);
   --foreground: oklch(0.24 0.05 255);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.05 255);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.24 0.05 255);
-  --primary: oklch(0.52 0.095 192);
+  --primary: oklch(0.46 0.13 190);
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.955 0.015 195);
   --secondary-foreground: oklch(0.27 0.06 255);
@@ -102,7 +102,7 @@
   --chart-3: oklch(0.62 0.13 70);
   --chart-4: oklch(0.58 0.12 155);
   --chart-5: oklch(0.56 0.2 25);
-  --sidebar: oklch(1 0 0);
+  --sidebar: oklch(0.985 0.004 265);
   --sidebar-foreground: oklch(0.27 0.06 255);
   --sidebar-primary: oklch(0.52 0.095 192);
   --sidebar-primary-foreground: oklch(0.99 0 0);
@@ -184,6 +184,32 @@ input, textarea { min-width: 0; }
   .print-full { margin: 0 !important; padding: 0 !important; max-width: none !important; }
 }
 
-.tour-highlight { outline: 3px solid hsl(var(--primary)); outline-offset: 3px; border-radius: 0.5rem; animation: tour-pulse 1.6s ease-in-out infinite; }
+.welcome-panel {
+  background: linear-gradient(120deg, oklch(0.94 0.045 185), oklch(0.96 0.025 285));
+  border: 1px solid oklch(0.86 0.04 190);
+}
+.overview-stats > :nth-child(1) {
+  background: oklch(0.97 0.023 190);
+  border-top: 4px solid oklch(0.46 0.13 190);
+}
+.overview-stats > :nth-child(2) {
+  background: oklch(0.97 0.02 285);
+  border-top: 4px solid oklch(0.5 0.15 285);
+}
+.overview-stats > :nth-child(3) {
+  background: oklch(0.98 0.025 75);
+  border-top: 4px solid oklch(0.55 0.12 65);
+}
+main details > summary::marker { color: var(--primary); }
+main details[open] > summary { margin-bottom: 0.5rem; }
+.care-page > section:first-of-type {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: oklch(0.95 0.023 190);
+}
+@media print {
+  .welcome-panel, .overview-stats > *, .care-page > section:first-of-type { background: white; }
+}
+.tour-highlight { outline: 3px solid var(--primary); outline-offset: 3px; border-radius: 0.5rem; animation: tour-pulse 1.6s ease-in-out infinite; }
 @keyframes tour-pulse { 0%, 100% { outline-offset: 2px; } 50% { outline-offset: 6px; } }
 @media (prefers-reduced-motion: reduce) { .tour-highlight { animation: none; } }

@@ -1,3 +1,5 @@
+import { translationsReplay } from "./translations-replay";
+import { translationsSafety } from "./translations-safety";
 // English wording is the stable dictionary key; clinical numbers and user data are never altered.
 import { translationsBrief3 } from "./translations-brief3";
 import { translationsBrief2 } from "./translations-brief2";
@@ -5,6 +7,8 @@ import { translationsConnected } from "./translations-connected";
 
 export const translations: Record<string, { ms: string; zh: string }> = {
   ...translationsConnected,
+  ...translationsSafety,
+  ...translationsReplay,
   ...translationsBrief3,
   ...translationsBrief2,
   "Sign in to save online": {"ms": "Log masuk untuk simpan dalam talian", "zh": "登录以在线保存"},
@@ -1750,6 +1754,23 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Consider tosai with dhal": {"ms": "Pertimbangkan tosai dengan dal", "zh": "可考虑印度薄饼配扁豆咖喱"},
   "General ideas only, not a diet restriction. Ask your doctor or dietitian what suits you.": {"ms": "Idea umum sahaja, bukan sekatan diet. Tanya doktor atau pakar diet apa yang sesuai untuk anda.", "zh": "仅为一般建议，并非饮食限制。请咨询医生或营养师什么适合您。"},
   "Your doctor's goal": {"ms": "Matlamat doktor anda", "zh": "医生为您设定的目标"},
-  "Doctor-assigned, read-only": {"ms": "Ditetapkan doktor, baca sahaja", "zh": "医生设定，仅供查看"}
+  "Doctor-assigned, read-only": {"ms": "Ditetapkan doktor, baca sahaja", "zh": "医生设定，仅供查看"},
+  "Learn more": {"ms": "Ketahui lebih lanjut", "zh": "了解更多"},
+  "Daily log": {"ms": "Catatan harian", "zh": "日常记录"},
+  "Insights": {"ms": "Cerapan", "zh": "分析"},
+  "History": {"ms": "Sejarah", "zh": "历史"},
+  "Devices & demo": {"ms": "Peranti & demo", "zh": "设备与演示"},
+  "Record a meal, activity or symptom": {"ms": "Rekod makanan, aktiviti atau gejala", "zh": "记录餐食、活动或症状"},
+  "Your day at a glance": {"ms": "Ringkasan hari anda", "zh": "今日概览"},
+  "Readings, logs and trends": {"ms": "Bacaan, catatan dan trend", "zh": "读数、记录与趋势"},
+  "Understand your records": {"ms": "Fahami rekod anda", "zh": "了解您的记录"},
+  "Prepare for your appointment": {"ms": "Bersedia untuk janji temu", "zh": "准备就诊"},
+  "Medication and daily check-in": {"ms": "Ubat dan semakan harian", "zh": "用药与每日签到"},
+  "Demo tools": {"ms": "Alat demo", "zh": "演示工具"},
+  "Today's care": {"ms": "Penjagaan hari ini", "zh": "今日护理"},
+  "Home": {"ms": "Utama", "zh": "首页"},
+  "Health": {"ms": "Kesihatan", "zh": "健康"},
+  "Visit": {"ms": "Lawatan", "zh": "就诊"},
+  "Care": {"ms": "Penjagaan", "zh": "护理"}
 
 };
