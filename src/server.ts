@@ -1,5 +1,6 @@
 import "./lib/error-capture";
 import { handleMealAnalysis, type MealEnvironment } from "./lib/meal-analysis.server";
+import { handleCopilot } from "./lib/copilot.server";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
@@ -47,6 +48,13 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    if (new URL(request.url).pathname === "/api/copilot") {
+      const runtime = typeof env === "object" && env ? (env as MealEnvironment) : {};
+      return handleCopilot(request, {
+        ...(typeof process === "undefined" ? {} : process.env),
+        ...runtime,
+      });
+    }
     if (new URL(request.url).pathname === "/api/meal-analysis") {
       const runtime = typeof env === "object" && env ? (env as MealEnvironment) : {};
       const variables = typeof process === "undefined" ? {} : process.env;

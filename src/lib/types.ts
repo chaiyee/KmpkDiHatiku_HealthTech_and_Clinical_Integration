@@ -39,6 +39,7 @@ export interface HealthLog {
   detail?: string | undefined;
   source: RecordSource;
   meal?: import("./meals").MealRecord;
+  activity?: import("./activity").ActivityRecord | undefined;
 }
 
 export interface CheckIn {
@@ -84,6 +85,7 @@ export interface EmergencyInfo {
 }
 
 export interface AppData {
+  activityReminder?: { enabled: boolean; time: string; dismissedDate?: string };
   consultationQuestions?: string;
   emergency?: EmergencyInfo;
   pinnedQuestions?: { id: string; text: string; createdAt: string; discussed: boolean }[];

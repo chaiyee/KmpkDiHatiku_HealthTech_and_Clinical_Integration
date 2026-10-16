@@ -10,6 +10,7 @@ import { BrandMark } from "@/components/BrandMark";
 import { PageHeader, PageLoading } from "@/components/common";
 import { useStore } from "@/lib/store";
 import { getCopilotResponse, type CopilotResponse } from "@/lib/copilot-service";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/copilot")({
   head: () => ({
@@ -50,7 +51,32 @@ const SUGGESTIONS = [
 
 function CopilotPage() {
   const { t: tr, format, language } = useLanguage();
-  const { data } = useStore();
+  const { data, userEmail, syncState } = useStore();
+  const [configured, setConfigured] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [liveStatus, setLiveStatus] = useState("");
+  const requestGeneration = useRef(0);
+  useEffect(() => {
+    let active = true;
+    fetch("/api/copilot")
+      .then((r) => r.json())
+      .then((result) => {
+        if (active) setConfigured(result.configured === true);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+  useEffect(() => {
+    const accountGeneration = ++requestGeneration.current;
+    setConsent(false);
+    setMessages([]);
+    setLoading(false);
+    return () => {
+      requestGeneration.current = accountGeneration + 1;
+    };
+  }, [userEmail]);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -69,16 +95,52 @@ function CopilotPage() {
   async function send(text: string) {
     const q = text.trim();
     if (!q || loading || !data) return;
+    const generation = requestGeneration.current;
     setMessages((m) => [...m, { id: Date.now(), role: "user", text: q }]);
     setInput("");
     setLoading(true);
     try {
-      const res = await getCopilotResponse(q, data, new Date(), language);
+      let res = await getCopilotResponse(q, data, new Date(), language);
+      if (generation !== requestGeneration.current) return;
+      if (res.kind !== "safety" && consent && configured && userEmail && syncState === "saved") {
+        try {
+          const { data: session } = await supabase.auth.getSession();
+          if (generation !== requestGeneration.current || session.session?.user.email !== userEmail)
+            return;
+          const reply = await fetch("/api/copilot", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.session?.access_token ?? ""}`,
+            },
+            body: JSON.stringify({
+              question: q,
+              consent: true,
+              language,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            }),
+          });
+          if (!reply.ok) throw new Error();
+          const result = await reply.json();
+          if (generation !== requestGeneration.current) return;
+          if (
+            typeof result.response?.text !== "string" ||
+            !["personal", "safety"].includes(result.response.kind)
+          )
+            throw new Error();
+          res = result.response;
+          setLiveStatus("AI-assisted record review. Numbers come from your saved records.");
+        } catch {
+          if (generation !== requestGeneration.current) return;
+          setLiveStatus("Online AI is unavailable. Showing a local record summary.");
+        }
+      } else setLiveStatus("Local record review. No records sent to an AI provider.");
       setMessages((m) => [
         ...m,
         { id: Date.now() + 1, role: "assistant", text: res.text, meta: res },
       ]);
     } catch {
+      if (generation !== requestGeneration.current) return;
       setMessages((m) => [
         ...m,
         {
@@ -89,7 +151,7 @@ function CopilotPage() {
         },
       ]);
     } finally {
-      setLoading(false);
+      if (generation === requestGeneration.current) setLoading(false);
     }
   }
 
@@ -100,11 +162,32 @@ function CopilotPage() {
         subtitle={tr("Diabetes education and help understanding your records.")}
       />
       <div className="mb-5 rounded-xl border bg-secondary p-4 text-sm">
-        <p className="font-semibold">{tr("Based on your records · not live AI")}</p>
+        <p className="font-semibold">
+          {tr(
+            configured ? "Record-focused Copilot" : "Local record review · online AI unavailable",
+          )}
+        </p>
         <p className="mt-1">
           {tr(
             "Supports record review, not diagnosis or treatment changes. Seek medical help for urgent symptoms.",
           )}
+        </p>
+        {configured && (
+          <label className="mt-3 flex items-start gap-2">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={consent}
+              disabled={!userEmail || syncState !== "saved"}
+              onChange={(e) => setConsent(e.target.checked)}
+            />
+            {tr(
+              "Use online AI for this session: send my question and limited saved meal, glucose and activity records to OpenAI. Names, clinic details and notes are excluded. Avoid identifying details in questions. Sign in and finish syncing first.",
+            )}
+          </label>
+        )}
+        <p className="mt-2" role="status">
+          {tr(liveStatus)}
         </p>
       </div>
 

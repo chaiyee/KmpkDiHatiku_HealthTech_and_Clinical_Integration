@@ -1,4 +1,5 @@
 import { useLanguage, type Language } from "@/lib/i18n";
+import { RecordNotices } from "./RecordNotices";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Bell,
@@ -301,7 +302,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
         <MedicationNotice />
         <MealReminderNotice />
+        <RecordNotices />
         <main
+          key={userEmail ?? "guest"}
           id="main-content"
           tabIndex={-1}
           className="print-full mx-auto w-full max-w-6xl flex-1 px-4 pb-32 pt-5 sm:px-6 lg:px-8 lg:pb-10"

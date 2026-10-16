@@ -5,6 +5,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useRef,
   type ReactNode,
   type Context,
 } from "react";
@@ -20,6 +21,8 @@ import type {
 } from "./types";
 import { localDay } from "./medications";
 import { saveConfirmedMeal } from "./meals";
+import { saveActivity as applyActivity } from "./activity";
+import { accountKey, emptyAccount, sameCloudVersion } from "./persistence";
 import { DEFAULT_CAREGIVER, sharingAllows, syncCaregiverAlerts } from "./caregiver";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
@@ -39,20 +42,21 @@ function normalize(saved: AppData): AppData {
   };
 }
 
-function load(): AppData {
+function load(key = KEY): AppData {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(key);
     if (raw) return normalize(JSON.parse(raw) as AppData);
   } catch {
     /* ignore */
   }
-  return generateSampleData();
+  return key === KEY ? generateSampleData() : emptyAccount(generateSampleData());
 }
 
 interface Store {
   data: AppData | null;
   userEmail: string | null;
   syncState: "local" | "syncing" | "saved" | "error";
+  retrySync: () => void;
   demoDoctor: boolean;
   setDemoDoctor: (enabled: boolean) => void;
   saveQuestions: (questions: string) => void;
@@ -70,6 +74,9 @@ interface Store {
   addReading: (r: Omit<GlucoseReading, "id" | "source" | "unit">) => void;
   addLog: (l: Omit<HealthLog, "id" | "source">) => void;
   saveMeal: (log: HealthLog) => void;
+  saveActivity: (log: HealthLog) => void;
+  removeActivity: (id: string) => void;
+  saveActivityReminder: (reminder: NonNullable<AppData["activityReminder"]>) => void;
   dismissMealReminder: (id: string) => void;
   /** Simulated device readings; skips any with a timestamp already recorded from a device. */
   addDeviceReadings: (rs: Omit<GlucoseReading, "id" | "source" | "unit">[]) => void;
@@ -107,12 +114,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [syncState, setSyncState] = useState<Store["syncState"]>("local");
   const [cloudReady, setCloudReady] = useState(false);
+  const [syncAttempt, setSyncAttempt] = useState(0);
+  const activeKey = useRef(KEY);
+  const accountGeneration = useRef(0);
+  const cloudVersion = useRef<string | null>(null);
+  const dirty = useRef(false);
 
   useEffect(() => setData(load()), []);
 
   // Track the signed-in account.
   useEffect(() => {
+    let authChanged = false;
     supabase.auth.getUser().then(({ data: u }) => {
+      if (authChanged) return;
       setUserId(u.user?.id ?? null);
       setUserEmail(u.user?.email ?? null);
     });
@@ -124,15 +138,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         event !== "INITIAL_SESSION"
       )
         return;
+      authChanged = true;
       setUserId(session?.user.id ?? null);
       setUserEmail(session?.user.email ?? null);
     });
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      authChanged = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   // On sign-in: pull the saved record, or upload the current one for a new account.
   useEffect(() => {
+    const generation = ++accountGeneration.current;
     setCloudReady(false);
+    activeKey.current = accountKey(userId);
+    setDemoDoctor(false);
+    const cached = load(activeKey.current);
+    setData(cached);
+    dirty.current = localStorage.getItem(`${activeKey.current}:dirty`) === "true";
+    cloudVersion.current = localStorage.getItem(`${activeKey.current}:version`);
     if (!userId) {
       setSyncState("local");
       return;
@@ -142,7 +167,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (async () => {
       const { data: row, error } = await supabase
         .from("patient_data")
-        .select("data")
+        .select("data,updated_at")
         .eq("user_id", userId)
         .maybeSingle();
       if (cancelled) return;
@@ -151,42 +176,80 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (row?.data) {
+        if (dirty.current && !sameCloudVersion(cloudVersion.current, row.updated_at)) {
+          setSyncState("error");
+          return;
+        }
         const remote = normalize(row.data as unknown as AppData);
-        localStorage.setItem(KEY, JSON.stringify(remote));
-        setData(remote);
+        cloudVersion.current = row.updated_at;
+        localStorage.setItem(`${activeKey.current}:version`, row.updated_at);
+        if (!dirty.current) {
+          localStorage.setItem(activeKey.current, JSON.stringify(remote));
+          setData(remote);
+        }
       } else {
-        const current = load();
+        const current = cached;
+        const version = new Date().toISOString();
         const { error: e2 } = await supabase
           .from("patient_data")
-          .insert({ user_id: userId, data: current as unknown as Json });
+          .insert({ user_id: userId, data: current as unknown as Json, updated_at: version });
+        if (cancelled || generation !== accountGeneration.current) return;
         if (e2) {
           setSyncState("error");
           return;
         }
+        cloudVersion.current = version;
+        localStorage.setItem(`${activeKey.current}:version`, version);
       }
       setCloudReady(true);
-      setSyncState("saved");
-    })();
+      setSyncState(dirty.current ? "syncing" : "saved");
+    })().catch(() => {
+      if (!cancelled) setSyncState("error");
+    });
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, syncAttempt]);
+
+  useEffect(() => {
+    const retry = () => setSyncAttempt((value) => value + 1);
+    window.addEventListener("online", retry);
+    return () => window.removeEventListener("online", retry);
+  }, []);
 
   // Push changes to the account (debounced).
   useEffect(() => {
-    if (!userId || !cloudReady || !data) return;
+    if (!userId || !cloudReady || !data || !dirty.current) return;
+    const generation = accountGeneration.current;
+    const key = accountKey(userId);
+    let cancelled = false;
     const t = window.setTimeout(async () => {
       setSyncState("syncing");
-      const { error } = await supabase
+      const version = new Date().toISOString();
+      const { data: changed, error } = await supabase
         .from("patient_data")
-        .upsert({
-          user_id: userId,
+        .update({
           data: data as unknown as Json,
-          updated_at: new Date().toISOString(),
-        });
-      setSyncState(error ? "error" : "saved");
+          updated_at: version,
+        })
+        .eq("user_id", userId)
+        .eq("updated_at", cloudVersion.current!)
+        .select("updated_at");
+      if (generation !== accountGeneration.current) return;
+      if (!error && changed?.length) {
+        cloudVersion.current = changed[0]!.updated_at;
+        localStorage.setItem(`${key}:version`, changed[0]!.updated_at);
+        if (!cancelled) {
+          dirty.current = false;
+          localStorage.removeItem(`${key}:dirty`);
+        }
+      }
+      if (!cancelled) setSyncState(error || !changed?.length ? "error" : "saved");
     }, 800);
-    return () => window.clearTimeout(t);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
   }, [data, userId, cloudReady]);
 
   const update = useCallback((fn: (d: AppData) => AppData) => {
@@ -194,7 +257,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!prev) return prev;
       const next = syncCaregiverAlerts(fn(prev));
       if (next === prev) return prev;
-      localStorage.setItem(KEY, JSON.stringify(next));
+      localStorage.setItem(activeKey.current, JSON.stringify(next));
+      dirty.current = true;
+      if (activeKey.current !== KEY) setSyncState("syncing");
+      localStorage.setItem(`${activeKey.current}:dirty`, "true");
       return next;
     });
   }, []);
@@ -215,6 +281,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       data,
       userEmail,
       syncState,
+      retrySync: () => setSyncAttempt((value) => value + 1),
       demoDoctor,
       setDemoDoctor,
       saveQuestions: (questions) => update((d) => ({ ...d, consultationQuestions: questions })),
@@ -293,6 +360,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           const logs = saveConfirmedMeal(d.logs, log);
           return logs === d.logs ? d : { ...d, logs };
         }),
+      saveActivity: (log) => update((d) => ({ ...d, logs: applyActivity(d.logs, log) })),
+      removeActivity: (id) =>
+        update((d) => ({
+          ...d,
+          logs: d.logs.filter(
+            (log) => !(log.id === id && log.source === "user" && log.category === "activity"),
+          ),
+        })),
+      saveActivityReminder: (activityReminder) => update((d) => ({ ...d, activityReminder })),
       dismissMealReminder: (id) =>
         update((d) => ({
           ...d,
@@ -431,13 +507,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }),
       resetDemo: () => {
         const fresh = generateSampleData();
-        localStorage.setItem(KEY, JSON.stringify(fresh));
+        localStorage.setItem(activeKey.current, JSON.stringify(fresh));
+        dirty.current = true;
+        localStorage.setItem(`${activeKey.current}:dirty`, "true");
         setData(fresh);
         setDemoDoctor(false);
       },
       loadScenario: (scenario) => {
         const fresh = generateSampleData(new Date(), scenario);
-        localStorage.setItem(KEY, JSON.stringify(fresh));
+        localStorage.setItem(activeKey.current, JSON.stringify(fresh));
+        dirty.current = true;
+        localStorage.setItem(`${activeKey.current}:dirty`, "true");
         setData(fresh);
         setDemoDoctor(false);
       },

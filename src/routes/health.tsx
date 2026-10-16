@@ -1,5 +1,6 @@
 import { nutritionTotals } from "@/lib/meals";
 import { MealCompanion, MealEditDialog } from "@/components/MealCompanion";
+import { ActivityCompanion } from "@/components/ActivityCompanion";
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { subDays } from "date-fns";
@@ -291,6 +292,8 @@ function LogTab() {
           </div>
           {category === "meal" ? (
             <MealCompanion />
+          ) : category === "activity" ? (
+            <ActivityCompanion />
           ) : (
             <form onSubmit={submit} className="space-y-4" noValidate>
               <div>

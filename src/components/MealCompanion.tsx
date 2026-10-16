@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { useLanguage } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { useClock } from "@/hooks/use-clock";
+import { FoodGlucoseInsights } from "./FoodGlucoseInsights";
+import { mealTimeline } from "@/lib/food-insights";
 import { analyseMealPhoto, prepareMealPhoto } from "@/lib/meal-photo";
 import {
   blankFood,
@@ -14,7 +16,6 @@ import {
   nearbyMealReadings,
   NUTRIENTS,
   nutritionTotals,
-  recurringMeals,
   type FoodItem,
 } from "@/lib/meals";
 import type { HealthLog } from "@/lib/types";
@@ -654,12 +655,14 @@ export function MealCompanion() {
           setKey(key + 1);
         }}
       />
-      <SavedMeals
-        onEdit={(log) => {
-          setEditing(log);
-          window.scrollTo({ top: 0, behavior: "auto" });
-        }}
-      />
+      <FoodGlucoseInsights>
+        <SavedMeals
+          onEdit={(log) => {
+            setEditing(log);
+            window.scrollTo({ top: 0, behavior: "auto" });
+          }}
+        />
+      </FoodGlucoseInsights>
     </div>
   );
 }
@@ -674,7 +677,6 @@ export function SavedMeals({ onEdit }: { onEdit?: (log: HealthLog) => void }) {
     .filter((log) => log.category === "meal")
     .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
   const meals = allMeals.slice(0, limit);
-  const patterns = recurringMeals(data);
   return (
     <div className="space-y-3">
       <h3 className="text-lg font-semibold text-navy">{t("Meals & nearby glucose")}</h3>
@@ -683,14 +685,6 @@ export function SavedMeals({ onEdit }: { onEdit?: (log: HealthLog) => void }) {
           {t("Save a meal to review it alongside your glucose records.")}
         </p>
       )}
-      {patterns.map((pattern) => (
-        <p key={pattern.name} className="rounded-lg bg-secondary p-3 text-sm">
-          {t(
-            "Your recorded glucose was higher after several similar meals: {name}. This association does not prove the meal caused the change.",
-            { name: pattern.name },
-          )}
-        </p>
-      ))}
       {meals.map((log) => {
         const readings = nearbyMealReadings(log, data.readings);
         const totals = log.meal ? nutritionTotals(log.meal.items) : null;
@@ -767,7 +761,22 @@ export function SavedMeals({ onEdit }: { onEdit?: (log: HealthLog) => void }) {
                       "Nearby means within three hours. Times show recorded observations, not a causal link. Sample and simulated readings are kept separate from your meal observations.",
                     )}
                   </p>
-                  {!readings.length ? (
+                  {log.source === "user" &&
+                    log.meal?.confirmed &&
+                    mealTimeline(log, data.logs, data.readings).map(
+                      ({ reading, minutes, relation }) => (
+                        <p key={`timing-${reading.id}`}>
+                          {format(new Date(reading.timestamp), "HH:mm")} · {reading.value} mmol/L ·{" "}
+                          {t("Manual entry")} · {t(relation)} ·{" "}
+                          {t("{minutes} minutes from meal", { minutes })}
+                        </p>
+                      ),
+                    )}
+                  {log.source === "user" && log.meal?.confirmed ? (
+                    mealTimeline(log, data.logs, data.readings).length === 0 && (
+                      <p>{t("No nearby manually recorded glucose readings.")}</p>
+                    )
+                  ) : !readings.length ? (
                     <p>
                       {t("No matching-source readings nearby. Nothing was measured automatically.")}
                     </p>

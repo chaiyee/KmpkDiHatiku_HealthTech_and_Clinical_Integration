@@ -108,6 +108,7 @@ describe("Meal Companion workflow", () => {
       },
     ];
     render(<MealCompanion />);
+    fireEvent.click(screen.getByText("Meal and glucose timeline"));
     fireEvent.click(screen.getByRole("button", { name: "Edit meal" }));
     fireEvent.change(screen.getByLabelText("Carbohydrates (g)"), { target: { value: "30" } });
     fireEvent.click(screen.getByLabelText("I reviewed the foods, portions and estimates."));

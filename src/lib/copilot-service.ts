@@ -2,6 +2,7 @@ import type { AppData } from "./types";
 import { detectPatterns, fastingBaseline } from "./patterns";
 import { mealCopilotAnswer } from "./meal-copilot";
 import type { Language } from "./i18n";
+import { renderRecordAnswer } from "./record-answers";
 
 // Isolated AI service layer. Currently returns DEMO responses (no AI or RAG backend connected).
 // Replace `getCopilotResponse` with a call to a server-side RAG service later; keep the response shape.
@@ -73,9 +74,26 @@ export async function getCopilotResponse(
     };
   }
 
-  await new Promise((r) => setTimeout(r, 700));
-
+  data = {
+    ...data,
+    readings: data.readings.filter((r) => r.source === "user"),
+    logs: data.logs.filter((l) => l.source === "user"),
+  };
   const t = data.thresholds;
+  const statedGlucose =
+    /(?:glucose|glukosa|gula darah|血糖)\s*(?:is|adalah|为|是|:|=)?\s*(\d+(?:\.\d+)?)\s*mmol\/?l/i.exec(
+      q,
+    );
+  if (
+    statedGlucose &&
+    (Number(statedGlucose[1]) < t.hypo || Number(statedGlucose[1]) >= t.severeHigh)
+  )
+    return {
+      kind: "safety",
+      demo: false,
+      sources: [],
+      text: "Your stated glucose may need prompt attention. Follow your healthcare team's safety plan and contact your clinic. If you feel very unwell, confused or unable to swallow, seek urgent medical help; call 999 in Malaysia. Do not wait for an AI answer.",
+    };
   const sorted = [...data.readings].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 
   if (LOW_LIKE.test(q)) {
@@ -134,6 +152,25 @@ export async function getCopilotResponse(
 
   const mealAnswer = mealCopilotAnswer(q, data, now, language);
   if (mealAnswer) return { kind: "personal", demo: false, sources: [], text: mealAnswer };
+  if (/walk|walking|berjalan|步行|散步|activity|aktiviti|活动/.test(q))
+    return {
+      kind: "personal",
+      demo: false,
+      sources: [],
+      text: renderRecordAnswer(
+        { intent: /summar|ringkas|总结/.test(q) ? "summary" : "walking_week", mealIds: [] },
+        data,
+        now,
+        language,
+      ),
+    };
+  if (/after.*(lunch|meal)|selepas.*makan|午餐后|饭后/.test(q))
+    return {
+      kind: "personal",
+      demo: false,
+      sources: [],
+      text: renderRecordAnswer({ intent: "meal_glucose", mealIds: [] }, data, now, language),
+    };
   if (WHY_HIGH.test(q) || (YESTERDAY.test(q) && /(gula|sugar|glucose|血糖)/i.test(q))) {
     const y = new Date(now);
     y.setDate(y.getDate() - 1);
@@ -196,7 +233,7 @@ export async function getCopilotResponse(
       kind: "personal",
       demo: true,
       sources: [],
-      text: "Based on your recent records, you might ask:\n\n• My morning readings have been higher this past week — what could be contributing?\n• Should my target ranges be adjusted for me?\n• Are late dinners or late nights something I should change?\n• When should I contact the clinic if readings stay high?\n\nYou can find these on the Doctor Visit report too.",
+      text: renderRecordAnswer({ intent: "doctor", mealIds: [] }, data, now, language),
     };
   }
 
@@ -205,7 +242,7 @@ export async function getCopilotResponse(
       kind: "education",
       demo: true,
       sources: [],
-      text: "General ideas often discussed in diabetes education (demo answer, not personalised advice):\n\n• Use the 'suku-suku separuh' plate idea: half vegetables, a quarter protein, a quarter carbohydrates.\n• Choose brown rice or smaller rice portions instead of large servings of white rice.\n• Ikan bakar, chicken soup, tauhu and sayur goreng with less oil are lighter options than deep-fried dishes.\n• Ask for 'kurang manis' or plain drinks instead of teh tarik with condensed milk.\n\nA dietitian can tailor this to you.",
+      text: "Meal portions and recipes vary. Review your confirmed meal estimates and ask your healthcare team about choices that suit your care plan.",
     };
   }
 
@@ -213,6 +250,6 @@ export async function getCopilotResponse(
     kind: "education",
     demo: true,
     sources: [],
-    text: "I'm a demo assistant and can currently help with: explaining your recent glucose trend, preparing questions for your doctor, and general Malaysian meal ideas. A full answer to this question needs the medical-source service, which isn't connected yet.",
+    text: "I can review confirmed meals, logged activity and manual glucose records. I cannot diagnose conditions or recommend treatment changes.",
   };
 }

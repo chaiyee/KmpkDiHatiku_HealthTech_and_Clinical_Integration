@@ -1,4 +1,5 @@
 import { translationsDesign } from "./translations-design";
+import { translationsCompanions } from "./translations-companions";
 import { translationsMeals } from "./translations-meals";
 import { translationsMealPhoto } from "./translations-meal-photo";
 import { translationsReplay } from "./translations-replay";
@@ -9,6 +10,7 @@ import { translationsBrief2 } from "./translations-brief2";
 import { translationsConnected } from "./translations-connected";
 
 export const translations: Record<string, { ms: string; zh: string }> = {
+  ...translationsCompanions,
   ...translationsConnected,
   ...translationsSafety,
   ...translationsReplay,

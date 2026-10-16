@@ -17,6 +17,7 @@ import { Route as CopilotRouteImport } from './routes/copilot'
 import { Route as DoctorRouteImport } from './routes/doctor'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as ApiCopilotRouteImport } from './routes/api.copilot'
 import { Route as ApiMealAnalysisRouteImport } from './routes/api.meal-analysis'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const HealthRoute = HealthRouteImport.update({
   path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCopilotRoute = ApiCopilotRouteImport.update({
+  id: '/api/copilot',
+  path: '/api/copilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMealAnalysisRoute = ApiMealAnalysisRouteImport.update({
   id: '/api/meal-analysis',
   path: '/api/meal-analysis',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/doctor': typeof DoctorRoute
   '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
+  '/api/copilot': typeof ApiCopilotRoute
   '/api/meal-analysis': typeof ApiMealAnalysisRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/doctor': typeof DoctorRoute
   '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
+  '/api/copilot': typeof ApiCopilotRoute
   '/api/meal-analysis': typeof ApiMealAnalysisRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/doctor': typeof DoctorRoute
   '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
+  '/api/copilot': typeof ApiCopilotRoute
   '/api/meal-analysis': typeof ApiMealAnalysisRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/doctor'
     | '/emergency'
     | '/health'
+    | '/api/copilot'
     | '/api/meal-analysis'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/doctor'
     | '/emergency'
     | '/health'
+    | '/api/copilot'
     | '/api/meal-analysis'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/doctor'
     | '/emergency'
     | '/health'
+    | '/api/copilot'
     | '/api/meal-analysis'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   DoctorRoute: typeof DoctorRoute
   EmergencyRoute: typeof EmergencyRoute
   HealthRoute: typeof HealthRoute
+  ApiCopilotRoute: typeof ApiCopilotRoute
   ApiMealAnalysisRoute: typeof ApiMealAnalysisRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/copilot': {
+      id: '/api/copilot'
+      path: '/api/copilot'
+      fullPath: '/api/copilot'
+      preLoaderRoute: typeof ApiCopilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/meal-analysis': {
       id: '/api/meal-analysis'
       path: '/api/meal-analysis'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   DoctorRoute: DoctorRoute,
   EmergencyRoute: EmergencyRoute,
   HealthRoute: HealthRoute,
+  ApiCopilotRoute: ApiCopilotRoute,
   ApiMealAnalysisRoute: ApiMealAnalysisRoute,
 }
 export const routeTree = rootRouteImport
