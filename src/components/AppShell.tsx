@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { detectPatterns } from "@/lib/patterns";
 import { BrandMark } from "./BrandMark";
 import { MedicationNotice } from "./MedicationNotice";
+import { MealReminderNotice } from "./MealCompanion";
 
 const NAV = [
   {
@@ -58,7 +59,7 @@ const NAV = [
   {
     to: "/care-plan",
     label: "My Care Plan",
-    short: "Care",
+    short: "Plan",
     description: "Medication and daily check-in",
     icon: CalendarCheck,
   },
@@ -78,8 +79,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       .join("") ?? "";
 
   return (
-    <div className="min-h-screen md:flex">
-      <aside className="no-print hidden w-64 shrink-0 flex-col border-r bg-sidebar md:flex md:sticky md:top-0 md:h-screen">
+    <div className="min-h-screen lg:flex">
+      <a className="skip-link" href="#main-content">
+        {tr("Skip to main content")}
+      </a>
+      <aside className="no-print hidden w-64 shrink-0 flex-col border-r bg-sidebar lg:flex lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
         <div className="flex items-center gap-2 px-5 py-6">
           <BrandMark />
           <div>
@@ -87,7 +91,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <p className="text-xs text-muted-foreground">{tr("Copilot")}</p>
           </div>
         </div>
-        <nav className="flex-1 space-y-1 px-3">
+        <nav aria-label={tr("Main navigation")} className="flex-1 space-y-2 px-3">
           {NAV.map(({ to, label, description, icon: Icon }) => {
             const active = to === "/" ? path === "/" : path.startsWith(to);
             return (
@@ -189,12 +193,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="no-print sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b bg-background/95 px-4 py-3 backdrop-blur md:px-8">
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-2 lg:hidden">
             <BrandMark />
-            <span className="font-semibold text-navy">DiaMonitor</span>
+            <span className="sr-only font-semibold text-navy min-[440px]:not-sr-only">
+              DiaMonitor
+            </span>
           </div>
-          <p className="hidden text-sm text-muted-foreground md:block">
-            {tr("Demonstration prototype · all patient data is fictional")}
+          <p className="hidden text-sm text-muted-foreground lg:block">
+            {tr("Demo workspace · sample and simulated data")}
           </p>
           <div className="flex items-center gap-2">
             <Popover>
@@ -202,7 +208,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-11 w-11 md:hidden"
+                  className="h-11 w-11 lg:hidden"
                   aria-label={tr("Demo scenario")}
                 >
                   <LayoutDashboard className="h-5 w-5" />
@@ -294,12 +300,20 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <MedicationNotice />
-        <main className="print-full mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-10">
+        <MealReminderNotice />
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="print-full mx-auto w-full max-w-6xl flex-1 px-4 pb-32 pt-5 sm:px-6 lg:px-8 lg:pb-10"
+        >
           {children}
         </main>
       </div>
 
-      <nav className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-background md:hidden">
+      <nav
+        aria-label={tr("Main navigation")}
+        className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-card pb-[env(safe-area-inset-bottom)] shadow-sm lg:hidden"
+      >
         {NAV.map(({ to, short, icon: Icon }) => {
           const active = to === "/" ? path === "/" : path.startsWith(to);
           return (
@@ -307,7 +321,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               key={to}
               to={to}
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-20 flex-col items-center justify-center gap-1 px-0 py-2 text-center text-[13px] leading-tight font-medium [overflow-wrap:normal] ${
+              className={`flex min-h-20 flex-col items-center justify-center gap-1 px-1 py-2 text-center text-[14px] leading-snug font-medium [overflow-wrap:anywhere] ${
                 active ? "text-primary" : "text-muted-foreground"
               }`}
             >

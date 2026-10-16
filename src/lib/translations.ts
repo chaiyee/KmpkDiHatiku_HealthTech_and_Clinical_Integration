@@ -1,3 +1,6 @@
+import { translationsDesign } from "./translations-design";
+import { translationsMeals } from "./translations-meals";
+import { translationsMealPhoto } from "./translations-meal-photo";
 import { translationsReplay } from "./translations-replay";
 import { translationsSafety } from "./translations-safety";
 // English wording is the stable dictionary key; clinical numbers and user data are never altered.
@@ -9,6 +12,9 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   ...translationsConnected,
   ...translationsSafety,
   ...translationsReplay,
+  ...translationsMealPhoto,
+  ...translationsMeals,
+  ...translationsDesign,
   ...translationsBrief3,
   ...translationsBrief2,
   "Sign in to save online": {"ms": "Log masuk untuk simpan dalam talian", "zh": "登录以在线保存"},

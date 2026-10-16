@@ -1,3 +1,5 @@
+import { nutritionTotals } from "@/lib/meals";
+import { MealCompanion, MealEditDialog } from "@/components/MealCompanion";
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { subDays } from "date-fns";
@@ -69,10 +71,23 @@ function HealthPage() {
         title={tr("My Health")}
         subtitle={tr("Record readings and see how they change over time.")}
       />
+      <p className="mb-5 max-w-3xl text-sm text-muted-foreground">
+        {tr(
+          tab === "devices"
+            ? "Preview sensor updates and supportive Guardian check-ins. All device activity here is simulated."
+            : tab === "patterns"
+              ? "Explore recorded changes and the readings behind them."
+              : tab === "log"
+                ? "Record meals, movement and how you feel. Your notes add context to your readings."
+                : tab === "timeline"
+                  ? "Your readings and daily records, together in time."
+                  : "Add a glucose reading or review your latest records.",
+        )}
+      </p>
       <Tabs value={tab} onValueChange={(v) => navigate({ search: { tab: v as Tab } })}>
-        <TabsList className="mb-4 grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-5">
+        <TabsList className="mb-5 grid h-auto w-full grid-cols-2 gap-1 rounded-xl border bg-card p-1.5 sm:grid-cols-3 xl:grid-cols-5">
           <TabsTrigger value="glucose" className="h-11 px-4">
-            {tr("Glucose")}
+            {tr("Glucose records")}
           </TabsTrigger>
           <TabsTrigger value="log" className="h-11 px-4">
             {tr("Daily log")}
@@ -81,10 +96,10 @@ function HealthPage() {
             {tr("History")}
           </TabsTrigger>
           <TabsTrigger value="patterns" className="h-11 px-4">
-            {tr("Insights")}
+            {tr("Health trends")}
           </TabsTrigger>
           <TabsTrigger value="devices" className="h-11 px-4">
-            {tr("Devices & demo")}
+            {tr("Monitoring")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="glucose">
@@ -118,63 +133,8 @@ function GlucoseTab() {
   const b = fastingBaseline(d.readings, d.thresholds, now);
   const recent = [...inRange].sort((a, b) => b.timestamp.localeCompare(a.timestamp)).slice(0, 8);
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      <div className="order-2 space-y-4 lg:order-1 lg:col-span-2">
-        <Card>
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-lg">{tr("Glucose history")}</CardTitle>
-            <Select value={range} onValueChange={setRange}>
-              <SelectTrigger className="h-11 w-36" aria-label={tr("Date range")}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">{tr("Last 7 days")}</SelectItem>
-                <SelectItem value="14">{tr("Last 14 days")}</SelectItem>
-                <SelectItem value="30">{tr("Last 30 days")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </CardHeader>
-          <CardContent>
-            <GlucoseChart readings={inRange} t={d.thresholds} height={300} />
-            <p className="mt-2 text-xs text-muted-foreground">
-              {tr("Green band: demo reference range")} {d.thresholds.hypo}–
-              {d.thresholds.fastingHigh} {tr("mmol/L (not a personal target).")}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">{tr("Recent readings")}</CardTitle>
-          </CardHeader>
-          <CardContent className="divide-y">
-            {recent.length === 0 && (
-              <p className="text-muted-foreground">{tr("No readings in this period.")}</p>
-            )}
-            {recent.map((r) => (
-              <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <div>
-                  <p className="font-medium">{r.value.toFixed(1)} mmol/L</p>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(r.timestamp), "EEE d MMM, h:mm a")} ·{" "}
-                    {tr(CONTEXT_LABELS[r.context])}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {r.source === "sample" ? (
-                    <SampleBadge>{tr("Sample")}</SampleBadge>
-                  ) : r.source === "device" ? (
-                    <SampleBadge>{tr("Simulated device")}</SampleBadge>
-                  ) : (
-                    <SampleBadge>{tr("You")}</SampleBadge>
-                  )}
-                  <StatusPill status={readingStatus(r, d.thresholds)} />
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-      <div className="order-1 space-y-4 lg:order-2">
+    <div className="grid items-start gap-5 xl:grid-cols-2">
+      <div className="order-1 space-y-5 xl:order-1">
         <Card className="border-primary/30">
           <CardHeader>
             <CardTitle className="text-lg">{tr("Add a reading")}</CardTitle>
@@ -217,6 +177,49 @@ function GlucoseTab() {
           </Card>
         </details>
       </div>
+      <div className="order-2 space-y-5 xl:order-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{tr("Recent readings")}</CardTitle>
+            <Select value={range} onValueChange={setRange}>
+              <SelectTrigger className="h-11 w-full sm:w-40" aria-label={tr("Date range")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">{tr("Last 7 days")}</SelectItem>
+                <SelectItem value="14">{tr("Last 14 days")}</SelectItem>
+                <SelectItem value="30">{tr("Last 30 days")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent className="divide-y">
+            {recent.length === 0 && (
+              <p className="text-muted-foreground">{tr("No readings in this period.")}</p>
+            )}
+            {recent.map((r) => (
+              <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div>
+                  <p className="font-medium">{r.value.toFixed(1)} mmol/L</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(r.timestamp), "EEE d MMM, h:mm a")} ·{" "}
+                    {tr(CONTEXT_LABELS[r.context])}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {r.source === "sample" ? (
+                    <SampleBadge>{tr("Sample")}</SampleBadge>
+                  ) : r.source === "device" ? (
+                    <SampleBadge>{tr("Simulated device")}</SampleBadge>
+                  ) : (
+                    <SampleBadge>{tr("You")}</SampleBadge>
+                  )}
+                  <StatusPill status={readingStatus(r, d.thresholds)} />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -231,6 +234,7 @@ function LogTab() {
   const [when, setWhen] = useState(format(new Date(), "yyyy-MM-dd'T'HH:mm"));
   const [error, setError] = useState("");
   const [symptomSaved, setSymptomSaved] = useState(false);
+
   const placeholders: Record<LogCategory, string> = {
     meal: tr("e.g. Nasi lemak, half portion"),
     activity: tr("e.g. Brisk walk, 30 min"),
@@ -264,7 +268,7 @@ function LogTab() {
         <CardTitle className="text-lg">{tr("Record a meal, activity or symptom")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={submit} className="space-y-4" noValidate>
+        <div className="space-y-4">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {(Object.keys(CATEGORY_LABELS) as LogCategory[]).map((c) => {
               const Icon = icons[c];
@@ -285,86 +289,92 @@ function LogTab() {
               );
             })}
           </div>
-          <div>
-            <Label htmlFor="l-title">{tr("What")}</Label>
-            <Input
-              id="l-title"
-              aria-invalid={!!error}
-              aria-describedby={error ? "l-error" : undefined}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={placeholders[category]}
-              className="mt-1.5 h-12"
-            />
-          </div>
-          <div>
-            <Label htmlFor="l-detail">{tr("Details (optional)")}</Label>
-            <Input
-              id="l-detail"
-              value={detail}
-              onChange={(e) => setDetail(e.target.value)}
-              className="mt-1.5 h-12"
-            />
-          </div>
-          <div>
-            <Label htmlFor="l-when">{tr("When")}</Label>
-            <Input
-              id="l-when"
-              type="datetime-local"
-              value={when}
-              onChange={(e) => setWhen(e.target.value)}
-              className="mt-1.5 h-12"
-            />
-          </div>
-          {error && (
-            <p id="l-error" role="alert" className="text-sm text-destructive">
-              {tr(error)}
-            </p>
-          )}
-          {symptomSaved && category === "symptom" && (
-            <div
-              role="alert"
-              className="space-y-3 rounded-lg border border-warning/40 bg-warning-soft p-4"
-            >
-              <p className="font-medium">
-                {tr(
-                  "Symptoms like dizziness, shaking or sweating can be linked to low or high glucose.",
-                )}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {tr(
-                  "Please check your glucose now if you can. If you feel very unwell, confused or drowsy, seek medical help immediately (999 in Malaysia).",
-                )}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  className="min-h-12"
-                  onClick={() => navigate({ search: { tab: "glucose" } })}
-                >
-                  <Droplet />
-                  {tr("Check glucose now")}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="min-h-12"
-                  onClick={() => setSymptomSaved(false)}
-                >
-                  {tr("Dismiss")}
-                </Button>
+          {category === "meal" ? (
+            <MealCompanion />
+          ) : (
+            <form onSubmit={submit} className="space-y-4" noValidate>
+              <div>
+                <Label htmlFor="l-title">{tr("What")}</Label>
+                <Input
+                  id="l-title"
+                  aria-invalid={!!error}
+                  aria-describedby={error ? "l-error" : undefined}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder={placeholders[category]}
+                  className="mt-1.5 h-12"
+                />
               </div>
-            </div>
-          )}
-          {category === "medication" && (
-            <p className="text-sm text-muted-foreground">
-              {tr(
-                "Medication logs are your own records. A day without a log doesn't mean a dose was missed.",
+              <div>
+                <Label htmlFor="l-detail">{tr("Details (optional)")}</Label>
+                <Input
+                  id="l-detail"
+                  value={detail}
+                  onChange={(e) => setDetail(e.target.value)}
+                  className="mt-1.5 h-12"
+                />
+              </div>
+              <div>
+                <Label htmlFor="l-when">{tr("When")}</Label>
+                <Input
+                  id="l-when"
+                  type="datetime-local"
+                  value={when}
+                  onChange={(e) => setWhen(e.target.value)}
+                  className="mt-1.5 h-12"
+                />
+              </div>
+              {error && (
+                <p id="l-error" role="alert" className="text-sm text-destructive">
+                  {tr(error)}
+                </p>
               )}
-            </p>
+              {symptomSaved && category === "symptom" && (
+                <div
+                  role="alert"
+                  className="space-y-3 rounded-lg border border-warning/40 bg-warning-soft p-4"
+                >
+                  <p className="font-medium">
+                    {tr(
+                      "Symptoms like dizziness, shaking or sweating can be linked to low or high glucose.",
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {tr(
+                      "Please check your glucose now if you can. If you feel very unwell, confused or drowsy, seek medical help immediately (999 in Malaysia).",
+                    )}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      className="min-h-12"
+                      onClick={() => navigate({ search: { tab: "glucose" } })}
+                    >
+                      <Droplet />
+                      {tr("Check glucose now")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="min-h-12"
+                      onClick={() => setSymptomSaved(false)}
+                    >
+                      {tr("Dismiss")}
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {category === "medication" && (
+                <p className="text-sm text-muted-foreground">
+                  {tr(
+                    "Medication logs are your own records. A day without a log doesn't mean a dose was missed.",
+                  )}
+                </p>
+              )}
+              <Button type="submit" className="h-12 w-full text-base">
+                {tr("Save to timeline")}
+              </Button>
+            </form>
           )}
-          <Button type="submit" className="h-12 w-full text-base">
-            {tr("Save to timeline")}
-          </Button>
-        </form>
+        </div>
       </CardContent>
     </Card>
   );
@@ -373,6 +383,7 @@ function LogTab() {
 function TimelineTab() {
   const { t: tr, format } = useLanguage();
   const { data } = useStore();
+  const [editingMeal, setEditingMeal] = useState<import("@/lib/types").HealthLog | undefined>();
   const [cat, setCat] = useState<"all" | "glucose" | LogCategory>("all");
   const [range, setRange] = useState("7");
   if (!data) return <PageLoading />;
@@ -385,6 +396,8 @@ function TimelineTab() {
     title: string;
     detail?: string | undefined;
     sample: boolean;
+    device?: boolean;
+    logId?: string;
   };
   const items: Item[] = [
     ...d.readings.map((r) => ({
@@ -394,6 +407,7 @@ function TimelineTab() {
       title: `${r.value.toFixed(1)} mmol/L`,
       detail: tr(CONTEXT_LABELS[r.context]) + (r.note ? ` · ${r.note}` : ""),
       sample: r.source === "sample",
+      device: r.source === "device",
     })),
     ...d.logs.map((l) => ({
       id: l.id,
@@ -402,6 +416,7 @@ function TimelineTab() {
       title: l.title,
       detail: l.detail,
       sample: l.source === "sample",
+      logId: l.id,
     })),
   ]
     .filter((i) => new Date(i.ts) >= since && (cat === "all" || i.kind === cat))
@@ -420,6 +435,9 @@ function TimelineTab() {
   } as Record<string, typeof Droplet>;
   return (
     <div className="space-y-4">
+      {editingMeal && (
+        <MealEditDialog log={editingMeal} onClose={() => setEditingMeal(undefined)} />
+      )}
       <div className="flex flex-wrap gap-3">
         <Select value={cat} onValueChange={(v) => setCat(v as typeof cat)}>
           <SelectTrigger className="h-11 w-48" aria-label={tr("Category")}>
@@ -461,6 +479,8 @@ function TimelineTab() {
             <CardContent className="divide-y p-0">
               {list.map((i) => {
                 const Icon = icon[i.kind] ?? Droplet;
+                const mealLog =
+                  i.kind === "meal" ? d.logs.find((log) => log.id === i.logId) : undefined;
                 return (
                   <div key={i.id} className="flex items-start gap-3 px-4 py-3">
                     <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-primary">
@@ -468,6 +488,24 @@ function TimelineTab() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-medium">{i.sample ? tr(i.title) : i.title}</p>
+                      {mealLog?.meal && (
+                        <p className="text-sm font-semibold text-primary">
+                          {tr("Estimated carbohydrates: {value} g", {
+                            value:
+                              nutritionTotals(mealLog.meal.items).carbohydrates.value ??
+                              tr("Not entered"),
+                          })}
+                        </p>
+                      )}
+                      {mealLog?.source === "user" && (
+                        <Button
+                          variant="outline"
+                          className="mt-2 min-h-11"
+                          onClick={() => setEditingMeal(mealLog)}
+                        >
+                          {tr("Edit meal")}
+                        </Button>
+                      )}
                       {i.detail && (
                         <p className="text-sm text-muted-foreground">
                           {i.sample ? tr(i.detail) : i.detail}
@@ -479,6 +517,7 @@ function TimelineTab() {
                         {format(new Date(i.ts), "h:mm a")}
                       </p>
                       {i.sample && <SampleBadge>{tr("Sample")}</SampleBadge>}
+                      {i.device && <SampleBadge>{tr("Simulated device")}</SampleBadge>}
                     </div>
                   </div>
                 );
@@ -494,12 +533,44 @@ function TimelineTab() {
 function PatternsTab() {
   const { t: tr, format } = useLanguage();
   const { data } = useStore();
+  const [range, setRange] = useState("14");
   if (!data) return <PageLoading />;
   const d = data;
   const findings = detectPatterns(d.readings, d.thresholds);
   const t = d.thresholds;
+  const inRange = d.readings.filter(
+    (r) => new Date(r.timestamp) >= subDays(new Date(), Number(range)),
+  );
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {findings
+        .filter((f) => f.kind === "safety")
+        .map((f) => (
+          <FindingCard key={f.id} f={f} t={t} />
+        ))}
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-lg">{tr("Glucose history")}</CardTitle>
+          <Select value={range} onValueChange={setRange}>
+            <SelectTrigger className="h-11 w-36" aria-label={tr("Date range")}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">{tr("Last 7 days")}</SelectItem>
+              <SelectItem value="14">{tr("Last 14 days")}</SelectItem>
+              <SelectItem value="30">{tr("Last 30 days")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardHeader>
+        <CardContent>
+          <GlucoseChart readings={inRange} t={d.thresholds} height={300} />
+          <p className="mt-2 text-xs text-muted-foreground">
+            {tr("Green band: demo reference range")} {d.thresholds.hypo}–{d.thresholds.fastingHigh}{" "}
+            {tr("mmol/L (not a personal target).")}
+          </p>
+        </CardContent>
+      </Card>
+
       {findings.length === 0 && (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
@@ -507,9 +578,11 @@ function PatternsTab() {
           </CardContent>
         </Card>
       )}
-      {findings.map((f) => (
-        <FindingCard key={f.id} f={f} t={t} />
-      ))}
+      {findings
+        .filter((f) => f.kind !== "safety")
+        .map((f) => (
+          <FindingCard key={f.id} f={f} t={t} />
+        ))}
       <PersonalInsights />
       <Card>
         <CardHeader>

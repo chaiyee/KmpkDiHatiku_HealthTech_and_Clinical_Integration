@@ -1,4 +1,5 @@
 import "./lib/error-capture";
+import { handleMealAnalysis, type MealEnvironment } from "./lib/meal-analysis.server";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
@@ -46,6 +47,11 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    if (new URL(request.url).pathname === "/api/meal-analysis") {
+      const runtime = typeof env === "object" && env ? (env as MealEnvironment) : {};
+      const variables = typeof process === "undefined" ? {} : process.env;
+      return handleMealAnalysis(request, { ...variables, ...runtime });
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

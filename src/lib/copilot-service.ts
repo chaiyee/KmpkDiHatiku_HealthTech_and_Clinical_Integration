@@ -1,5 +1,7 @@
 import type { AppData } from "./types";
 import { detectPatterns, fastingBaseline } from "./patterns";
+import { mealCopilotAnswer } from "./meal-copilot";
+import type { Language } from "./i18n";
 
 // Isolated AI service layer. Currently returns DEMO responses (no AI or RAG backend connected).
 // Replace `getCopilotResponse` with a call to a server-side RAG service later; keep the response shape.
@@ -47,6 +49,7 @@ export async function getCopilotResponse(
   question: string,
   data: AppData,
   now = new Date(),
+  language: Language = "en",
 ): Promise<CopilotResponse> {
   const q = question.toLowerCase();
 
@@ -129,6 +132,8 @@ export async function getCopilotResponse(
     };
   }
 
+  const mealAnswer = mealCopilotAnswer(q, data, now, language);
+  if (mealAnswer) return { kind: "personal", demo: false, sources: [], text: mealAnswer };
   if (WHY_HIGH.test(q) || (YESTERDAY.test(q) && /(gula|sugar|glucose|血糖)/i.test(q))) {
     const y = new Date(now);
     y.setDate(y.getDate() - 1);
@@ -182,7 +187,7 @@ export async function getCopilotResponse(
       sources: [],
       doctorQuestion:
         "My morning readings have been higher this past week — what could be contributing?",
-      text: `Here's what your recorded data shows (based on the rule-based monitoring engine, not a diagnosis):\n\n${lines}\n\n${b.sufficient ? "" : "There isn't enough earlier data yet to compare with your usual levels.\n\n"}You also logged late nights and some late, heavier dinners on some of these days. That may be worth discussing, but these records only show things happened around the same time — they don't prove one caused the other. Your doctor can help interpret this.`,
+      text: `Here's what your recorded data shows (based on the rule-based monitoring engine, not a diagnosis):\n\n${lines}\n\n${b.sufficient ? "" : "There isn't enough earlier data yet to compare with your usual levels.\n\n"}Recorded meals and activity can provide context, but cannot establish the cause of a glucose change. Your doctor can help interpret this.`,
     };
   }
 

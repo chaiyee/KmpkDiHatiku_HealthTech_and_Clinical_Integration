@@ -6,10 +6,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { PatternFinding } from "@/lib/patterns";
 import { CONTEXT_LABELS, type GlucoseReading, type Thresholds } from "@/lib/types";
 
-export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
+export function PageHeader({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+}) {
   const { t: tr, format } = useLanguage();
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div className="page-header flex flex-wrap items-end justify-between gap-3">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-navy md:text-[28px]">{title}</h1>
         {subtitle && <p className="mt-1 text-muted-foreground">{subtitle}</p>}
@@ -22,8 +30,8 @@ export function PageHeader({ title, subtitle, action }: { title: string; subtitl
 export function SampleBadge({ children }: { children?: ReactNode }) {
   const { t: tr, format } = useLanguage();
   return (
-    <span className="inline-flex items-center rounded-full border border-dashed px-2 py-0.5 text-xs font-medium text-muted-foreground">
-      {typeof children === "string" ? tr(children) : children ?? tr("Sample data")}
+    <span className="inline-flex items-center rounded-full border bg-muted/50 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+      {typeof children === "string" ? tr(children) : (children ?? tr("Sample data"))}
     </span>
   );
 }
@@ -39,7 +47,7 @@ export function PageLoading() {
   );
 }
 
-export type Status = "low" | "high" | "in" ;
+export type Status = "low" | "high" | "in";
 export function readingStatus(r: GlucoseReading, t: Thresholds): Status {
   if (r.value < t.hypo) return "low";
   const high = r.context === "after_meal" ? t.postMealHigh : t.fastingHigh;
@@ -76,7 +84,10 @@ export function EvidenceTable({ readings, t }: { readings: GlucoseReading[]; t: 
               <td className="px-3 py-2">{format(new Date(r.timestamp), "EEE d MMM, h:mm a")}</td>
               <td className="px-3 py-2">{tr(CONTEXT_LABELS[r.context])}</td>
               <td className="px-3 py-2 text-right font-medium">
-                {r.value.toFixed(1)} <span className="ml-1 align-middle"><StatusPill status={readingStatus(r, t)} /></span>
+                {r.value.toFixed(1)}{" "}
+                <span className="ml-1 align-middle">
+                  <StatusPill status={readingStatus(r, t)} />
+                </span>
               </td>
             </tr>
           ))}
@@ -86,7 +97,15 @@ export function EvidenceTable({ readings, t }: { readings: GlucoseReading[]; t: 
   );
 }
 
-export function FindingCard({ f, t, compact }: { f: PatternFinding; t: Thresholds; compact?: boolean }) {
+export function FindingCard({
+  f,
+  t,
+  compact,
+}: {
+  f: PatternFinding;
+  t: Thresholds;
+  compact?: boolean;
+}) {
   const { t: tr, format } = useLanguage();
   const tone =
     f.severity === "alert"
@@ -101,9 +120,13 @@ export function FindingCard({ f, t, compact }: { f: PatternFinding; t: Threshold
         <div className="min-w-0 flex-1 space-y-2">
           <p className="font-semibold">{tr(f.title)}</p>
           <p className="text-[15px]">{tr(f.summary)}</p>
-          {f.uncertainty && <p className="text-sm italic text-muted-foreground">{tr(f.uncertainty)}</p>}
+          {f.uncertainty && (
+            <p className="text-sm italic text-muted-foreground">{tr(f.uncertainty)}</p>
+          )}
           <p className="text-xs text-muted-foreground">
-            <span className="font-medium">{tr("Rule:")}</span> {tr(f.rule)} · {f.evidence.length} {tr("supporting reading")} {tr("· demo thresholds")}</p>
+            <span className="font-medium">{tr("Rule:")}</span> {tr(f.rule)} · {f.evidence.length}{" "}
+            {tr("supporting reading")} {tr("· demo thresholds")}
+          </p>
           {!compact && <EvidenceTable readings={f.evidence} t={t} />}
         </div>
       </div>

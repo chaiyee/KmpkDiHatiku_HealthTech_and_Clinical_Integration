@@ -13,7 +13,7 @@ import { PageHeader, PageLoading, SampleBadge } from "@/components/common";
 import { useStore } from "@/lib/store";
 import { MedicationReminders } from "@/components/MedicationReminders";
 import { localDay } from "@/lib/medications";
-import { DailyCareGuide } from "@/components/DailyCareGuide";
+import { DailyCareGuide, dailyGuide } from "@/components/DailyCareGuide";
 import { useClock } from "@/hooks/use-clock";
 import { CaregiverSupport } from "@/components/CaregiverSupport";
 
@@ -81,7 +81,7 @@ function CarePlanPage() {
             {format(now, "EEE, d MMM")}
           </span>
         </h2>
-        <div className="grid items-start gap-4 lg:grid-cols-2">
+        <div className="grid items-start gap-5 xl:grid-cols-2">
           <div id="medication-reminders" className="scroll-mt-36">
             <MedicationReminders />
           </div>
@@ -103,7 +103,10 @@ function CarePlanPage() {
                     ) : (
                       <Circle className="h-5 w-5 text-muted-foreground" />
                     )}
-                    {tr("Morning")}: {tr("Fasting reading recorded")}
+                    {tr("Morning")}:{" "}
+                    {tr(
+                      hasFasting ? "Fasting reading recorded" : "No fasting reading recorded yet",
+                    )}
                   </span>
                   {fasting ? (
                     <span className="ml-7 block text-sm text-muted-foreground">
@@ -120,18 +123,7 @@ function CarePlanPage() {
                     </Link>
                   )}
                 </li>
-                <li
-                  className={`rounded-lg p-2 ${period === "afternoon" ? "bg-accent ring-1 ring-primary/30" : ""}`}
-                >
-                  <span className="flex items-center gap-2 [&_svg]:shrink-0">
-                    {medsTakenToday ? (
-                      <Check className="h-5 w-5 text-success" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-muted-foreground" />
-                    )}
-                    {tr("Medication doses marked taken today")}: {medsTakenToday}
-                  </span>
-                </li>
+
                 <li
                   className={`rounded-lg p-2 ${period === "evening" ? "bg-accent ring-1 ring-primary/30" : ""}`}
                 >
@@ -141,7 +133,12 @@ function CarePlanPage() {
                     ) : (
                       <Circle className="h-5 w-5 text-muted-foreground" />
                     )}
-                    {tr("Evening")}: {tr("After-meal reading recorded")}
+                    {tr("Evening")}:{" "}
+                    {tr(
+                      hasDinner
+                        ? "After-meal reading recorded"
+                        : "No after-meal reading recorded yet",
+                    )}
                   </span>
                 </li>
               </ul>
@@ -191,115 +188,125 @@ function CarePlanPage() {
           </Card>
         </div>
       </section>
-      <section className="space-y-4 border-t pt-6" aria-labelledby="doctor-goals">
-        <h2 id="doctor-goals" className="flex items-center gap-2 text-xl font-semibold text-navy">
-          <Target className="h-5 w-5 text-primary" />
-          {tr("Your doctor's goal")}
-        </h2>
-        <Card>
-          <CardHeader className="flex-row items-start justify-between space-y-0">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Target className="h-5 w-5 text-primary" />
-              {tr("Goal from")} {data.patient.doctor.replace(" (fictional)", "")}
-            </CardTitle>
-            <SampleBadge>
-              {data.doctorResponseAt ? "Demo doctor response · not verified" : "Sample data"}
-            </SampleBadge>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-lg font-medium text-navy">{tr(plan.goal)}</p>
-            <p className="rounded-lg bg-secondary px-4 py-3 text-sm">
-              {tr(
-                "This is an example goal for demonstration. Real care goals should be agreed with your healthcare professional.",
-              )}
-            </p>
-            <details className="rounded-lg border p-3">
-              <summary className="min-h-11 cursor-pointer py-2 font-medium text-primary">
-                {tr("Learn more")}
-              </summary>
-              <p className="pt-2 text-sm text-muted-foreground">{tr(plan.explanation)}</p>
-            </details>
-            <div>
-              <div className="mb-1 flex justify-between text-sm">
-                <span>{tr("Progress")}</span>
-                <span className="font-medium">
-                  {done} {tr("of")} {plan.durationDays} {tr("days")}
-                </span>
-              </div>
-              <Progress
-                value={plan.durationDays ? (done / plan.durationDays) * 100 : 0}
-                className="h-3"
-              />
-            </div>
-            <details className="rounded-lg border p-3">
-              <summary className="min-h-11 cursor-pointer py-2 font-medium text-primary">
-                {tr("My Weekly Progress")}
-              </summary>
-              <div className="grid grid-cols-7 gap-1.5 pt-3">
-                {days.map((d) => {
-                  const c = data.checkIns.find((x) => x.date === d);
-                  const future = d > today;
-                  return (
-                    <div
-                      key={d}
-                      title={d}
-                      className={`flex aspect-square flex-col items-center justify-center rounded-lg border text-xs ${c?.completed ? "border-success/40 bg-success-soft text-success" : future ? "text-muted-foreground/60" : d === today ? "border-primary" : "bg-muted text-muted-foreground"}`}
-                    >
-                      <span>{format(parseISO(d), "d")}</span>
-                      {c?.completed ? (
-                        <Check className="h-3.5 w-3.5" />
-                      ) : (
-                        <Circle className="h-2 w-2" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </details>
-            <p className="text-sm text-muted-foreground">
-              {tr("Follow-up:")}{" "}
-              <span className="font-medium text-foreground">
-                {format(new Date(plan.followUpDate), "EEEE, d MMM yyyy · h:mm a")}
-              </span>
-            </p>
-          </CardContent>
-        </Card>
-
-        <details className="rounded-xl border bg-card p-4">
-          <summary className="min-h-11 cursor-pointer py-2 font-semibold text-navy">
-            {tr("Doctor feedback")}
-          </summary>
-          <Card className="mt-3 border-0 shadow-none">
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
+      <div className="rounded-xl border bg-secondary p-5">
+        <p className="eyebrow mb-2">{tr("One idea for today")}</p>
+        <p>{tr(dailyGuide(now)[4] ?? "")}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {tr(
+            "An educational suggestion. Follow your care team’s advice and dietary restrictions.",
+          )}
+        </p>
+      </div>
+      <details className="disclosure" aria-labelledby="doctor-goals">
+        <summary id="doctor-goals" className="font-semibold text-navy">
+          {tr("Doctor goals & feedback")}
+        </summary>
+        <div className="mt-4 space-y-4">
+          <Card>
+            <CardHeader className="flex-row items-start justify-between space-y-0">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Target className="h-5 w-5 text-primary" />
+                {tr("Goal from")} {data.patient.doctor.replace(" (fictional)", "")}
+              </CardTitle>
+              <SampleBadge>
+                {data.doctorResponseAt ? "Demo doctor response · not verified" : "Sample data"}
+              </SampleBadge>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-lg font-medium text-navy">{tr(plan.goal)}</p>
+              <p className="rounded-lg bg-secondary px-4 py-3 text-sm">
                 {tr(
-                  data.doctorResponseAt
-                    ? "Demo doctor response · not verified"
-                    : "Simulated demo feedback",
+                  "This is an example goal for demonstration. Real care goals should be agreed with your healthcare professional.",
                 )}
-                {data.doctorResponseAt &&
-                  ` · ${format(new Date(data.doctorResponseAt), "d MMM yyyy, HH:mm")}`}
               </p>
-              <p className="whitespace-pre-wrap">
-                {tr(plan.doctorFeedback) || tr("No doctor feedback recorded yet.")}
+              <details className="rounded-lg border p-3">
+                <summary className="min-h-11 cursor-pointer py-2 font-medium text-primary">
+                  {tr("Learn more")}
+                </summary>
+                <p className="pt-2 text-sm text-muted-foreground">{tr(plan.explanation)}</p>
+              </details>
+              <div>
+                <div className="mb-1 flex justify-between text-sm">
+                  <span>{tr("Progress")}</span>
+                  <span className="font-medium">
+                    {done} {tr("of")} {plan.durationDays} {tr("days")}
+                  </span>
+                </div>
+                <Progress
+                  value={plan.durationDays ? (done / plan.durationDays) * 100 : 0}
+                  className="h-3"
+                />
+              </div>
+              <details className="rounded-lg border p-3">
+                <summary className="min-h-11 cursor-pointer py-2 font-medium text-primary">
+                  {tr("My Weekly Progress")}
+                </summary>
+                <div className="grid grid-cols-7 gap-1.5 pt-3">
+                  {days.map((d) => {
+                    const c = data.checkIns.find((x) => x.date === d);
+                    const future = d > today;
+                    return (
+                      <div
+                        key={d}
+                        title={d}
+                        className={`flex aspect-square flex-col items-center justify-center rounded-lg border text-xs ${c?.completed ? "border-success/40 bg-success-soft text-success" : future ? "text-muted-foreground/60" : d === today ? "border-primary" : "bg-muted text-muted-foreground"}`}
+                      >
+                        <span>{format(parseISO(d), "d")}</span>
+                        {c?.completed ? (
+                          <Check className="h-3.5 w-3.5" />
+                        ) : (
+                          <Circle className="h-2 w-2" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+              <p className="text-sm text-muted-foreground">
+                {tr("Follow-up:")}{" "}
+                <span className="font-medium text-foreground">
+                  {format(new Date(plan.followUpDate), "EEEE, d MMM yyyy · h:mm a")}
+                </span>
               </p>
-              {data.doctorNotes && (
-                <p className="whitespace-pre-wrap border-t pt-3">{data.doctorNotes}</p>
-              )}
-              <h3 className="font-semibold">{tr("Follow-up instructions")}</h3>
-              <p className="whitespace-pre-wrap">
-                {data.followUpInstructions || tr("No follow-up instructions recorded yet.")}
-              </p>
-              <Button asChild variant="outline" className="min-h-12">
-                <Link to="/doctor">
-                  {tr("Doctor Visit")}
-                  <ArrowRight />
-                </Link>
-              </Button>
             </CardContent>
           </Card>
-        </details>
-      </section>
+
+          <details className="disclosure">
+            <summary className="min-h-11 cursor-pointer py-2 font-semibold text-navy">
+              {tr("Doctor feedback")}
+            </summary>
+            <Card className="mt-3 border-0 shadow-none">
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {tr(
+                    data.doctorResponseAt
+                      ? "Demo doctor response · not verified"
+                      : "Simulated demo feedback",
+                  )}
+                  {data.doctorResponseAt &&
+                    ` · ${format(new Date(data.doctorResponseAt), "d MMM yyyy, HH:mm")}`}
+                </p>
+                <p className="whitespace-pre-wrap">
+                  {tr(plan.doctorFeedback) || tr("No doctor feedback recorded yet.")}
+                </p>
+                {data.doctorNotes && (
+                  <p className="whitespace-pre-wrap border-t pt-3">{data.doctorNotes}</p>
+                )}
+                <h3 className="font-semibold">{tr("Follow-up instructions")}</h3>
+                <p className="whitespace-pre-wrap">
+                  {data.followUpInstructions || tr("No follow-up instructions recorded yet.")}
+                </p>
+                <Button asChild variant="outline" className="min-h-12">
+                  <Link to="/doctor">
+                    {tr("Doctor Visit")}
+                    <ArrowRight />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </details>
+        </div>
+      </details>
       <details className="rounded-xl border bg-card p-4">
         <summary className="min-h-11 cursor-pointer py-2 font-semibold text-navy">
           {tr("Daily Care Guide")}

@@ -38,6 +38,7 @@ export interface HealthLog {
   title: string;
   detail?: string | undefined;
   source: RecordSource;
+  meal?: import("./meals").MealRecord;
 }
 
 export interface CheckIn {
@@ -111,7 +112,14 @@ export interface MedicationSchedule {
   timing?: string; // Optional prescribed meal-timing instruction entered by the patient.
   purpose?: string; // Optional plain-language purpose as told by the clinician.
 }
-export const SKIP_REASONS = ["Forgot", "Side Effects", "Ran Out", "Felt Unwell", "Fasting", "Other"] as const;
+export const SKIP_REASONS = [
+  "Forgot",
+  "Side Effects",
+  "Ran Out",
+  "Felt Unwell",
+  "Fasting",
+  "Other",
+] as const;
 export type MedicationAction = "taken" | "skipped" | "later";
 export interface MedicationStatus {
   scheduleId: string;
