@@ -3,7 +3,6 @@ export const translationsBrief3: Record<string, { ms: string; zh: string }> = {
   // Caregiver view
   "Caregiver view": { ms: "Paparan Penjaga", zh: "照护者视图" },
   "Preview what my caregiver sees": { ms: "Pratonton apa yang penjaga saya lihat", zh: "预览照护者所见内容" },
-  "Simulated view. This is what your caregiver would see after you give consent. Nothing is actually sent.": { ms: "Paparan simulasi. Inilah yang akan dilihat oleh penjaga anda selepas anda memberi kebenaran. Tiada apa-apa dihantar sebenarnya.", zh: "模拟视图。这是您同意分享后照护者将看到的内容。实际上并未发送任何信息。" },
   "Sharing is turned off": { ms: "Perkongsian dimatikan", zh: "共享已关闭" },
   "Turn on caregiver sharing in your Care Plan to let a trusted person see selected alerts. Nothing is shared until you enable it.": { ms: "Hidupkan perkongsian penjaga dalam Pelan Penjagaan anda untuk membenarkan orang yang dipercayai melihat amaran terpilih. Tiada apa-apa dikongsi sehingga anda mengaktifkannya.", zh: "在您的护理计划中开启照护者共享，让信任的人查看所选提醒。启用前不会共享任何内容。" },
   "Go to caregiver settings": { ms: "Pergi ke tetapan penjaga", zh: "前往照护者设置" },

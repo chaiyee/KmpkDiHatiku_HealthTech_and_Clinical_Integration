@@ -26,9 +26,7 @@ export function FastingForecastCard({
   const enough = result.actual.length >= 5;
   const rising = enough && result.available;
   const highDays = result.actual.filter((p) => p.value > thresholds.fastingHigh).length;
-  const question = tr(
-    "Can we review my recent fasting readings and my agreed care plan?",
-  );
+  const question = tr("Can we review my recent fasting readings and my agreed care plan?");
   const pinned = added || (data?.pinnedQuestions ?? []).some((q) => q.text === question);
   return (
     <Card>
@@ -68,16 +66,12 @@ export function FastingForecastCard({
               {tr("{count} days with fasting readings available.", { count: result.actual.length })}
             </li>
             <li>
-              {tr("{count} recorded days above the demo fasting threshold of {value} mmol/L.", {
+              {tr("{count} days above the fasting reference of {value} mmol/L.", {
                 count: highDays,
                 value: thresholds.fastingHigh,
               })}
             </li>
-            <li>
-              {tr(
-                "This describes recorded readings, not the probability of a future spike. Meals, sleep and medication causes cannot be established here.",
-              )}
-            </li>
+            <li>{tr("Recorded trend, not a forecast.")}</li>
           </ul>
         ) : (
           <p className="text-sm text-muted-foreground">

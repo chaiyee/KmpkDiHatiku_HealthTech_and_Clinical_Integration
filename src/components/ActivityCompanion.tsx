@@ -54,9 +54,7 @@ export function ActivityCompanion() {
         {t("Activity & Glucose")}
       </h2>
       <p className="text-sm text-muted-foreground">
-        {t(
-          "Record what you did. Nearby readings provide context, not proof of an exercise effect.",
-        )}
+        {t("Record your movement and review nearby readings.")}
       </p>
       <form
         className="space-y-3"
@@ -156,11 +154,19 @@ export function ActivityCompanion() {
           {t(message)}
         </p>
       </form>
-      <p className="rounded-lg bg-secondary p-3 text-sm">
-        {t(
-          "If glucose is low or you feel unwell, follow your care team's safety plan rather than starting exercise. Some diabetes medicines increase low-glucose risk during or after activity. Ask your care team what is suitable for you.",
-        )}
+      <p className="text-sm text-muted-foreground">
+        {t("Low glucose or feeling unwell? Follow your safety plan before activity.")}
       </p>
+      <details className="rounded-lg border p-3 text-sm">
+        <summary className="min-h-11 cursor-pointer content-center font-medium">
+          {t("Activity safety")}
+        </summary>
+        <p className="mt-2">
+          {t(
+            "If glucose is low or you feel unwell, follow your care team's safety plan rather than starting exercise. Some diabetes medicines increase low-glucose risk during or after activity. Ask your care team what is suitable for you.",
+          )}
+        </p>
+      </details>
       <p className="font-medium">
         {t("Today: {minutes} logged minutes", {
           minutes: history.today.reduce((sum, log) => sum + log.activity!.duration, 0),

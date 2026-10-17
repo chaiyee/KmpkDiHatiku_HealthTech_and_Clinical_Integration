@@ -28,9 +28,7 @@ describe("guided Guardian presentation", () => {
     expect(mocks.add).toHaveBeenCalledOnce();
     fireEvent.click(screen.getByRole("button", { name: "Review the pattern" }));
     expect(
-      screen.queryByText(
-        "Three morning readings are ready to review. These readings are simulated.",
-      ),
+      screen.queryByText("Three simulated morning readings are ready."),
     ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Continue to check-in" }));
   }

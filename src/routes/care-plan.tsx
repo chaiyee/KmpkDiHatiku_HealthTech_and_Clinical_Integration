@@ -143,7 +143,7 @@ function CarePlanPage() {
                 </li>
               </ul>
               <p className="border-t pt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {tr("Self-reported")}
+                {tr("Patient-entered")}
               </p>
               <div>
                 <Label htmlFor="reflection">{tr("How did today go? (optional)")}</Label>
@@ -191,11 +191,6 @@ function CarePlanPage() {
       <div className="rounded-xl border bg-secondary p-5">
         <p className="eyebrow mb-2">{tr("One idea for today")}</p>
         <p>{tr(dailyGuide(now)[4] ?? "")}</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {tr(
-            "An educational suggestion. Follow your care team’s advice and dietary restrictions.",
-          )}
-        </p>
       </div>
       <details className="disclosure" aria-labelledby="doctor-goals">
         <summary id="doctor-goals" className="font-semibold text-navy">
@@ -208,17 +203,10 @@ function CarePlanPage() {
                 <Target className="h-5 w-5 text-primary" />
                 {tr("Goal from")} {data.patient.doctor.replace(" (fictional)", "")}
               </CardTitle>
-              <SampleBadge>
-                {data.doctorResponseAt ? "Demo doctor response · not verified" : "Sample data"}
-              </SampleBadge>
+              <SampleBadge>{tr("Sample care plan")}</SampleBadge>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-lg font-medium text-navy">{tr(plan.goal)}</p>
-              <p className="rounded-lg bg-secondary px-4 py-3 text-sm">
-                {tr(
-                  "This is an example goal for demonstration. Real care goals should be agreed with your healthcare professional.",
-                )}
-              </p>
               <details className="rounded-lg border p-3">
                 <summary className="min-h-11 cursor-pointer py-2 font-medium text-primary">
                   {tr("Learn more")}
@@ -278,11 +266,7 @@ function CarePlanPage() {
             <Card className="mt-3 border-0 shadow-none">
               <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  {tr(
-                    data.doctorResponseAt
-                      ? "Demo doctor response · not verified"
-                      : "Simulated demo feedback",
-                  )}
+                  {tr("Sample feedback")}
                   {data.doctorResponseAt &&
                     ` · ${format(new Date(data.doctorResponseAt), "d MMM yyyy, HH:mm")}`}
                 </p>
@@ -315,7 +299,11 @@ function CarePlanPage() {
           <DailyCareGuide />
         </div>
       </details>
-      <details className="rounded-xl border bg-card p-4">
+      <details
+        id="caregiver-support"
+        open={!data.caregiver?.name.trim() || !data.caregiver?.relationship.trim()}
+        className="scroll-mt-24 rounded-xl border bg-card p-4"
+      >
         <summary className="min-h-11 cursor-pointer py-2 font-semibold text-navy">
           {tr("Caregiver support · simulated")}
         </summary>

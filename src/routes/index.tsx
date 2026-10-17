@@ -12,6 +12,7 @@ import {
   Bluetooth,
   Pill,
   ShieldAlert,
+  HeartHandshake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -141,11 +142,6 @@ function Overview() {
                         : "Manually recorded",
                   )}
                 </SampleBadge>
-                <p className="text-sm text-muted-foreground">
-                  {tr(
-                    "Reference ranges in this workspace are for demonstration. Follow the targets agreed with your healthcare team.",
-                  )}
-                </p>
               </>
             ) : (
               <p>{tr("No readings yet.")}</p>
@@ -314,15 +310,45 @@ function Overview() {
           <HealthReplay />
         </div>
       </details>
-      <details className="disclosure">
-        <summary className="font-semibold text-navy">{tr("Caregiver alert previews")}</summary>
-        <div className="mt-4">
-          <CaregiverAlerts overview />
-        </div>
-      </details>
-      <p className="text-sm text-muted-foreground">
-        {tr("Patterns describe recorded changes, not their cause. They are not a diagnosis.")}
-      </p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-lg">
+            <HeartHandshake aria-hidden="true" className="h-6 w-6 shrink-0 text-primary" />
+            {tr(
+              data.caregiver?.name.trim() && data.caregiver?.relationship.trim()
+                ? "Caregiver previews"
+                : "Stay Connected with Someone You Trust",
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {data.caregiver?.name.trim() && data.caregiver?.relationship.trim() ? (
+            <>
+              <p className="text-sm">
+                <span className="font-medium">{data.caregiver.name}</span> ·{" "}
+                {data.caregiver.relationship}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {tr("Preview only · no messages sent")}
+              </p>
+              <CaregiverAlerts overview />
+            </>
+          ) : (
+            <>
+              <p className="max-w-prose text-sm leading-relaxed text-muted-foreground">
+                {tr(
+                  "No caregiver has been added yet. Add a family member or trusted person to help support your diabetes care.",
+                )}
+              </p>
+              <Button asChild className="min-h-11 w-full sm:w-auto">
+                <Link to="/care-plan" hash="caregiver-support">
+                  {tr("Add a Caregiver")}
+                </Link>
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -36,7 +36,7 @@ export function MedicationReminders() {
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Pill className="h-5 w-5 shrink-0 text-primary" />
-          {t("Medication Reminder")}
+          {t("Medication Tracker")}
         </CardTitle>
         <Button variant="outline" onClick={() => setEditing("new")}>
           <Plus />
@@ -44,11 +44,6 @@ export function MedicationReminders() {
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          {t(
-            "Follow your prescription. These are self-reported records, not confirmed adherence. Never change doses or take extra medication based on this app.",
-          )}
-        </p>
         <h3 className="font-medium">
           {t("Today's medication status")} · {format(now, "d MMM")}
         </h3>

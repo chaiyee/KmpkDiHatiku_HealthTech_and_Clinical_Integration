@@ -23,7 +23,7 @@ export function MedicationNotice() {
         <Pill className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
         <p>
           <span className="font-semibold">{t("Medication reminder due")}: </span>
-          {due.map((s) => s.name).join(", ")} · {t("Not Logged does not mean a dose was missed.")}
+          {due.map((s) => s.name).join(", ")}
         </p>
       </div>
       <Link to="/care-plan" className="inline-flex min-h-11 items-center font-medium text-primary">

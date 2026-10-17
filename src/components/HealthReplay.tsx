@@ -150,11 +150,6 @@ export function HealthReplay() {
               );
             })}
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            {t(
-              "Missing records do not mean a meal, activity or medication dose was missed. Context does not prove a cause.",
-            )}
-          </p>
           {!demo && value !== undefined && (
             <p className="mt-2 text-xs text-muted-foreground">
               {t(
@@ -203,7 +198,7 @@ export function HealthReplay() {
                   {t(
                     feeling === "okay"
                       ? "Feeling okay acknowledges the check-in. It does not confirm the readings are safe; monitoring and urgent guidance still apply."
-                      : "For the live demo, caregiver sharing follows your consent settings. No SMS or WhatsApp is sent.",
+                      : "Preview only · no messages sent",
                   )}
                 </p>
                 {feeling !== "okay" && (
@@ -222,7 +217,7 @@ export function HealthReplay() {
                     search={{ tab: "devices" }}
                     className="text-sm font-medium text-primary underline"
                   >
-                    {t("Open Guardian demo")}
+                    {t("Open Guardian preview")}
                   </Link>
                 </div>
               </div>

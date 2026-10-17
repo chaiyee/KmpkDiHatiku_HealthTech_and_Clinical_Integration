@@ -20,17 +20,9 @@ export function FoodGlucoseInsights({ children }: { children: ReactNode }) {
           value: insights.carbs ?? t("Not entered"),
         })}
       </p>
-      <p className="text-sm text-muted-foreground">
-        {t(
-          "Estimates include confirmed meals only. Missing nutrients and unlogged meals are not included.",
-        )}
-      </p>
+      <p className="text-sm text-muted-foreground">{t("Confirmed meals · nutrition estimates")}</p>
       {!insights.patterns.length ? (
-        <p className="text-sm">
-          {t(
-            "Insufficient data for a repeated meal pattern. Three comparable meals with suitable before and after readings are needed.",
-          )}
-        </p>
+        <p className="text-sm">{t("More paired meal and glucose records needed.")}</p>
       ) : (
         insights.patterns.map((pattern) => (
           <p key={pattern.name} className="text-sm">

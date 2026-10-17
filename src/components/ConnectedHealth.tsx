@@ -207,9 +207,7 @@ export function ConnectedHealth() {
         </div>
 
         <p className="text-sm text-muted-foreground">
-          {tr(
-            "This preview uses simulated sensor readings. A smartwatch does not measure glucose; a CGM or meter is needed. No real Bluetooth connection is made.",
-          )}
+          {tr("Simulated devices · no hardware connected")}
         </p>
 
         {step > 0 && (
@@ -253,9 +251,7 @@ export function ConnectedHealth() {
             </div>
             {step === 1 && (
               <>
-                <p>
-                  {tr("Three morning readings are ready to review. These readings are simulated.")}
-                </p>
+                <p>{tr("Three simulated morning readings are ready.")}</p>
                 <Button size="lg" onClick={() => setStep(2)}>
                   {tr("Review the pattern")}
                   <ChevronDown className="h-4 w-4" />
@@ -268,9 +264,7 @@ export function ConnectedHealth() {
                   <FindingCard key={f.id} f={f} t={t} compact />
                 ))}
                 <p className="text-sm text-muted-foreground">
-                  {tr(
-                    "What changed: several fasting readings were higher than the demo reference range. This is a pattern to discuss, not a diagnosis.",
-                  )}
+                  {tr("Several fasting readings were above the reference range.")}
                 </p>
                 <Button size="lg" onClick={() => setStep(3)}>
                   {tr("Continue to check-in")}
@@ -298,7 +292,7 @@ export function ConnectedHealth() {
                       ? "Urgent safety guidance is shown above."
                       : feeling === "unwell"
                         ? "Your symptom was recorded. Consider contacting your clinic."
-                        : "Thanks. Your check-in was recorded. No extra caregiver alert was created because of this answer. The pattern stays in your records for your doctor.",
+                        : "Check-in saved. No extra caregiver preview created.",
                   )}
                 </p>
                 {feeling === "okay" && (

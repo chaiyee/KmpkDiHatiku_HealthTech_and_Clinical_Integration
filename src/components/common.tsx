@@ -57,9 +57,9 @@ export function readingStatus(r: GlucoseReading, t: Thresholds): Status {
 export function StatusPill({ status }: { status: Status }) {
   const { t: tr, format } = useLanguage();
   const map = {
-    in: [tr("In demo range"), "bg-success-soft text-success"],
-    high: [tr("Above demo range"), "bg-warning-soft text-warning"],
-    low: [tr("Below demo range"), "bg-danger-soft text-destructive"],
+    in: [tr("Within reference"), "bg-success-soft text-success"],
+    high: [tr("Above reference"), "bg-warning-soft text-warning"],
+    low: [tr("Below reference"), "bg-danger-soft text-destructive"],
   } as const;
   const [label, cls] = map[status];
   return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>{tr(label)}</span>;
@@ -81,7 +81,18 @@ export function EvidenceTable({ readings, t }: { readings: GlucoseReading[]; t: 
         <tbody>
           {readings.map((r) => (
             <tr key={r.id} className="border-t">
-              <td className="px-3 py-2">{format(new Date(r.timestamp), "EEE d MMM, h:mm a")}</td>
+              <td className="px-3 py-2">
+                {format(new Date(r.timestamp), "EEE d MMM, h:mm a")}
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  {tr(
+                    r.source === "sample"
+                      ? "Sample"
+                      : r.source === "device"
+                        ? "Simulated"
+                        : "Patient-entered",
+                  )}
+                </span>
+              </td>
               <td className="px-3 py-2">{tr(CONTEXT_LABELS[r.context])}</td>
               <td className="px-3 py-2 text-right font-medium">
                 {r.value.toFixed(1)}{" "}
@@ -123,10 +134,15 @@ export function FindingCard({
           {f.uncertainty && (
             <p className="text-sm italic text-muted-foreground">{tr(f.uncertainty)}</p>
           )}
-          <p className="text-xs text-muted-foreground">
-            <span className="font-medium">{tr("Rule:")}</span> {tr(f.rule)} · {f.evidence.length}{" "}
-            {tr("supporting reading")} {tr("· demo thresholds")}
-          </p>
+          <details className="text-xs text-muted-foreground">
+            <summary className="min-h-11 cursor-pointer content-center font-medium">
+              {tr("Reading details")}
+            </summary>
+            <p className="pt-1">
+              <span className="font-medium">{tr("Rule:")}</span> {tr(f.rule)} · {f.evidence.length}{" "}
+              {tr("supporting reading")}
+            </p>
+          </details>
           {!compact && <EvidenceTable readings={f.evidence} t={t} />}
         </div>
       </div>

@@ -69,6 +69,6 @@ export function renderRecordAnswer(
   if (selection.intent === "summary")
     return `${t("Today's recorded carbohydrate estimates: {value} g", { value: carbs })}\n${walking}\n${t("Real glucose records available: {count}", { count: data.readings.filter((r) => r.source === "user" && Date.parse(r.timestamp) <= +now).length })}\n\n${disclaimer}\n${foodInsights(data, now).patterns.length ? t("Repeated meal associations are available in Daily Log. They do not establish cause.") : t("More information is needed. Choose a confirmed meal and record suitable glucose readings.")}`;
   return t(
-    "I can review confirmed meals, logged activity and manual glucose records. I cannot diagnose conditions or recommend treatment changes.",
+    "I can help review your meals, activity and glucose records. Try a question about your day.",
   );
 }

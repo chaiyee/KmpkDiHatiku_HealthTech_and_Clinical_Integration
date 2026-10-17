@@ -80,7 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "DiaMonitor Copilot" },
-      { name: "description", content: "AI-assisted diabetes care companion between clinic visits (demo)." },
+      { name: "description", content: "Your diabetes records, daily care and clinic preparation." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

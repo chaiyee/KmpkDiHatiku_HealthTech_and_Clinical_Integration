@@ -30,7 +30,6 @@ export const translationsConnected: Record<string, { ms: string; zh: string }> =
   "Three morning readings arrived automatically from the Demo CGM.": { ms: "Tiga bacaan pagi diterima secara automatik daripada CGM Demo.", zh: "演示CGM自动传来三条早晨读数。" },
   "Next": { ms: "Seterusnya", zh: "下一步" },
   "DiaMonitor checked your recent days for repeated patterns.": { ms: "DiaMonitor menyemak hari-hari terkini anda untuk corak berulang.", zh: "DiaMonitor检查了您最近几天的重复模式。" },
-  "What changed: several fasting readings were higher than the demo reference range. This is a pattern to discuss, not a diagnosis.": { ms: "Apa yang berubah: beberapa bacaan berpuasa lebih tinggi daripada julat rujukan demo. Ini corak untuk dibincangkan, bukan diagnosis.", zh: "变化：多次空腹读数高于演示参考范围。这是需要讨论的模式，并非诊断。" },
   "How are you feeling?": { ms: "Bagaimana perasaan anda?", zh: "您感觉怎么样？" },
   "I feel okay": { ms: "Saya rasa okey", zh: "我感觉还好" },
   "I feel unwell": { ms: "Saya rasa tidak sihat", zh: "我感觉不适" },

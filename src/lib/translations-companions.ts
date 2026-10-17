@@ -21,11 +21,6 @@ export const translationsCompanions: Record<string, { ms: string; zh: string }> 
       ms: "Anggaran hanya termasuk makanan disahkan. Nutrien tidak diketahui dan makanan tidak direkod tidak termasuk.",
       zh: "估计仅包含已确认餐食，不包含缺失营养及未记录餐食。",
     },
-  "Insufficient data for a repeated meal pattern. Three comparable meals with suitable before and after readings are needed.":
-    {
-      ms: "Data belum cukup untuk corak berulang. Perlukan tiga hidangan setanding dengan bacaan sebelum dan selepas yang sesuai.",
-      zh: "数据不足以判断重复餐食规律。需要三次可比餐食及合适的餐前后读数。",
-    },
   "Across {count} comparable meals containing {food}, later readings were higher. This association does not show cause.":
     {
       ms: "Dalam {count} hidangan setanding mengandungi {food}, bacaan kemudian lebih tinggi. Hubungan ini tidak membuktikan punca.",
@@ -70,10 +65,6 @@ export const translationsCompanions: Record<string, { ms: string; zh: string }> 
   Vigorous: { ms: "Tinggi", zh: "高强度" },
   "Save activity": { ms: "Simpan aktiviti", zh: "保存活动" },
   "Activity saved.": { ms: "Aktiviti disimpan.", zh: "活动已保存。" },
-  "Record what you did. Nearby readings provide context, not proof of an exercise effect.": {
-    ms: "Rekod aktiviti anda. Bacaan berdekatan memberi konteks, bukan bukti kesan senaman.",
-    zh: "记录您做过的活动。附近读数提供背景，不能证明运动效果。",
-  },
   "Enter a duration of 1–720 whole minutes and a valid past start time.": {
     ms: "Masukkan tempoh 1–720 minit penuh dan masa mula yang sah pada masa lalu.",
     zh: "请输入 1–720 整数分钟及有效的过去开始时间。",
@@ -142,26 +133,9 @@ export const translationsCompanions: Record<string, { ms: string; zh: string }> 
       ms: "Saiz hidangan dan resipi berbeza. Semak anggaran makanan disahkan dan tanya pasukan penjagaan pilihan yang sesuai.",
       zh: "份量和食谱因人而异。请查看已确认餐食估计，并咨询医疗团队适合护理计划的选择。",
     },
-  "Record-focused Copilot": { ms: "Copilot berasaskan rekod", zh: "记录助手" },
-  "Local record review · online AI unavailable": {
-    ms: "Semakan rekod setempat · AI dalam talian tidak tersedia",
-    zh: "本地记录查看 · 在线 AI 不可用",
-  },
   "Use online AI for this session: send my question and limited saved meal, glucose and activity records to OpenAI. Names, clinic details and notes are excluded. Avoid identifying details in questions. Sign in and finish syncing first.":
     {
       ms: "Gunakan AI dalam talian sesi ini: hantar soalan serta rekod makanan, glukosa dan aktiviti terhad kepada OpenAI. Nama, butiran klinik dan nota dikecualikan. Elakkan maklumat pengenalan dalam soalan. Log masuk dan selesaikan penyegerakan dahulu.",
       zh: "本次会话使用在线 AI：将问题及有限的已保存餐食、血糖、活动记录发送给 OpenAI，不含姓名、诊所详情和笔记。请勿在问题中填写身份信息，并先登录及完成同步。",
     },
-  "AI-assisted record review. Numbers come from your saved records.": {
-    ms: "Semakan rekod dibantu AI. Angka daripada rekod disimpan.",
-    zh: "AI 辅助记录查看，数字来自已保存记录。",
-  },
-  "Online AI is unavailable. Showing a local record summary.": {
-    ms: "AI dalam talian tidak tersedia. Ringkasan rekod setempat dipaparkan.",
-    zh: "在线 AI 不可用，现显示本地记录摘要。",
-  },
-  "Local record review. No records sent to an AI provider.": {
-    ms: "Semakan rekod setempat. Tiada rekod dihantar kepada penyedia AI.",
-    zh: "本地记录查看，未向 AI 服务商发送记录。",
-  },
 };

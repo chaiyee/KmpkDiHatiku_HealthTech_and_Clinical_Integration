@@ -37,7 +37,8 @@ const draftId = () =>
 const errorKeys: Record<string, string> = {
   image: "Choose a clear JPG, PNG or WebP photo up to 10 MB.",
   signin: "Sign in to use photo analysis. Manual entry is always available.",
-  configuration: "Photo analysis is not configured yet. You can enter your meal manually.",
+  configuration:
+    "We couldn't estimate this photo. You can still enter foods and portions manually.",
   limit: "Photo analysis limit reached. Try later or enter the meal manually.",
   analysis: "We could not estimate this meal. Try a clearer photo or enter it manually.",
 };
@@ -267,7 +268,9 @@ function MealEditor({ initial, onSaved }: { initial?: HealthLog; onSaved: () => 
             }}
           />
           {!ready && (
-            <p className="text-sm text-muted-foreground">{t(errorKeys["configuration"]!)}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("Enter foods and portions to record your meal.")}
+            </p>
           )}
           {image && (
             <>
@@ -333,11 +336,6 @@ function MealEditor({ initial, onSaved }: { initial?: HealthLog; onSaved: () => 
             {t("Incomplete estimate: some food items have no nutrition entered.")}
           </p>
         )}
-        <p className="mt-2 text-sm">
-          {t(
-            "Carbohydrates can affect blood glucose. This estimate may change depending on your portion size and ingredients.",
-          )}
-        </p>
       </div>
       {items.length > 1 && biggest && (
         <p className="text-sm text-muted-foreground">
@@ -348,11 +346,7 @@ function MealEditor({ initial, onSaved }: { initial?: HealthLog; onSaved: () => 
         </p>
       )}
       <p className="text-sm text-muted-foreground">
-        {t(
-          source === "manual"
-            ? "Manual estimate — use a food label or a nutritional reference."
-            : "AI estimate — ingredients and portions need your review.",
-        )}
+        {t(source === "manual" ? "Manual estimate" : "AI estimate · review portions")}
       </p>
       <fieldset disabled={busy} className="space-y-4">
         {items.map((item, index) => (
@@ -413,9 +407,7 @@ function MealEditor({ initial, onSaved }: { initial?: HealthLog; onSaved: () => 
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              {t(
-                "Enter nutrition for one described portion. Changing the number of portions scales the estimate; changing ingredients needs a new estimate.",
-              )}
+              {t("Nutrition per portion. Adjust servings to update totals.")}
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               {NUTRIENTS.slice(0, 2).map((key) => (
@@ -554,11 +546,6 @@ function MealEditor({ initial, onSaved }: { initial?: HealthLog; onSaved: () => 
       >
         {t("Look up Malaysian food nutrition (MyFCD)")}
       </a>
-      <p className="text-xs text-muted-foreground">
-        {t(
-          "MyFCD is a reference you can consult. These estimates are not verified database values. No food is rated safe or unsafe here.",
-        )}
-      </p>
       <div>
         <Label htmlFor="meal-when">{t("Meal date and time")}</Label>
         <Input
@@ -757,9 +744,7 @@ export function SavedMeals({ onEdit }: { onEdit?: (log: HealthLog) => void }) {
                       </p>
                     ))}
                   <p className="text-xs text-muted-foreground">
-                    {t(
-                      "Nearby means within three hours. Times show recorded observations, not a causal link. Sample and simulated readings are kept separate from your meal observations.",
-                    )}
+                    {t("Readings within three hours · timing does not show cause")}
                   </p>
                   {log.source === "user" &&
                     log.meal?.confirmed &&

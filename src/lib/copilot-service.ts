@@ -4,8 +4,8 @@ import { mealCopilotAnswer } from "./meal-copilot";
 import type { Language } from "./i18n";
 import { renderRecordAnswer } from "./record-answers";
 
-// Isolated AI service layer. Currently returns DEMO responses (no AI or RAG backend connected).
-// Replace `getCopilotResponse` with a call to a server-side RAG service later; keep the response shape.
+// Deterministic guided assistance and safety checks. Optional online record review
+// is handled by the existing server endpoint; local replies never imply a model call.
 
 export type ResponseKind = "education" | "personal" | "safety";
 
@@ -224,7 +224,7 @@ export async function getCopilotResponse(
       sources: [],
       doctorQuestion:
         "My morning readings have been higher this past week — what could be contributing?",
-      text: `Here's what your recorded data shows (based on the rule-based monitoring engine, not a diagnosis):\n\n${lines}\n\n${b.sufficient ? "" : "There isn't enough earlier data yet to compare with your usual levels.\n\n"}Recorded meals and activity can provide context, but cannot establish the cause of a glucose change. Your doctor can help interpret this.`,
+      text: `Your records show:\n\n${lines}\n\n${b.sufficient ? "" : "There isn't enough earlier data yet to compare with your usual levels.\n\n"}Recorded meals and activity can provide context, but cannot establish the cause of a glucose change. Your doctor can help interpret this.`,
     };
   }
 
@@ -250,6 +250,6 @@ export async function getCopilotResponse(
     kind: "education",
     demo: true,
     sources: [],
-    text: "I can review confirmed meals, logged activity and manual glucose records. I cannot diagnose conditions or recommend treatment changes.",
+    text: "I can help review your meals, activity and glucose records. Try a question about your day.",
   };
 }

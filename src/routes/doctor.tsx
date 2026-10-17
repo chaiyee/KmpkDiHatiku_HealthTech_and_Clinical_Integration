@@ -2,14 +2,7 @@ import { useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { addDays, parseISO, subDays } from "date-fns";
 import { useEffect, useState } from "react";
-import {
-  Printer,
-  ClipboardCheck,
-  Stethoscope,
-  CalendarCheck,
-  ArrowRight,
-  LockKeyhole,
-} from "lucide-react";
+import { Printer, ClipboardCheck, Stethoscope, CalendarCheck, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,7 +21,7 @@ import { useStore } from "@/lib/store";
 import { detectPatterns, fastingBaseline } from "@/lib/patterns";
 import { CATEGORY_LABELS } from "@/lib/types";
 import type { ReactNode } from "react";
-import { visibleCaregiverAlerts, SIMULATION_NOTICE, URGENT_NOTICE } from "@/lib/caregiver";
+import { visibleCaregiverAlerts, URGENT_NOTICE } from "@/lib/caregiver";
 import { CaregiverAlertDetails } from "@/components/CaregiverSupport";
 import { localDay, statusFor, WEEKDAYS } from "@/lib/medications";
 import { ConsultationBrief } from "@/components/ConsultationBrief";
@@ -65,7 +57,6 @@ function Section({
   tag: string;
   children: ReactNode;
 }) {
-  const { t: tr, format } = useLanguage();
   return (
     <details open={n === 6} className="break-inside-avoid border-t py-4">
       <summary className="min-h-12 cursor-pointer content-center text-navy marker:text-primary">
@@ -83,35 +74,13 @@ function Section({
 
 function DoctorPage() {
   const { t: tr, format } = useLanguage();
-  const {
-    data,
-    demoDoctor,
-    setDemoDoctor,
-    saveQuestions,
-    saveDoctorResponse,
-    removeQuestion,
-    toggleDiscussed,
-  } = useStore();
+  const { data, saveQuestions, removeQuestion, toggleDiscussed } = useStore();
   const [range, setRange] = useState("7");
-  const [notes, setNotes] = useState("");
   const [questions, setQuestions] = useState("");
-  const [feedback, setFeedback] = useState("");
-  const [goal, setGoal] = useState("");
-  const [explanation, setExplanation] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [followUpDate, setFollowUpDate] = useState("");
+  const consultationQuestions = data?.consultationQuestions;
   useEffect(() => {
-    if (!data) return;
-    setQuestions(data.consultationQuestions ?? "");
-    setFeedback(data.carePlan.doctorFeedback);
-    setGoal(data.carePlan.goal);
-    setExplanation(data.carePlan.explanation);
-    setInstructions(data.followUpInstructions ?? "");
-    setFollowUpDate(format(new Date(data.carePlan.followUpDate), "yyyy-MM-dd'T'HH:mm"));
-  }, [data?.consultationQuestions, data?.carePlan, data?.followUpInstructions, demoDoctor]);
-  useEffect(() => {
-    if (data) setNotes(data.doctorNotes);
-  }, [data?.doctorNotes]); // eslint-disable-line react-hooks/exhaustive-deps
+    setQuestions(consultationQuestions ?? "");
+  }, [consultationQuestions]);
   if (!data) return <PageLoading />;
   const now = new Date();
   const since = subDays(now, Number(range));
@@ -194,36 +163,6 @@ function DoctorPage() {
         </div>
       </div>
 
-      <details open={demoDoctor} className="disclosure no-print mb-5">
-        <summary className="font-medium text-navy">
-          {tr(demoDoctor ? "Doctor preview" : "Patient Mode")} · {tr("Consultation mode")}
-        </summary>
-        <div className="mt-3 space-y-3">
-          <div className="flex flex-wrap gap-2" role="group" aria-label={tr("Consultation mode")}>
-            <Button
-              variant={!demoDoctor ? "default" : "outline"}
-              aria-pressed={!demoDoctor}
-              onClick={() => setDemoDoctor(false)}
-            >
-              <LockKeyhole />
-              {tr("Patient Mode")}
-            </Button>
-            <Button
-              variant={demoDoctor ? "default" : "outline"}
-              aria-pressed={demoDoctor}
-              onClick={() => setDemoDoctor(true)}
-            >
-              <Stethoscope />
-              {tr("Doctor preview")}
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {tr(
-              "Doctor editing is a simulation, not secure clinician access. Feedback is not verified.",
-            )}
-          </p>
-        </div>
-      </details>
       <nav
         aria-label={tr("Visit preparation sections")}
         className="no-print mb-5 flex flex-wrap gap-2"
@@ -246,9 +185,13 @@ function DoctorPage() {
         <header className="flex flex-wrap items-start justify-between gap-4 rounded-lg bg-navy p-4 text-navy-foreground">
           <div>
             <p className="text-xs uppercase tracking-wider opacity-80">
-              {tr("Consultation summary · demo data")}
+              {tr("Consultation summary")}
             </p>
             <p className="mt-1 text-xl font-semibold">{p.name}</p>
+            {(readings.some((r) => r.source !== "user") ||
+              logs.some((log) => log.source !== "user")) && (
+              <p className="text-xs opacity-90">{tr("Includes sample or simulated records")}</p>
+            )}
             <p className="text-sm opacity-90">
               {p.age} {tr("y ·")} {tr(p.sex)} · {tr(p.diabetesType)} ({p.yearsSinceDiagnosis}{" "}
               {tr("y)")}
@@ -264,11 +207,6 @@ function DoctorPage() {
             <p>{tr(p.doctor)}</p>
           </div>
         </header>
-        <p className="mt-4 text-sm text-muted-foreground">
-          {tr(
-            "Patient entries are self-reported. Patterns use demo reference ranges and are not diagnoses. Doctor feedback and caregiver messages are simulated.",
-          )}
-        </p>
         {findings.some((finding) => finding.kind === "safety") && (
           <p className="mt-3 rounded-md bg-danger-soft p-3 text-sm text-destructive">
             {tr(URGENT_NOTICE)}
@@ -310,9 +248,7 @@ function DoctorPage() {
             ))}
           </div>
           <p className="mb-4 text-xs text-muted-foreground">
-            {tr(
-              '"Within range" is the share of these discrete sample readings between the demo low and after-meal thresholds. It is not continuous-monitoring Time-in-Range and may not reflect the whole day.',
-            )}
+            {tr("Reading-based range summary · not CGM time in range")}
           </p>
           <GlucoseChart readings={readings} t={t} height={220} />
         </Section>
@@ -377,11 +313,6 @@ function DoctorPage() {
                 })
               : tr("No medication records in this period.")}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {tr(
-              "These are patient-entered records, not confirmed adherence. A day without a record does not mean a dose was missed.",
-            )}
-          </p>
           <h3 className="mt-4 font-semibold">{tr("Medication schedules")}</h3>
           {!schedules.length && (
             <p className="mt-2 text-sm text-muted-foreground">{tr("No medication scheduled.")}</p>
@@ -410,10 +341,10 @@ function DoctorPage() {
               );
             })}
           </ul>
-          <h3 className="mt-4 font-semibold">{tr("Self-reported medication history")}</h3>
+          <h3 className="mt-4 font-semibold">{tr("Medication history · patient-entered")}</h3>
           {!statuses.length && (
             <p className="mt-2 text-sm text-muted-foreground">
-              {tr("No self-reported medication statuses in this period.")}
+              {tr("No medication updates in this period.")}
             </p>
           )}
           <ul className="mt-2 space-y-2 text-sm">
@@ -438,7 +369,7 @@ function DoctorPage() {
           </ul>
         </Section>
 
-        <Section n={5} title={tr("Plain-language explanation")} tag={tr("AI-generated · demo")}>
+        <Section n={5} title={tr("Plain-language explanation")} tag={tr("Record summary")}>
           <p className="text-sm">
             {findings.some((f) => f.kind === "baseline_shift" && f.severity === "watch")
               ? tr(
@@ -447,9 +378,6 @@ function DoctorPage() {
               : tr(
                   "Readings in this period look broadly similar to earlier records based on the available data.",
                 )}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {tr("Template-generated demo text. Not reviewed by a clinician; no sources retrieved.")}
           </p>
         </Section>
 
@@ -528,12 +456,7 @@ function DoctorPage() {
             {tr("Doctor's Feedback")}
           </h2>
           <p className="mb-3 text-sm text-muted-foreground">
-            {tr(p.doctor)} ·{" "}
-            {tr(
-              data.doctorResponseAt
-                ? "Demo doctor response · not verified"
-                : "Simulated demo feedback",
-            )}
+            {tr(p.doctor)} · {tr("Sample feedback")}
             {data.doctorResponseAt &&
               ` · ${format(new Date(data.doctorResponseAt), "d MMM yyyy, HH:mm")}`}
           </p>
@@ -551,66 +474,6 @@ function DoctorPage() {
               </p>
             </div>
           </div>
-          {demoDoctor && (
-            <form
-              className="no-print mt-5 space-y-4 rounded-lg border border-warning/40 bg-warning-soft p-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!demoDoctor) return;
-                const date = new Date(followUpDate);
-                if (!goal.trim() || !Number.isFinite(date.getTime())) return;
-                saveDoctorResponse({
-                  notes: notes.trim(),
-                  feedback: feedback.trim(),
-                  goal: goal.trim(),
-                  explanation: explanation.trim(),
-                  followUpInstructions: instructions.trim(),
-                  followUpDate: date.toISOString(),
-                });
-                toast.success(tr("Doctor preview saved."));
-              }}
-            >
-              <h3 className="font-semibold">
-                {tr("Demo Doctor Mode")} · {tr("Simulation")}
-              </h3>
-              {[
-                ["doctor-notes", "Clinician review notes", notes, setNotes],
-                ["doctor-feedback", "Doctor feedback", feedback, setFeedback],
-                ["doctor-goal", "Doctor's goal", goal, setGoal],
-                ["doctor-explanation", "Goal explanation", explanation, setExplanation],
-                ["doctor-follow-up", "Follow-up instructions", instructions, setInstructions],
-              ].map(([id, label, value, setter]) => (
-                <div key={String(id)}>
-                  <Label htmlFor={String(id)}>{tr(String(label))}</Label>
-                  <Textarea
-                    id={String(id)}
-                    className="mt-1.5 text-base"
-                    rows={2}
-                    value={String(value)}
-                    onChange={(e) => {
-                      if (typeof setter === "function") setter(e.target.value);
-                    }}
-                    required={id === "doctor-goal"}
-                    maxLength={5000}
-                  />
-                </div>
-              ))}
-              <div>
-                <Label htmlFor="follow-up-date">{tr("Follow-up date")}</Label>
-                <Input
-                  id="follow-up-date"
-                  type="datetime-local"
-                  required
-                  className="mt-1.5 h-12"
-                  value={followUpDate}
-                  onChange={(e) => setFollowUpDate(e.target.value)}
-                />
-              </div>
-              <Button type="submit" className="min-h-12">
-                {tr("Save demo doctor response")}
-              </Button>
-            </form>
-          )}
         </section>
         <section className="border-t py-5">
           <h2
@@ -661,7 +524,9 @@ function DoctorPage() {
           title={tr("Caregiver alert history · simulated")}
           tag={tr("Rule-detected · simulated")}
         >
-          <p className="mb-3 text-xs text-muted-foreground">{tr(SIMULATION_NOTICE)}</p>
+          <p className="mb-3 text-xs text-muted-foreground">
+            {tr("Preview only · no messages sent")}
+          </p>
           {!caregiverAlerts.length && (
             <p className="text-sm text-muted-foreground">
               {tr("No permitted caregiver alerts in this report period.")}

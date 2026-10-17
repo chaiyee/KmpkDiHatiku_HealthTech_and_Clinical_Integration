@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
@@ -13,7 +13,6 @@ import { useLanguage } from "@/lib/i18n";
 import {
   DEFAULT_CAREGIVER,
   CAREGIVER_MESSAGE,
-  SIMULATION_NOTICE,
   URGENT_NOTICE,
   visibleCaregiverAlerts,
 } from "@/lib/caregiver";
@@ -50,13 +49,6 @@ export function CaregiverAlertDetails({
           {t(URGENT_NOTICE)}
         </p>
       )}
-      {alert.category === "safety" && (
-        <p className="text-xs text-muted-foreground">
-          {t(
-            "Safety guidance is demo text, not clinician-reviewed. Clinical review is required before real-world use.",
-          )}
-        </p>
-      )}
       <EvidenceTable readings={alert.evidence} t={alert.thresholds} />
       {!report && !alert.acknowledgedAt && (
         <Button variant="outline" onClick={() => acknowledgeCaregiver(alert.id)}>
@@ -73,6 +65,7 @@ export function CaregiverAlerts({ overview = false }: { overview?: boolean }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   if (!data) return null;
   const alerts = visibleCaregiverAlerts(data);
+  if (!alerts.length) return null;
   const selected = alerts.find((alert) => alert.id === selectedId);
   const latest = alerts.find((alert) => !alert.acknowledgedAt) ?? alerts[0];
   return (
@@ -81,20 +74,11 @@ export function CaregiverAlerts({ overview = false }: { overview?: boolean }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Users className="h-5 w-5 text-primary" />
-            {t(
-              overview
-                ? "Caregiver notifications · simulated"
-                : "Caregiver alert history · simulated",
-            )}
+            {t(overview ? "Caregiver previews" : "Caregiver preview history")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-xs text-muted-foreground">{t(SIMULATION_NOTICE)}</p>
-          {!alerts.length && (
-            <p className="text-sm text-muted-foreground">
-              {t("No caregiver alert previews yet. Sharing follows your selected consent.")}
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground">{t("Preview only · no messages sent")}</p>
           {(overview ? (latest ? [latest] : []) : alerts.slice(0, 5)).map((alert) => (
             <div key={alert.id} className="space-y-2 border-t pt-3 text-sm">
               <p className="font-semibold">{t(alert.title)}</p>
@@ -122,7 +106,7 @@ export function CaregiverAlerts({ overview = false }: { overview?: boolean }) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("Simulated caregiver notification")}</DialogTitle>
-            <DialogDescription>{t(SIMULATION_NOTICE)}</DialogDescription>
+            <DialogDescription>{t("Preview only · no messages sent")}</DialogDescription>
           </DialogHeader>
           {selected && <CaregiverAlertDetails alert={selected} />}
         </DialogContent>
@@ -136,6 +120,20 @@ export function CaregiverSupport() {
   const { t } = useLanguage();
   const [settings, setSettings] = useState(data?.caregiver ?? DEFAULT_CAREGIVER);
   const [error, setError] = useState("");
+  const nameInput = useRef<HTMLInputElement>(null);
+  const ready = Boolean(data);
+  useEffect(() => {
+    const revealSetup = () => {
+      if (window.location.hash !== "#caregiver-support") return;
+      const section = nameInput.current?.closest("details");
+      if (section) section.open = true;
+      nameInput.current?.focus({ preventScroll: true });
+      document.getElementById("caregiver-support")?.scrollIntoView({ block: "start" });
+    };
+    if (ready) revealSetup();
+    window.addEventListener("hashchange", revealSetup);
+    return () => window.removeEventListener("hashchange", revealSetup);
+  }, [ready]);
   useEffect(() => setSettings(data?.caregiver ?? DEFAULT_CAREGIVER), [data?.caregiver]);
   if (!data) return null;
   function submit(event: FormEvent) {
@@ -158,15 +156,12 @@ export function CaregiverSupport() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Users className="h-5 w-5 text-primary" />
-            {t("Caregiver support · simulated")}
+            {t("Caregiver sharing · preview")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} noValidate className="space-y-4">
-            <p className="text-sm text-muted-foreground">{t(SIMULATION_NOTICE)}</p>
-            <p className="text-xs text-muted-foreground">
-              {t("Use fictional caregiver details for this hackathon demonstration.")}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("Preview only · no messages sent")}</p>
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor="caregiver-enabled">{t("Enable caregiver mode")}</Label>
               <Switch
@@ -183,6 +178,7 @@ export function CaregiverSupport() {
               <div>
                 <Label htmlFor="caregiver-name">{t("Caregiver name")}</Label>
                 <Input
+                  ref={nameInput}
                   id="caregiver-name"
                   className="mt-1.5 h-12"
                   value={settings.name}
@@ -231,11 +227,6 @@ export function CaregiverSupport() {
                 {t("Share existing glucose safety alerts")}
               </label>
             </fieldset>
-            <p className="text-xs text-muted-foreground">
-              {t(
-                "Revoking consent stops new simulated sharing and hides shared history in notifications and the doctor report. Local patient history is retained.",
-              )}
-            </p>
             {error && (
               <p role="alert" className="text-sm text-destructive">
                 {t(error)}

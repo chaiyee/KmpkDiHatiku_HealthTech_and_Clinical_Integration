@@ -50,9 +50,7 @@ function fill() {
 describe("Meal Companion workflow", () => {
   it("offers manual entry without AI and saves confirmed structured portions once", async () => {
     render(<MealCompanion />);
-    await screen.findByText(
-      "Photo analysis is not configured yet. You can enter your meal manually.",
-    );
+    await screen.findByText("Enter foods and portions to record your meal.");
     fill();
     expect(screen.getByText("25.0 g")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save confirmed meal" })).toBeDisabled();

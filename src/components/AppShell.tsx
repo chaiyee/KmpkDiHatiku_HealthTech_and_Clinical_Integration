@@ -70,6 +70,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { t: tr, format, formatDistanceToNow, language, setLanguage } = useLanguage();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { data, resetDemo, loadScenario, userEmail, syncState } = useStore();
+  const hasSample =
+    data?.readings.some((r) => r.source === "sample") ||
+    data?.logs.some((log) => log.source === "sample");
+  const hasSimulated = data?.readings.some((r) => r.source === "device");
   const findings = data
     ? detectPatterns(data.readings, data.thresholds).filter((f) => f.severity !== "info")
     : [];
@@ -125,16 +129,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{data.patient.name}</p>
-                <p className="text-xs text-muted-foreground">{tr("Fictional demo patient")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {tr(hasSample ? "Sample profile" : "Your profile")}
+                </p>
               </div>
             </div>
             <details className="mt-3 border-t pt-2">
               <summary className="min-h-11 cursor-pointer py-2 text-xs font-medium text-muted-foreground">
-                {tr("Demo tools")}
+                {tr("Preview options")}
               </summary>
               <div className="mt-2">
                 <p className="mb-1 text-xs font-medium text-muted-foreground">
-                  {tr("Demo scenario")}
+                  {tr("Preview scenario")}
                 </p>
                 <Select
                   onValueChange={(v) => {
@@ -146,7 +152,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                     );
                   }}
                 >
-                  <SelectTrigger className="h-11 w-full text-xs" aria-label={tr("Demo scenario")}>
+                  <SelectTrigger
+                    className="h-11 w-full text-xs"
+                    aria-label={tr("Preview scenario")}
+                  >
                     <SelectValue placeholder={tr("Choose a scenario")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -159,7 +168,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Select>
               </div>
               <Button variant="ghost" size="sm" className="mt-2 w-full text-xs" onClick={resetDemo}>
-                {tr("Reset demo data")}
+                {tr("Reset records to sample data")}
               </Button>
             </details>
             <div className="mt-2 border-t pt-2 text-xs">
@@ -201,7 +210,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </div>
           <p className="hidden text-sm text-muted-foreground lg:block">
-            {tr("Demo workspace · sample and simulated data")}
+            {tr(
+              hasSample && hasSimulated
+                ? "Sample & simulated records"
+                : hasSample
+                  ? "Sample records"
+                  : hasSimulated
+                    ? "Simulated records"
+                    : "Your health companion",
+            )}
           </p>
           <div className="flex items-center gap-2">
             <Popover>
@@ -210,13 +227,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                   variant="outline"
                   size="icon"
                   className="h-11 w-11 lg:hidden"
-                  aria-label={tr("Demo scenario")}
+                  aria-label={tr("Preview scenario")}
                 >
                   <LayoutDashboard className="h-5 w-5" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="start" className="w-64">
-                <p className="mb-2 text-sm font-semibold">{tr("Demo scenario")}</p>
+                <p className="mb-2 text-sm font-semibold">{tr("Preview scenario")}</p>
                 <Select
                   onValueChange={(v) => {
                     loadScenario(v as DemoScenario);
@@ -227,7 +244,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                     );
                   }}
                 >
-                  <SelectTrigger className="h-11 w-full text-sm" aria-label={tr("Demo scenario")}>
+                  <SelectTrigger
+                    className="h-11 w-full text-sm"
+                    aria-label={tr("Preview scenario")}
+                  >
                     <SelectValue placeholder={tr("Choose a scenario")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -244,7 +264,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   className="mt-2 w-full text-xs"
                   onClick={resetDemo}
                 >
-                  {tr("Reset demo data")}
+                  {tr("Reset records to sample data")}
                 </Button>
               </PopoverContent>
             </Popover>

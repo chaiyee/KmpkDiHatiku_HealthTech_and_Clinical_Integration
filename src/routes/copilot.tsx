@@ -20,14 +20,12 @@ export const Route = createFileRoute("/copilot")({
       { title: "AI Copilot · DiaMonitor Copilot" },
       {
         name: "description",
-        content:
-          "Ask questions about diabetes and your own recorded glucose trends (demo assistant).",
+        content: "Guided help reviewing your recorded meals, activity and glucose trends.",
       },
       { property: "og:title", content: "AI Copilot · DiaMonitor Copilot" },
       {
         property: "og:description",
-        content:
-          "Ask questions about diabetes and your own recorded glucose trends (demo assistant).",
+        content: "Guided help reviewing your recorded meals, activity and glucose trends.",
       },
     ],
   }),
@@ -40,6 +38,7 @@ type Msg = {
   text: string;
   meta?: CopilotResponse;
   error?: boolean;
+  origin?: "guided" | "online";
 };
 
 const SUGGESTIONS = [
@@ -50,11 +49,10 @@ const SUGGESTIONS = [
 ];
 
 function CopilotPage() {
-  const { t: tr, format, language } = useLanguage();
+  const { t: tr, language } = useLanguage();
   const { data, userEmail, syncState } = useStore();
   const [configured, setConfigured] = useState(false);
   const [consent, setConsent] = useState(false);
-  const [liveStatus, setLiveStatus] = useState("");
   const requestGeneration = useRef(0);
   useEffect(() => {
     let active = true;
@@ -101,6 +99,7 @@ function CopilotPage() {
     setLoading(true);
     try {
       let res = await getCopilotResponse(q, data, new Date(), language);
+      let origin: "guided" | "online" = "guided";
       if (generation !== requestGeneration.current) return;
       if (res.kind !== "safety" && consent && configured && userEmail && syncState === "saved") {
         try {
@@ -129,15 +128,14 @@ function CopilotPage() {
           )
             throw new Error();
           res = result.response;
-          setLiveStatus("AI-assisted record review. Numbers come from your saved records.");
+          origin = result.response.kind === "safety" ? "guided" : "online";
         } catch {
           if (generation !== requestGeneration.current) return;
-          setLiveStatus("Online AI is unavailable. Showing a local record summary.");
         }
-      } else setLiveStatus("Local record review. No records sent to an AI provider.");
+      }
       setMessages((m) => [
         ...m,
-        { id: Date.now() + 1, role: "assistant", text: res.text, meta: res },
+        { id: Date.now() + 1, role: "assistant", text: res.text, meta: res, origin },
       ]);
     } catch {
       if (generation !== requestGeneration.current) return;
@@ -146,7 +144,7 @@ function CopilotPage() {
         {
           id: Date.now() + 1,
           role: "assistant",
-          text: "Sorry, something went wrong. Please try again.",
+          text: "This answer couldn't be generated. Please try another question.",
           error: true,
         },
       ]);
@@ -157,22 +155,12 @@ function CopilotPage() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col">
-      <PageHeader
-        title={tr("AI Copilot")}
-        subtitle={tr("Diabetes education and help understanding your records.")}
-      />
-      <div className="mb-5 rounded-xl border bg-secondary p-4 text-sm">
-        <p className="font-semibold">
-          {tr(
-            configured ? "Record-focused Copilot" : "Local record review · online AI unavailable",
-          )}
-        </p>
-        <p className="mt-1">
-          {tr(
-            "Supports record review, not diagnosis or treatment changes. Seek medical help for urgent symptoms.",
-          )}
-        </p>
-        {configured && (
+      <PageHeader title={tr("AI Copilot")} subtitle={tr("Questions, records and next steps.")} />
+      {configured && (
+        <details className="disclosure mb-5 text-sm">
+          <summary className="min-h-11 cursor-pointer content-center font-medium">
+            {tr("Online review options")}
+          </summary>
           <label className="mt-3 flex items-start gap-2">
             <input
               type="checkbox"
@@ -185,11 +173,8 @@ function CopilotPage() {
               "Use online AI for this session: send my question and limited saved meal, glucose and activity records to OpenAI. Names, clinic details and notes are excluded. Avoid identifying details in questions. Sign in and finish syncing first.",
             )}
           </label>
-        )}
-        <p className="mt-2" role="status">
-          {tr(liveStatus)}
-        </p>
-      </div>
+        </details>
+      )}
 
       <Card className="flex min-h-[460px] flex-col">
         <CardContent
@@ -281,14 +266,18 @@ function CopilotPage() {
 }
 
 function AssistantMessage({ m }: { m: Msg }) {
-  const { t: tr, format } = useLanguage();
+  const { t: tr } = useLanguage();
   const kind = m.meta?.kind;
   const label =
     kind === "safety"
       ? { Icon: ShieldAlert, text: tr("Safety message"), cls: "bg-danger-soft text-destructive" }
       : kind === "personal"
-        ? { Icon: LineChart, text: tr("Based on your records"), cls: "bg-accent text-primary" }
-        : { Icon: BookOpen, text: tr("General diabetes education"), cls: "bg-secondary text-navy" };
+        ? {
+            Icon: LineChart,
+            text: tr(m.origin === "online" ? "AI-assisted record review" : "Guided record review"),
+            cls: "bg-accent text-primary",
+          }
+        : { Icon: BookOpen, text: tr("Guided diabetes education"), cls: "bg-secondary text-navy" };
   return (
     <div className="max-w-[92%] space-y-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -299,11 +288,6 @@ function AssistantMessage({ m }: { m: Msg }) {
             <label.Icon className="h-3.5 w-3.5" /> {tr(label.text)}
           </span>
         )}
-        {m.meta?.demo && (
-          <span className="rounded-full border border-dashed px-2 py-0.5 text-xs text-muted-foreground">
-            {tr("Limited guidance")}
-          </span>
-        )}
       </div>
       <p
         className={`whitespace-pre-line text-[15px] leading-relaxed ${m.error ? "text-destructive" : ""}`}
@@ -312,8 +296,10 @@ function AssistantMessage({ m }: { m: Msg }) {
       </p>
       {m.meta?.doctorQuestion && <PinButton text={m.meta.doctorQuestion} />}
       {kind === "education" && (
-        <div className="rounded-lg border bg-muted/50 p-3 text-sm">
-          <p className="font-medium">{tr("Sources")}</p>
+        <details className="rounded-lg border bg-muted/30 px-3 text-sm">
+          <summary className="min-h-11 cursor-pointer content-center font-medium">
+            {tr("About this guidance")}
+          </summary>
           {m.meta?.sources.length ? (
             <ul className="mt-1 list-disc pl-5">
               {m.meta?.sources.map((s) => (
@@ -327,7 +313,7 @@ function AssistantMessage({ m }: { m: Msg }) {
               )}
             </p>
           )}
-        </div>
+        </details>
       )}
     </div>
   );

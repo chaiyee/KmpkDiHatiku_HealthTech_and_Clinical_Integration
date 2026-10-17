@@ -11,10 +11,6 @@ export const translationsMeals = {
     ms: "Log masuk untuk analisis foto. Kemasukan manual sentiasa tersedia.",
     zh: "登录后可分析照片。您随时可以手动录入。",
   },
-  "Photo analysis is not configured yet. You can enter your meal manually.": {
-    ms: "Analisis foto belum tersedia. Anda boleh merekod makanan secara manual.",
-    zh: "照片分析尚未配置。您可以手动记录餐食。",
-  },
   "Photo analysis limit reached. Try later or enter the meal manually.": {
     ms: "Had analisis foto dicapai. Cuba kemudian atau rekod secara manual.",
     zh: "照片分析次数已达上限。请稍后再试或手动录入。",
@@ -80,11 +76,6 @@ export const translationsMeals = {
     ms: "Anggaran tidak lengkap: sesetengah makanan tiada nilai pemakanan.",
     zh: "估算不完整：部分食物尚未输入营养数值。",
   },
-  "Carbohydrates can affect blood glucose. This estimate may change depending on your portion size and ingredients.":
-    {
-      ms: "Karbohidrat boleh mempengaruhi glukosa darah. Anggaran ini mungkin berubah mengikut saiz hidangan dan bahan.",
-      zh: "碳水化合物可能影响血糖。此估算会因份量和食材而变化。",
-    },
   "Manual estimate — use a food label or a nutritional reference.": {
     ms: "Anggaran manual — gunakan label makanan atau rujukan pemakanan.",
     zh: "手动估算——请参考食品标签或营养资料。",
@@ -117,11 +108,6 @@ export const translationsMeals = {
     ms: "Bilangan hidangan (0.5 = separuh)",
     zh: "份数（0.5表示半份）",
   },
-  "Enter nutrition for one described portion. Changing the number of portions scales the estimate; changing ingredients needs a new estimate.":
-    {
-      ms: "Masukkan nilai pemakanan untuk satu hidangan yang dinyatakan. Bilangan hidangan mengubah anggaran secara berkadar; perubahan bahan memerlukan anggaran baharu.",
-      zh: "请输入所描述的一份食物的营养数值。更改份数会按比例调整估算；更改食材需要重新估算。",
-    },
   "Carbohydrates (g)": {
     ms: "Karbohidrat (g)",
     zh: "碳水化合物（克）",
@@ -208,11 +194,6 @@ export const translationsMeals = {
     ms: "Semak pemakanan makanan Malaysia (MyFCD)",
     zh: "查询马来西亚食品营养（MyFCD）",
   },
-  "MyFCD is a reference you can consult. These estimates are not verified database values. No food is rated safe or unsafe here.":
-    {
-      ms: "MyFCD ialah rujukan yang boleh disemak. Anggaran ini bukan nilai pangkalan data yang disahkan. Tiada makanan dinilai selamat atau tidak selamat di sini.",
-      zh: "您可以查阅MyFCD资料。这些估算不是经数据库核实的数值。此处不会将食物评为安全或不安全。",
-    },
   "Meal date and time": {
     ms: "Tarikh dan masa makan",
     zh: "进餐日期与时间",
@@ -377,10 +358,6 @@ export const translationsMeals = {
   "Reviewing your records…": {
     ms: "Menyemak rekod anda…",
     zh: "正在查看您的记录…",
-  },
-  "Limited guidance": {
-    ms: "Panduan terhad",
-    zh: "有限指引",
   },
   "This answer has not been checked against medical references. Confirm guidance with your healthcare team.":
     {

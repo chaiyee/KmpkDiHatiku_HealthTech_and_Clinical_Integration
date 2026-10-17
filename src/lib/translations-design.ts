@@ -1,13 +1,29 @@
 export const translationsDesign = {
-  "Based on your records · not live AI": {
-    ms: "Berdasarkan rekod anda · bukan AI langsung",
-    zh: "基于您的记录·非实时AI",
+  "Guided diabetes education": { ms: "Pendidikan diabetes berpandu", zh: "糖尿病知识指引" },
+  "Record summary": { ms: "Ringkasan rekod", zh: "记录摘要" },
+  "Guided summary of your records. Review it with your healthcare team.": {
+    ms: "Ringkasan berpandu berdasarkan rekod anda. Semak bersama pasukan penjagaan kesihatan anda.",
+    zh: "根据您的记录提供的摘要指引，请与医疗团队一起查看。",
   },
-  "Supports record review, not diagnosis or treatment changes. Seek medical help for urgent symptoms.":
-    {
-      ms: "Membantu menyemak rekod, bukan mendiagnosis atau mengubah rawatan. Dapatkan bantuan perubatan untuk gejala kecemasan.",
-      zh: "帮助查看记录，不能诊断或更改治疗。紧急症状请寻求医疗帮助。",
-    },
+  "Here's what your recorded data shows (not a diagnosis):": {
+    ms: "Inilah yang ditunjukkan oleh rekod anda (bukan diagnosis):",
+    zh: "以下是您已记录数据所显示的情况（并非诊断）：",
+  },
+  "Help understanding your records": { ms: "Bantuan memahami rekod anda", zh: "帮助理解您的记录" },
+  "Guided record review": { ms: "Semakan rekod berpandu", zh: "记录查看指引" },
+  "AI-assisted record review": { ms: "Semakan rekod dibantu AI", zh: "AI 辅助记录查看" },
+  "This answer couldn't be generated. Please try another question.": {
+    ms: "Jawapan ini tidak dapat disediakan. Cuba soalan lain.",
+    zh: "无法生成此回答，请尝试其他问题。",
+  },
+  "Enter foods and portions to record your meal.": {
+    ms: "Masukkan makanan dan saiz hidangan untuk merekod makanan anda.",
+    zh: "输入食物和份量以记录餐食。",
+  },
+  "We couldn't estimate this photo. You can still enter foods and portions manually.": {
+    ms: "Kami tidak dapat menganggarkan foto ini. Anda masih boleh memasukkan makanan dan saiz hidangan secara manual.",
+    zh: "无法估算此照片。您仍可手动输入食物和份量。",
+  },
   Plan: { ms: "Pelan", zh: "计划" },
   "How reminders work": { ms: "Cara peringatan berfungsi", zh: "提醒如何运作" },
   "No fasting reading recorded yet": {
@@ -26,10 +42,6 @@ export const translationsDesign = {
     ms: "Navigasi utama",
     zh: "主导航",
   },
-  "Demo workspace · sample and simulated data": {
-    ms: "Ruang demo · data contoh dan simulasi",
-    zh: "演示空间·示例与模拟数据",
-  },
   "Your health today, one step at a time.": {
     ms: "Kesihatan anda hari ini, selangkah demi selangkah.",
     zh: "今天的健康管理，一步一步来。",
@@ -42,11 +54,6 @@ export const translationsDesign = {
     ms: "Bacaan contoh",
     zh: "示例读数",
   },
-  "Reference ranges in this workspace are for demonstration. Follow the targets agreed with your healthcare team.":
-    {
-      ms: "Julat rujukan di sini adalah untuk demonstrasi. Ikuti sasaran yang dipersetujui dengan pasukan penjagaan anda.",
-      zh: "此处参考范围仅供演示。请遵循与医疗团队商定的目标。",
-    },
   "Your next step": {
     ms: "Langkah seterusnya",
     zh: "下一步",
@@ -99,10 +106,6 @@ export const translationsDesign = {
     ms: "Pratonton amaran penjaga",
     zh: "照护者提醒预览",
   },
-  "Patterns describe recorded changes, not their cause. They are not a diagnosis.": {
-    ms: "Corak menerangkan perubahan yang direkodkan, bukan puncanya. Ia bukan diagnosis.",
-    zh: "趋势描述已记录的变化，而非原因，也不是诊断。",
-  },
   "Glucose records": {
     ms: "Rekod glukosa",
     zh: "血糖记录",
@@ -140,10 +143,6 @@ export const translationsDesign = {
     ms: "Satu idea untuk hari ini",
     zh: "今日小建议",
   },
-  "An educational suggestion. Follow your care team’s advice and dietary restrictions.": {
-    ms: "Cadangan pendidikan. Ikuti nasihat pasukan penjagaan dan sekatan pemakanan anda.",
-    zh: "此为教育建议。请遵循医疗团队建议和饮食限制。",
-  },
   "Doctor goals & feedback": {
     ms: "Matlamat & maklum balas doktor",
     zh: "医生目标与反馈",
@@ -180,11 +179,6 @@ export const translationsDesign = {
     ms: "Mulakan pratonton Guardian",
     zh: "开始Guardian预览",
   },
-  "This preview uses simulated sensor readings. A smartwatch does not measure glucose; a CGM or meter is needed. No real Bluetooth connection is made.":
-    {
-      ms: "Pratonton ini menggunakan bacaan sensor simulasi. Jam pintar tidak mengukur glukosa; CGM atau meter diperlukan. Tiada sambungan Bluetooth sebenar dibuat.",
-      zh: "此预览使用模拟传感器读数。智能手表不能测量血糖，需要CGM或血糖仪。此处没有建立真实蓝牙连接。",
-    },
   "Guardian Mode": {
     ms: "Mod Guardian",
     zh: "Guardian模式",
@@ -217,10 +211,6 @@ export const translationsDesign = {
     ms: "Sokongan penjaga",
     zh: "照护者支持",
   },
-  "Three morning readings are ready to review. These readings are simulated.": {
-    ms: "Tiga bacaan pagi sedia untuk disemak. Bacaan ini disimulasikan.",
-    zh: "三次晨间读数已准备好供查看。这些读数为模拟数据。",
-  },
   "Review the pattern": {
     ms: "Semak corak",
     zh: "查看趋势",
@@ -249,10 +239,6 @@ export const translationsDesign = {
     ms: "Kawalan pratonton bacaan",
     zh: "读数预览控制",
   },
-  "Record-based guidance · not live AI": {
-    ms: "Panduan berasaskan rekod · bukan AI langsung",
-    zh: "基于记录的指引·非实时AI",
-  },
   Conversation: {
     ms: "Perbualan",
     zh: "对话",
@@ -261,27 +247,10 @@ export const translationsDesign = {
     ms: "Bahagian persediaan lawatan",
     zh: "就诊准备章节",
   },
-  "Doctor preview": {
-    ms: "Pratonton doktor",
-    zh: "医生预览",
-  },
-  "Doctor preview saved.": {
-    ms: "Pratonton doktor disimpan.",
-    zh: "医生预览已保存。",
-  },
-  "Doctor editing is a simulation, not secure clinician access. Feedback is not verified.": {
-    ms: "Suntingan doktor ialah simulasi, bukan akses klinikal selamat. Maklum balas tidak disahkan.",
-    zh: "医生编辑功能为模拟，并非安全的临床访问。反馈未经核实。",
-  },
   "Consultation summary · demo data": {
     ms: "Ringkasan konsultasi · data demo",
     zh: "就诊摘要·演示数据",
   },
-  "Patient entries are self-reported. Patterns use demo reference ranges and are not diagnoses. Doctor feedback and caregiver messages are simulated.":
-    {
-      ms: "Catatan pesakit dilaporkan sendiri. Corak menggunakan julat rujukan demo dan bukan diagnosis. Maklum balas doktor dan mesej penjaga disimulasikan.",
-      zh: "患者记录由本人填写。趋势使用演示参考范围，并非诊断。医生反馈和照护者消息均为模拟。",
-    },
   "Alert previews stay in this app. No SMS or WhatsApp is sent, and this preview is not secure caregiver access.":
     {
       ms: "Pratonton amaran kekal dalam aplikasi. Tiada SMS atau WhatsApp dihantar, dan pratonton ini bukan akses penjaga yang selamat.",

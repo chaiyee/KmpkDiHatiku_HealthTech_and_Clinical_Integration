@@ -1,4 +1,5 @@
 import { translationsDesign } from "./translations-design";
+import { translationsContent } from "./translations-content";
 import { translationsCompanions } from "./translations-companions";
 import { translationsMeals } from "./translations-meals";
 import { translationsMealPhoto } from "./translations-meal-photo";
@@ -10,6 +11,7 @@ import { translationsBrief2 } from "./translations-brief2";
 import { translationsConnected } from "./translations-connected";
 
 export const translations: Record<string, { ms: string; zh: string }> = {
+  ...translationsContent,
   ...translationsCompanions,
   ...translationsConnected,
   ...translationsSafety,
@@ -36,12 +38,9 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Back to the app": {"ms": "Kembali ke aplikasi", "zh": "返回应用"},
   "30-Second Consultation Brief": {"ms": "Ringkasan Konsultasi 30 Saat", "zh": "30秒问诊摘要"},
   "From recorded data only": {"ms": "Daripada data yang direkodkan sahaja", "zh": "仅基于已记录的数据"},
-  "No HbA1c estimate, diagnosis or risk score.": {"ms": "Tiada anggaran HbA1c, diagnosis atau skor risiko.", "zh": "不估算HbA1c，不作诊断或风险评分。"},
   "Insufficient data": {"ms": "Data tidak mencukupi", "zh": "数据不足"},
-  "Share of discrete finger-prick readings within demo thresholds (fasting or after-meal). Not continuous Time in Range.": {"ms": "Peratusan bacaan cucuk jari dalam ambang demo (berpuasa atau selepas makan). Bukan Masa Dalam Julat berterusan.", "zh": "指尖血读数在演示阈值内（空腹或餐后）的比例。并非连续血糖的目标范围内时间。"},
   "Repeated patterns": {"ms": "Corak berulang", "zh": "重复模式"},
   "None detected": {"ms": "Tiada dikesan", "zh": "未检测到"},
-  "Taken (self-reported)": {"ms": "Diambil (dilaporkan sendiri)", "zh": "已服用（自我报告）"},
   "Not logged": {"ms": "Tidak dicatat", "zh": "未记录"},
   "(not the same as missed)": {"ms": "(tidak sama dengan tertinggal)", "zh": "（不等于漏服）"},
   "Patient questions from Copilot": {"ms": "Soalan pesakit daripada Copilot", "zh": "患者从助手保存的问题"},
@@ -98,9 +97,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "A simulated safety alert is visible to your caregiver in this app. No SMS or WhatsApp was sent.": {"ms": "Amaran keselamatan simulasi boleh dilihat oleh penjaga dalam aplikasi ini. Tiada SMS atau WhatsApp dihantar.", "zh": "模拟安全提醒已在本应用中向照护者显示。未发送任何短信或 WhatsApp。"},
   "Caregiver sharing is off, so no caregiver alert was created.": {"ms": "Perkongsian penjaga dimatikan, jadi tiada amaran penjaga dibuat.", "zh": "照护者共享已关闭，因此未创建照护者提醒。"},
   "Call Caregiver": {"ms": "Hubungi Penjaga", "zh": "致电照护者"},
-  "Consultation mode": {"ms": "Mod konsultasi", "zh": "就诊模式"},
-  "Patient Mode": {"ms": "Mod Pesakit", "zh": "患者模式"},
-  "Demo Doctor Mode": {"ms": "Mod Doktor Demo", "zh": "演示医生模式"},
   "Simulation": {"ms": "Simulasi", "zh": "模拟"},
   "Simulation only. No sign-in or secure access control. Doctor feedback is not verified.": {"ms": "Simulasi sahaja. Tiada log masuk atau kawalan akses selamat. Maklum balas doktor tidak disahkan.", "zh": "仅为模拟，无登录或安全访问控制。医生反馈未经核实。"},
   "Before Your Visit": {"ms": "Sebelum Lawatan Anda", "zh": "就诊前"},
@@ -115,14 +111,10 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Questions saved.": {"ms": "Soalan disimpan.", "zh": "问题已保存。"},
   "No questions recorded yet.": {"ms": "Belum ada soalan direkodkan.", "zh": "暂无已记录的问题。"},
   "No doctor feedback recorded yet.": {"ms": "Belum ada maklum balas doktor direkodkan.", "zh": "暂无医生反馈记录。"},
-  "Demo doctor response · not verified": {"ms": "Respons doktor demo · tidak disahkan", "zh": "演示医生回复 · 未经核实"},
-  "Simulated demo feedback": {"ms": "Maklum balas demo simulasi", "zh": "模拟示例反馈"},
   "Doctor's goal": {"ms": "Matlamat doktor", "zh": "医生指定目标"},
   "Goal explanation": {"ms": "Penerangan matlamat", "zh": "目标说明"},
   "Follow-up instructions": {"ms": "Arahan susulan", "zh": "后续指导"},
   "Follow-up date": {"ms": "Tarikh susulan", "zh": "复诊日期"},
-  "Save demo doctor response": {"ms": "Simpan respons doktor demo", "zh": "保存演示医生回复"},
-  "Demo doctor response saved.": {"ms": "Respons doktor demo disimpan.", "zh": "演示医生回复已保存。"},
   "No follow-up instructions recorded yet.": {"ms": "Belum ada arahan susulan direkodkan.", "zh": "暂无后续指导记录。"},
   "View My Care Plan": {"ms": "Lihat Pelan Penjagaan Saya", "zh": "查看我的护理计划"},
   "Today's Plan": {"ms": "Pelan Hari Ini", "zh": "今日计划"},
@@ -161,17 +153,9 @@ export const translations: Record<string, { ms: string; zh: string }> = {
     "ms": "Copilot",
     "zh": "健康助手"
   },
-  "Fictional demo patient": {
-    "ms": "Pesakit rekaan untuk demo",
-    "zh": "虚构演示患者"
-  },
   "Reset demo data": {
     "ms": "Tetapkan semula data demo",
     "zh": "重置演示数据"
-  },
-  "Demonstration prototype · all patient data is fictional": {
-    "ms": "Prototaip demo · semua data pesakit adalah rekaan",
-    "zh": "演示版本 · 所有患者数据均为虚构"
   },
   "Language": {
     "ms": "Bahasa",
@@ -200,18 +184,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Loading": {
     "ms": "Sedang dimuatkan",
     "zh": "正在加载"
-  },
-  "In demo range": {
-    "ms": "Dalam julat demo",
-    "zh": "在演示范围内"
-  },
-  "Above demo range": {
-    "ms": "Melebihi julat demo",
-    "zh": "高于演示范围"
-  },
-  "Below demo range": {
-    "ms": "Di bawah julat demo",
-    "zh": "低于演示范围"
   },
   "Date": {
     "ms": "Tarikh",
@@ -373,10 +345,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
     "ms": "Lihat rekod sokongan",
     "zh": "查看相关记录"
   },
-  "Insights come from simple, transparent rules applied to your records using demo thresholds. They show what changed — not why — and are not a diagnosis.": {
-    "ms": "Penemuan ini berdasarkan peraturan mudah dan telus yang menggunakan ambang demo pada rekod anda. Ia menunjukkan perubahan, bukan puncanya, dan bukan diagnosis.",
-    "zh": "这些重点来自使用演示阈值分析记录的简单透明规则。它们反映变化，而非原因，也不构成诊断。"
-  },
   "Glucose (mmol/L)": {
     "ms": "Glukosa (mmol/L)",
     "zh": "血糖（mmol/L）"
@@ -512,10 +480,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Last 30 days": {
     "ms": "30 hari lalu",
     "zh": "过去 30 天"
-  },
-  "Green band: demo reference range": {
-    "ms": "Jalur hijau: julat rujukan demo",
-    "zh": "绿色区域：演示参考范围"
   },
   "mmol/L (not a personal target).": {
     "ms": "mmol/L (bukan sasaran peribadi).",
@@ -672,14 +636,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Diabetes education and help understanding your records.": {
     "ms": "Pendidikan diabetes dan bantuan memahami rekod anda.",
     "zh": "糖尿病知识与记录解读支持。"
-  },
-  "Demo assistant — no AI or medical-source service is connected yet.": {
-    "ms": "Pembantu demo — perkhidmatan AI atau sumber perubatan belum disambungkan.",
-    "zh": "演示助手——尚未连接 AI 或医学资料服务。"
-  },
-  "Answers are pre-written demo responses using your records. It can't diagnose, prescribe or change medication. For chest pain, fainting, confusion or other urgent symptoms, call 999.": {
-    "ms": "Jawapan demo telah ditulis dan menggunakan rekod anda. Ia tidak boleh mendiagnosis, memberi preskripsi atau mengubah ubat. Untuk sakit dada, pengsan, kekeliruan atau gejala kecemasan lain, hubungi 999.",
-    "zh": "回答是结合您记录的预写演示内容，不能诊断、开处方或调整药物。如有胸痛、昏厥、意识混乱或其他紧急症状，请拨打 999。"
   },
   "How can I help today?": {
     "ms": "Apa yang boleh saya bantu hari ini?",
@@ -861,17 +817,9 @@ export const translations: Record<string, { ms: string; zh: string }> = {
     "ms": "{title}: direkodkan pada {days} daripada {range} hari.",
     "zh": "{title}：在 {range} 天中有 {days} 天记录。"
   },
-  "These are patient-entered records, not confirmed adherence. A day without a record does not mean a dose was missed.": {
-    "ms": "Ini ialah rekod yang dimasukkan oleh pesakit, bukan pengesahan pematuhan ubat. Hari tanpa rekod tidak bermakna dos terlepas.",
-    "zh": "这些是患者填写的记录，并非已确认的用药依从情况。某天没有记录并不意味着漏服。"
-  },
   "Plain-language explanation": {
     "ms": "Penerangan mudah",
     "zh": "通俗说明"
-  },
-  "AI-generated · demo": {
-    "ms": "Dijana AI · demo",
-    "zh": "AI 生成 · 演示"
   },
   "Morning readings have been higher this week than earlier. Late nights and late, heavier dinners were also logged on some of these days. These occurred around the same time; the records do not show that one caused the other.": {
     "ms": "Bacaan pagi minggu ini lebih tinggi berbanding sebelumnya. Tidur lewat serta makan malam lewat dan lebih banyak turut direkodkan pada beberapa hari tersebut. Ia berlaku sekitar waktu yang sama; rekod ini tidak membuktikan hubungan sebab akibat.",
@@ -880,10 +828,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Readings in this period look broadly similar to earlier records based on the available data.": {
     "ms": "Berdasarkan data yang tersedia, bacaan dalam tempoh ini secara umum hampir sama dengan rekod terdahulu.",
     "zh": "根据现有数据，此期间的读数与此前记录大致相似。"
-  },
-  "Template-generated demo text. Not reviewed by a clinician; no sources retrieved.": {
-    "ms": "Teks demo berdasarkan templat. Belum disemak oleh doktor; tiada sumber diperoleh.",
-    "zh": "模板生成的演示文本，未经医生审核，也未检索资料来源。"
   },
   "Questions the patient may want to discuss": {
     "ms": "Soalan yang boleh dibincangkan oleh pesakit",
@@ -932,10 +876,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "A simple goal to follow between visits.": {
     "ms": "Matlamat mudah untuk diikuti antara lawatan.",
     "zh": "两次就诊之间可遵循的简单目标。"
-  },
-  "This is an example goal for demonstration. Real care goals should be agreed with your healthcare professional.": {
-    "ms": "Ini ialah contoh matlamat untuk demo. Matlamat penjagaan sebenar perlu dipersetujui bersama profesional kesihatan anda.",
-    "zh": "这是演示用的示例目标。实际护理目标应与医疗专业人员共同确定。"
   },
   "Goal from": {
     "ms": "Matlamat daripada",
@@ -1229,10 +1169,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
     "ms": "Corak mungkin kurang boleh dipercayai jika ada hari tanpa bacaan.",
     "zh": "缺少某些日期的记录可能降低规律分析的可靠性。"
   },
-  "Here's what your recorded data shows (based on the rule-based monitoring engine, not a diagnosis):": {
-    "ms": "Inilah yang ditunjukkan oleh rekod anda (berdasarkan pemantauan berasaskan peraturan, bukan diagnosis):",
-    "zh": "以下是您的记录所反映的情况（基于规则监测，并非诊断）："
-  },
   "• No repeated out-of-range pattern was detected in the last 7 days.": {
     "ms": "• Tiada corak berulang di luar julat dikesan dalam 7 hari lalu.",
     "zh": "• 过去 7 天未检测到反复超出范围的规律。"
@@ -1320,10 +1256,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Today's medication status": {
     "ms": "Status ubat hari ini",
     "zh": "今日用药状态"
-  },
-  "Follow your prescription. These are self-reported records, not confirmed adherence. Never change doses or take extra medication based on this app.": {
-    "ms": "Ikut preskripsi anda. Ini ialah rekod yang dilaporkan sendiri, bukan pengesahan pematuhan ubat. Jangan ubah dos atau ambil ubat tambahan berdasarkan aplikasi ini.",
-    "zh": "请遵循处方。这些是自行报告的记录，并非已确认的用药依从情况。切勿根据本应用改变剂量或额外服药。"
   },
   "No medication reminders yet.": {
     "ms": "Belum ada peringatan ubat.",
@@ -1456,10 +1388,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Daily Care Guide": {
     "ms": "Panduan Penjagaan Harian",
     "zh": "日常护理指南"
-  },
-  "General educational suggestions, not medical treatment instructions or a personalised diet or exercise prescription. Follow your healthcare team's advice and your dietary restrictions.": {
-    "ms": "Cadangan pendidikan umum, bukan arahan rawatan perubatan atau preskripsi diet atau senaman peribadi. Ikut nasihat pasukan kesihatan dan sekatan pemakanan anda.",
-    "zh": "以下为一般健康教育建议，并非治疗指示或个性化饮食、运动处方。请遵循医疗团队建议及您的饮食限制。"
   },
   "Breakfast": {
     "ms": "Sarapan",
@@ -1637,10 +1565,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
     "ms": "Kongsi amaran keselamatan glukosa sedia ada",
     "zh": "共享现有血糖安全提醒"
   },
-  "Revoking consent stops new simulated sharing and hides shared history in notifications and the doctor report. Local patient history is retained.": {
-    "ms": "Menarik balik persetujuan menghentikan perkongsian simulasi baharu dan menyembunyikan sejarah perkongsian dalam notifikasi dan laporan doktor. Sejarah pesakit setempat dikekalkan.",
-    "zh": "撤销授权将停止新的模拟共享，并在通知及医生报告中隐藏共享历史。本地患者历史仍保留。"
-  },
   "Enter a caregiver name and relationship before enabling caregiver mode.": {
     "ms": "Masukkan nama dan hubungan penjaga sebelum mengaktifkan mod penjaga.",
     "zh": "启用照护者模式前，请填写照护者姓名和关系。"
@@ -1661,10 +1585,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
     "ms": "Persetujuan perkongsian ditarik balik.",
     "zh": "共享授权已撤销。"
   },
-  "Use fictional caregiver details for this hackathon demonstration.": {
-    "ms": "Gunakan butiran penjaga rekaan untuk demonstrasi hackathon ini.",
-    "zh": "本次黑客松演示请使用虚构照护者资料。"
-  },
   "Medication statuses and reflections are patient-reported, not verified. Doctor feedback is simulated. Caregiver notifications are simulated and not externally delivered.": {
     "ms": "Status ubat dan refleksi dilaporkan oleh pesakit, belum disahkan. Maklum balas doktor ialah simulasi. Notifikasi penjaga ialah simulasi dan tidak dihantar ke luar aplikasi.",
     "zh": "用药状态与反思为患者自行报告，未经核实。医生反馈为模拟内容。照护者通知为模拟内容，并未发送至外部。"
@@ -1676,14 +1596,6 @@ export const translations: Record<string, { ms: string; zh: string }> = {
   "Medication schedules": {
     "ms": "Jadual ubat",
     "zh": "用药安排"
-  },
-  "Self-reported medication history": {
-    "ms": "Sejarah ubat yang dilaporkan sendiri",
-    "zh": "自行报告的用药历史"
-  },
-  "No self-reported medication statuses in this period.": {
-    "ms": "Tiada status ubat dilaporkan sendiri dalam tempoh ini.",
-    "zh": "此期间暂无自行报告的用药状态。"
   },
   "Reported at": {
     "ms": "Dilaporkan pada",

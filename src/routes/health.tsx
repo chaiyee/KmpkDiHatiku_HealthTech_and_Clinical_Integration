@@ -75,7 +75,7 @@ function HealthPage() {
       <p className="mb-5 max-w-3xl text-sm text-muted-foreground">
         {tr(
           tab === "devices"
-            ? "Preview sensor updates and supportive Guardian check-ins. All device activity here is simulated."
+            ? "Sensor previews and Guardian check-ins."
             : tab === "patterns"
               ? "Explore recorded changes and the readings behind them."
               : tab === "log"
@@ -568,8 +568,8 @@ function PatternsTab() {
         <CardContent>
           <GlucoseChart readings={inRange} t={d.thresholds} height={300} />
           <p className="mt-2 text-xs text-muted-foreground">
-            {tr("Green band: demo reference range")} {d.thresholds.hypo}–{d.thresholds.fastingHigh}{" "}
-            {tr("mmol/L (not a personal target).")}
+            {tr("Reference band")} {d.thresholds.hypo}–{d.thresholds.fastingHigh}
+            {" mmol/L"}
           </p>
         </CardContent>
       </Card>
