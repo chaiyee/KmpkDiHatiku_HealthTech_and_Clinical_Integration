@@ -74,11 +74,11 @@ export function CaregiverAlerts({ overview = false }: { overview?: boolean }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Users className="h-5 w-5 text-primary" />
-            {t(overview ? "Caregiver previews" : "Caregiver preview history")}
+            {t(overview ? "Caregiver notifications" : "Caregiver notification history")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-xs text-muted-foreground">{t("Preview only · no messages sent")}</p>
+          <p className="text-xs text-muted-foreground">{t("Notification not sent")}</p>
           {(overview ? (latest ? [latest] : []) : alerts.slice(0, 5)).map((alert) => (
             <div key={alert.id} className="space-y-2 border-t pt-3 text-sm">
               <p className="font-semibold">{t(alert.title)}</p>
@@ -105,8 +105,8 @@ export function CaregiverAlerts({ overview = false }: { overview?: boolean }) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("Simulated caregiver notification")}</DialogTitle>
-            <DialogDescription>{t("Preview only · no messages sent")}</DialogDescription>
+            <DialogTitle>{t("Caregiver notification")}</DialogTitle>
+            <DialogDescription>{t("Notification not sent")}</DialogDescription>
           </DialogHeader>
           {selected && <CaregiverAlertDetails alert={selected} />}
         </DialogContent>
@@ -156,12 +156,12 @@ export function CaregiverSupport() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Users className="h-5 w-5 text-primary" />
-            {t("Caregiver sharing · preview")}
+            {t("Caregiver sharing")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} noValidate className="space-y-4">
-            <p className="text-sm text-muted-foreground">{t("Preview only · no messages sent")}</p>
+            <p className="text-sm text-muted-foreground">{t("Notification not sent")}</p>
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor="caregiver-enabled">{t("Enable caregiver mode")}</Label>
               <Switch

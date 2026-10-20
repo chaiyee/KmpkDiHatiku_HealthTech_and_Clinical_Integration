@@ -103,7 +103,7 @@ export function ConnectedHealth() {
     {
       key: "cgm",
       icon: Bluetooth,
-      name: tr("Glucose Sensor Preview"),
+      name: tr("Glucose sensor"),
       what: tr("Glucose measurements"),
       d: cgm,
       set: setCgm,
@@ -111,7 +111,7 @@ export function ConnectedHealth() {
     {
       key: "watch",
       icon: Watch,
-      name: tr("Watch Preview"),
+      name: tr("Health watch"),
       what: tr("Heart rate, steps, activity and sleep"),
       d: watch,
       set: setWatch,
@@ -125,7 +125,7 @@ export function ConnectedHealth() {
           <HeartPulse className="h-5 w-5 text-primary" />
           {tr("Connected Health")}
         </CardTitle>
-        <SampleBadge>{tr("Simulated devices")}</SampleBadge>
+        <SampleBadge>{tr("Device simulator")}</SampleBadge>
       </CardHeader>
       <CardContent className="space-y-4">
         {urgent && (
@@ -162,16 +162,16 @@ export function ConnectedHealth() {
               <ShieldCheck
                 className={anyOn ? "h-5 w-5 text-success" : "h-5 w-5 text-muted-foreground"}
               />
-              {anyOn ? tr("Preview devices connected") : tr("Preview devices paused")}
+              {anyOn ? tr("Simulator running") : tr("Simulator paused")}
             </p>
             <p className="text-sm text-muted-foreground">
               {tr("Last update")}: {last ? format(last, "h:mm a") : tr("Not yet synced")} ·{" "}
-              {tr("{n} simulated readings saved", { n: deviceCount })}
+              {tr("{n} simulator readings saved", { n: deviceCount })}
             </p>
           </div>
           {step === 0 && (
             <Button size="lg" className="h-12 text-base" onClick={runGuardian}>
-              {tr("Start Guardian preview")}
+              {tr("Start Guardian check-in")}
             </Button>
           )}
         </div>
@@ -186,8 +186,8 @@ export function ConnectedHealth() {
                 </p>
                 <p className="text-sm text-muted-foreground">{what}</p>
                 <p className="text-sm">
-                  {d.connected ? tr("Preview connected") : tr("Preview paused")} · {tr("Last sync")}
-                  : {d.lastSync ? format(d.lastSync, "h:mm a") : "—"}
+                  {d.connected ? tr("Simulator running") : tr("Simulator paused")} ·{" "}
+                  {tr("Last sync")}: {d.lastSync ? format(d.lastSync, "h:mm a") : "—"}
                 </p>
                 {key === "watch" && d.connected && (
                   <p className="text-sm text-muted-foreground">
@@ -200,15 +200,13 @@ export function ConnectedHealth() {
                 className="h-11"
                 onClick={() => set({ ...d, connected: !d.connected })}
               >
-                {d.connected ? tr("Disconnect") : tr("Connect")}
+                {d.connected ? tr("Pause simulator") : tr("Start simulator")}
               </Button>
             </div>
           ))}
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          {tr("Simulated devices · no hardware connected")}
-        </p>
+        <p className="text-sm text-muted-foreground">{tr("No physical device connected")}</p>
 
         {step > 0 && (
           <section
@@ -220,7 +218,7 @@ export function ConnectedHealth() {
                 <ShieldCheck className="h-5 w-5 text-primary" />
                 {tr("Guardian Mode")}
               </h3>
-              <SampleBadge>{tr("Scenario Preview · simulated")}</SampleBadge>
+              <SampleBadge>{tr("Record scenario")}</SampleBadge>
             </div>
             <ol className="progress-steps" aria-label={tr("Guardian progress")}>
               {[1, 2, 3, 4, 5].map((number) => (
@@ -251,7 +249,7 @@ export function ConnectedHealth() {
             </div>
             {step === 1 && (
               <>
-                <p>{tr("Three simulated morning readings are ready.")}</p>
+                <p>{tr("Three morning readings from the simulator are ready.")}</p>
                 <Button size="lg" onClick={() => setStep(2)}>
                   {tr("Review the pattern")}
                   <ChevronDown className="h-4 w-4" />
@@ -264,7 +262,7 @@ export function ConnectedHealth() {
                   <FindingCard key={f.id} f={f} t={t} compact />
                 ))}
                 <p className="text-sm text-muted-foreground">
-                  {tr("Several fasting readings were above the reference range.")}
+                  {tr("Several fasting readings were above the glucose range.")}
                 </p>
                 <Button size="lg" onClick={() => setStep(3)}>
                   {tr("Continue to check-in")}
@@ -292,7 +290,7 @@ export function ConnectedHealth() {
                       ? "Urgent safety guidance is shown above."
                       : feeling === "unwell"
                         ? "Your symptom was recorded. Consider contacting your clinic."
-                        : "Check-in saved. No extra caregiver preview created.",
+                        : "Check-in saved. No additional caregiver alert recorded.",
                   )}
                 </p>
                 {feeling === "okay" && (
@@ -313,10 +311,9 @@ export function ConnectedHealth() {
                   {feeling === "okay"
                     ? tr("No extra caregiver alert was created by your check-in.")
                     : alerted
-                      ? tr(
-                          "Caregiver alert preview saved for {name}. No SMS or WhatsApp was sent.",
-                          { name: cg?.name || tr("your caregiver") },
-                        )
+                      ? tr("Caregiver alert recorded for {name}. Notification not sent.", {
+                          name: cg?.name || tr("your caregiver"),
+                        })
                       : tr("Not shared with a caregiver, following your sharing preferences.")}
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -326,7 +323,7 @@ export function ConnectedHealth() {
                     </Link>
                   </Button>
                   <Button variant="ghost" onClick={runGuardian}>
-                    {tr("Replay preview")}
+                    {tr("Repeat check-in")}
                   </Button>
                 </div>
               </div>
@@ -337,7 +334,7 @@ export function ConnectedHealth() {
         <details className="rounded-lg border p-3">
           <summary className="flex cursor-pointer items-center gap-2 font-medium">
             <ChevronDown className="h-4 w-4" />
-            {tr("Reading preview controls")}
+            {tr("Reading simulator controls")}
           </summary>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => sync()}>
@@ -353,7 +350,7 @@ export function ConnectedHealth() {
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             {tr(
-              'Simulated readings are labelled "Simulated device" and never duplicate an existing device reading time.',
+              "Device simulation readings are illustrative, not measurements from a physical device.",
             )}
           </p>
         </details>

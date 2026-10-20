@@ -106,7 +106,7 @@ export function GlucoseChart({
               const reading = p.payload as Pick<GlucoseReading, "context" | "source">;
               return [
                 `${v} mmol/L`,
-                `${tr(CONTEXT_LABELS[reading.context])} · ${tr(reading.source === "sample" ? "Sample" : reading.source === "device" ? "Simulated" : "Patient-entered")}`,
+                `${tr(CONTEXT_LABELS[reading.context])} · ${tr(reading.source === "sample" ? "Not personally measured" : reading.source === "device" ? "Device simulation" : "Manually recorded")}`,
               ];
             }}
             contentStyle={{ borderRadius: 8, border: "1px solid var(--color-border)" }}
@@ -151,7 +151,7 @@ export function GlucoseChart({
         ))}
       </div>
       <p className="sr-only">
-        {tr("Reference band")} {t.hypo}–{t.fastingHigh} mmol/L.
+        {tr("Glucose Range")} {t.hypo}–{t.fastingHigh} mmol/L.
       </p>
     </div>
   );

@@ -203,7 +203,7 @@ function CarePlanPage() {
                 <Target className="h-5 w-5 text-primary" />
                 {tr("Goal from")} {data.patient.doctor.replace(" (fictional)", "")}
               </CardTitle>
-              <SampleBadge>{tr("Sample care plan")}</SampleBadge>
+              <SampleBadge>{tr("Care plan guide · not prescribed")}</SampleBadge>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-lg font-medium text-navy">{tr(plan.goal)}</p>
@@ -266,7 +266,7 @@ function CarePlanPage() {
             <Card className="mt-3 border-0 shadow-none">
               <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  {tr("Sample feedback")}
+                  {tr("Not clinician-provided")}
                   {data.doctorResponseAt &&
                     ` · ${format(new Date(data.doctorResponseAt), "d MMM yyyy, HH:mm")}`}
                 </p>
@@ -305,7 +305,7 @@ function CarePlanPage() {
         className="scroll-mt-24 rounded-xl border bg-card p-4"
       >
         <summary className="min-h-11 cursor-pointer py-2 font-semibold text-navy">
-          {tr("Caregiver support · simulated")}
+          {tr("Caregiver Support")}
         </summary>
         <div className="pt-3">
           <CaregiverSupport />

@@ -116,7 +116,7 @@ function EmergencyPage() {
         <p className="max-w-sm text-xs text-muted-foreground">{t("This QR code is a visual sample only and does not link to any real data.")}</p>
         <Button variant="outline" className="no-print" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />{t("Print card")}</Button>
       </div>
-      <p className="text-xs text-muted-foreground">{t("This card is generated from your recorded demo data for emergency reference only. It is not a medical document.")}</p>
+      <p className="text-xs text-muted-foreground">{t("This card is generated from your recorded demo data for emergency information only. It is not a medical document.")}</p>
     </div>
   );
 }

@@ -135,9 +135,7 @@ function WhatIfSimulator({ data }: { data: AppData }) {
               },
             )}
           </p>
-          <p className="text-xs italic text-muted-foreground">
-            {tr("Past readings · not a prediction")}
-          </p>
+          <p className="text-xs italic text-muted-foreground">{tr("Past readings")}</p>
         </div>
       ) : (
         <UnlockHint have={result.n} need={2} />

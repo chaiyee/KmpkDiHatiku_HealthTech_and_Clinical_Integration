@@ -25,7 +25,7 @@ import {
   FindingCard,
   PageHeader,
   PageLoading,
-  SampleBadge,
+  RecordProvenance,
   StatusPill,
   readingStatus,
 } from "@/components/common";
@@ -75,7 +75,7 @@ function HealthPage() {
       <p className="mb-5 max-w-3xl text-sm text-muted-foreground">
         {tr(
           tab === "devices"
-            ? "Sensor previews and Guardian check-ins."
+            ? "Sensor information and Guardian check-ins."
             : tab === "patterns"
               ? "Explore recorded changes and the readings behind them."
               : tab === "log"
@@ -207,13 +207,7 @@ function GlucoseTab() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {r.source === "sample" ? (
-                    <SampleBadge>{tr("Sample")}</SampleBadge>
-                  ) : r.source === "device" ? (
-                    <SampleBadge>{tr("Simulated device")}</SampleBadge>
-                  ) : (
-                    <SampleBadge>{tr("You")}</SampleBadge>
-                  )}
+                  <RecordProvenance source={r.source} />
                   <StatusPill status={readingStatus(r, d.thresholds)} />
                 </div>
               </div>
@@ -519,8 +513,9 @@ function TimelineTab() {
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(i.ts), "h:mm a")}
                       </p>
-                      {i.sample && <SampleBadge>{tr("Sample")}</SampleBadge>}
-                      {i.device && <SampleBadge>{tr("Simulated device")}</SampleBadge>}
+                      {(i.sample || i.device) && (
+                        <RecordProvenance source={i.device ? "device" : "sample"} />
+                      )}
                     </div>
                   </div>
                 );
@@ -568,7 +563,7 @@ function PatternsTab() {
         <CardContent>
           <GlucoseChart readings={inRange} t={d.thresholds} height={300} />
           <p className="mt-2 text-xs text-muted-foreground">
-            {tr("Reference band")} {d.thresholds.hypo}–{d.thresholds.fastingHigh}
+            {tr("Glucose Range")} {d.thresholds.hypo}–{d.thresholds.fastingHigh}
             {" mmol/L"}
           </p>
         </CardContent>
@@ -594,7 +589,7 @@ function PatternsTab() {
         <CardContent className="space-y-1 text-sm text-muted-foreground">
           <p>
             {tr(
-              "Simple rules check your records — no AI decides these. Demo thresholds (not personal clinical targets):",
+              "Patterns are identified using these glucose ranges, which are not personal clinical targets:",
             )}
           </p>
           <p>

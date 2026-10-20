@@ -233,7 +233,7 @@ function MealEditor({ initial, onSaved }: { initial?: HealthLog; onSaved: () => 
             </Button>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               disabled={busy}
               onClick={() => {
                 setImage("");
@@ -538,14 +538,6 @@ function MealEditor({ initial, onSaved }: { initial?: HealthLog; onSaved: () => 
           {t(key)}
         </p>
       ))}
-      <a
-        className="inline-flex min-h-11 items-center text-sm text-primary underline"
-        href="https://myfcd.moh.gov.my/"
-        target="_blank"
-        rel="noreferrer"
-      >
-        {t("Look up Malaysian food nutrition (MyFCD)")}
-      </a>
       <div>
         <Label htmlFor="meal-when">{t("Meal date and time")}</Label>
         <Input
@@ -692,7 +684,7 @@ export function SavedMeals({ onEdit }: { onEdit?: (log: HealthLog) => void }) {
                     ? log.meal?.entrySource === "manual" || !log.meal
                       ? "Manual entry"
                       : "AI estimate · confirmed by you"
-                    : "Sample",
+                    : "Not personally measured",
                 )}
               </p>
             </CardHeader>
@@ -773,8 +765,8 @@ export function SavedMeals({ onEdit }: { onEdit?: (log: HealthLog) => void }) {
                           r.source === "user"
                             ? "Manually recorded"
                             : r.source === "device"
-                              ? "Simulated device"
-                              : "Sample",
+                              ? "Device simulation"
+                              : "Not personally measured",
                         )}
                       </p>
                     ))

@@ -190,7 +190,7 @@ function DoctorPage() {
             <p className="mt-1 text-xl font-semibold">{p.name}</p>
             {(readings.some((r) => r.source !== "user") ||
               logs.some((log) => log.source !== "user")) && (
-              <p className="text-xs opacity-90">{tr("Includes sample or simulated records")}</p>
+              <p className="text-xs opacity-90">{tr("Includes demonstration records.")}</p>
             )}
             <p className="text-sm opacity-90">
               {p.age} {tr("y ·")} {tr(p.sex)} · {tr(p.diabetesType)} ({p.yearsSinceDiagnosis}{" "}
@@ -456,7 +456,7 @@ function DoctorPage() {
             {tr("Doctor's Feedback")}
           </h2>
           <p className="mb-3 text-sm text-muted-foreground">
-            {tr(p.doctor)} · {tr("Sample feedback")}
+            {tr(p.doctor)} · {tr("Not clinician-provided")}
             {data.doctorResponseAt &&
               ` · ${format(new Date(data.doctorResponseAt), "d MMM yyyy, HH:mm")}`}
           </p>
@@ -521,12 +521,10 @@ function DoctorPage() {
         </Section>
         <Section
           n={9}
-          title={tr("Caregiver alert history · simulated")}
-          tag={tr("Rule-detected · simulated")}
+          title={tr("Caregiver notification history")}
+          tag={tr("Local alerts · not delivered")}
         >
-          <p className="mb-3 text-xs text-muted-foreground">
-            {tr("Preview only · no messages sent")}
-          </p>
+          <p className="mb-3 text-xs text-muted-foreground">{tr("Notification not sent")}</p>
           {!caregiverAlerts.length && (
             <p className="text-sm text-muted-foreground">
               {tr("No permitted caregiver alerts in this report period.")}

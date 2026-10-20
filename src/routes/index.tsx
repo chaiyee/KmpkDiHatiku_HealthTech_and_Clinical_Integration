@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { GlucoseForm } from "@/components/GlucoseForm";
-import { PageLoading, SampleBadge, StatusPill, readingStatus } from "@/components/common";
+import { PageLoading, RecordProvenance, StatusPill, readingStatus } from "@/components/common";
 import { useStore } from "@/lib/store";
 import { detectPatterns } from "@/lib/patterns";
 import { CONTEXT_LABELS } from "@/lib/types";
@@ -133,15 +133,7 @@ function Overview() {
                   {tr(CONTEXT_LABELS[latest.context])} ·{" "}
                   {format(new Date(latest.timestamp), "d MMM, h:mm a")}
                 </p>
-                <SampleBadge>
-                  {tr(
-                    latest.source === "sample"
-                      ? "Sample reading"
-                      : latest.source === "device"
-                        ? "Simulated device"
-                        : "Manually recorded",
-                  )}
-                </SampleBadge>
+                <RecordProvenance source={latest.source} />
               </>
             ) : (
               <p>{tr("No readings yet.")}</p>
@@ -240,14 +232,14 @@ function Overview() {
             {tr("Connected Health")}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            {tr("Explore simulated sensors, reading updates and Guardian check-ins.")}
+            {tr("Explore sensors, reading updates and Guardian check-ins.")}
           </p>
           <Link
             to="/health"
             search={{ tab: "devices" }}
             className="mt-2 inline-flex min-h-11 items-center gap-2 font-medium text-primary"
           >
-            {tr("Open monitoring preview")}
+            {tr("Open monitoring")}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -316,7 +308,7 @@ function Overview() {
             <HeartHandshake aria-hidden="true" className="h-6 w-6 shrink-0 text-primary" />
             {tr(
               data.caregiver?.name.trim() && data.caregiver?.relationship.trim()
-                ? "Caregiver previews"
+                ? "Caregiver notifications"
                 : "Stay Connected with Someone You Trust",
             )}
           </CardTitle>
@@ -328,9 +320,7 @@ function Overview() {
                 <span className="font-medium">{data.caregiver.name}</span> ·{" "}
                 {data.caregiver.relationship}
               </p>
-              <p className="text-sm text-muted-foreground">
-                {tr("Preview only · no messages sent")}
-              </p>
+              <p className="text-sm text-muted-foreground">{tr("Notification not sent")}</p>
               <CaregiverAlerts overview />
             </>
           ) : (

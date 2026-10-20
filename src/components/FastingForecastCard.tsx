@@ -66,12 +66,12 @@ export function FastingForecastCard({
               {tr("{count} days with fasting readings available.", { count: result.actual.length })}
             </li>
             <li>
-              {tr("{count} days above the fasting reference of {value} mmol/L.", {
+              {tr("{count} days above the fasting threshold of {value} mmol/L.", {
                 count: highDays,
                 value: thresholds.fastingHigh,
               })}
             </li>
-            <li>{tr("Recorded trend, not a forecast.")}</li>
+            <li>{tr("Recorded trend.")}</li>
           </ul>
         ) : (
           <p className="text-sm text-muted-foreground">

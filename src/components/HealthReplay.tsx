@@ -156,8 +156,8 @@ export function HealthReplay() {
                 selected.reading?.source === "user"
                   ? "You"
                   : selected.reading?.source === "device"
-                    ? "Simulated device"
-                    : "Sample",
+                    ? "Device simulation"
+                    : "Not personally measured",
               )}
             </p>
           )}
@@ -198,7 +198,7 @@ export function HealthReplay() {
                   {t(
                     feeling === "okay"
                       ? "Feeling okay acknowledges the check-in. It does not confirm the readings are safe; monitoring and urgent guidance still apply."
-                      : "Preview only · no messages sent",
+                      : "Notification not sent",
                   )}
                 </p>
                 {feeling !== "okay" && (
@@ -217,7 +217,7 @@ export function HealthReplay() {
                     search={{ tab: "devices" }}
                     className="text-sm font-medium text-primary underline"
                   >
-                    {t("Open Guardian preview")}
+                    {t("Open Guardian check-in")}
                   </Link>
                 </div>
               </div>

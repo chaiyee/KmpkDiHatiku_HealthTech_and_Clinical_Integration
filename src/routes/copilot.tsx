@@ -1,7 +1,7 @@
 import { useLanguage } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, LineChart, SendHorizontal, ShieldAlert } from "lucide-react";
+import { BookOpen, LineChart, SendHorizontal, ShieldAlert, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,6 +41,8 @@ type Msg = {
   origin?: "guided" | "online";
 };
 
+const MINIMUM_LOADING_MS = 2500;
+
 const SUGGESTIONS = [
   "Can you explain my recent glucose trend?",
   "What should I ask my doctor?",
@@ -54,6 +56,8 @@ function CopilotPage() {
   const [configured, setConfigured] = useState(false);
   const [consent, setConsent] = useState(false);
   const requestGeneration = useRef(0);
+  const pending = useRef(false);
+  const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => {
     let active = true;
     fetch("/api/copilot")
@@ -68,16 +72,26 @@ function CopilotPage() {
   }, []);
   useEffect(() => {
     const accountGeneration = ++requestGeneration.current;
+    activeRequest.current?.abort();
+    pending.current = false;
     setConsent(false);
     setMessages([]);
     setLoading(false);
     return () => {
       requestGeneration.current = accountGeneration + 1;
+      activeRequest.current?.abort();
     };
   }, [userEmail]);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  useEffect(() => {
+    setPreparing(false);
+    if (!loading) return;
+    const timer = window.setTimeout(() => setPreparing(true), 1400);
+    return () => window.clearTimeout(timer);
+  }, [loading]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -92,7 +106,11 @@ function CopilotPage() {
 
   async function send(text: string) {
     const q = text.trim();
-    if (!q || loading || !data) return;
+    if (!q || pending.current || !data) return;
+    pending.current = true;
+    const started = Date.now();
+    const controller = new AbortController();
+    activeRequest.current = controller;
     const generation = requestGeneration.current;
     setMessages((m) => [...m, { id: Date.now(), role: "user", text: q }]);
     setInput("");
@@ -108,6 +126,7 @@ function CopilotPage() {
             return;
           const reply = await fetch("/api/copilot", {
             method: "POST",
+            signal: controller.signal,
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${session.session?.access_token ?? ""}`,
@@ -133,6 +152,21 @@ function CopilotPage() {
           if (generation !== requestGeneration.current) return;
         }
       }
+      if (res.kind !== "safety") {
+        const remaining = MINIMUM_LOADING_MS - (Date.now() - started);
+        if (remaining > 0 && !controller.signal.aborted) {
+          await new Promise<void>((resolve) => {
+            const finish = () => {
+              window.clearTimeout(timer);
+              controller.signal.removeEventListener("abort", finish);
+              resolve();
+            };
+            const timer = window.setTimeout(finish, remaining);
+            controller.signal.addEventListener("abort", finish, { once: true });
+          });
+        }
+      }
+      if (generation !== requestGeneration.current || controller.signal.aborted) return;
       setMessages((m) => [
         ...m,
         { id: Date.now() + 1, role: "assistant", text: res.text, meta: res, origin },
@@ -149,7 +183,10 @@ function CopilotPage() {
         },
       ]);
     } finally {
-      if (generation === requestGeneration.current) setLoading(false);
+      if (generation === requestGeneration.current) {
+        pending.current = false;
+        setLoading(false);
+      }
     }
   }
 
@@ -216,13 +253,25 @@ function CopilotPage() {
             ),
           )}
           {loading && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="flex gap-1">
-                <span className="h-2 w-2 animate-bounce rounded-full bg-primary" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:120ms]" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:240ms]" />
-              </span>
-              {tr("Reviewing your records…")}
+            <div
+              role="status"
+              className="flex max-w-[92%] items-center gap-3 rounded-2xl rounded-bl-sm border bg-muted/40 px-4 py-4 text-sm text-muted-foreground"
+            >
+              <Bot aria-hidden="true" className="h-5 w-5 shrink-0 text-primary" />
+              <div className="min-w-0 space-y-2">
+                <p>
+                  {tr(preparing ? "Preparing your response…" : "Reviewing your health records…")}
+                </p>
+                <span aria-hidden="true" className="flex gap-1.5">
+                  {[0, 150, 300].map((delay) => (
+                    <span
+                      key={delay}
+                      className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary motion-reduce:animate-none"
+                      style={{ animationDelay: `${delay}ms` }}
+                    />
+                  ))}
+                </span>
+              </div>
             </div>
           )}
           <div ref={endRef} />
@@ -279,7 +328,7 @@ function AssistantMessage({ m }: { m: Msg }) {
           }
         : { Icon: BookOpen, text: tr("Guided diabetes education"), cls: "bg-secondary text-navy" };
   return (
-    <div className="max-w-[92%] space-y-2">
+    <div className="max-w-[92%] space-y-2 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
       <div className="flex flex-wrap items-center gap-2">
         {!m.error && (
           <span
@@ -309,7 +358,7 @@ function AssistantMessage({ m }: { m: Msg }) {
           ) : (
             <p className="mt-1 text-muted-foreground">
               {tr(
-                "This answer has not been checked against medical references. Confirm guidance with your healthcare team.",
+                "This answer has not been checked against medical sources. Confirm guidance with your healthcare team.",
               )}
             </p>
           )}

@@ -37,7 +37,7 @@ export const translationsBrief3: Record<string, { ms: string; zh: string }> = {
   "Sample QR for demo": { ms: "Kod QR Contoh untuk Demo", zh: "示例二维码（仅供演示）" },
   "This QR code is a visual sample only and does not link to any real data.": { ms: "Kod QR ini hanya contoh visual dan tidak dipautkan kepada sebarang data sebenar.", zh: "此二维码仅为示意图，并未链接到任何真实数据。" },
   "Print card": { ms: "Cetak kad", zh: "打印卡片" },
-  "This card is generated from your recorded demo data for emergency reference only. It is not a medical document.": { ms: "Kad ini dijana daripada data demo yang direkodkan untuk rujukan kecemasan sahaja. Ia bukan dokumen perubatan.", zh: "此卡片基于您记录的演示数据生成，仅供紧急参考，并非医疗文件。" },
+  "This card is generated from your recorded demo data for emergency information only. It is not a medical document.": { ms: "Kad ini dijana daripada data demo yang direkodkan untuk maklumat kecemasan sahaja. Ia bukan dokumen perubatan.", zh: "此卡片基于您记录的演示数据生成，仅供紧急信息，并非医疗文件。" },
 
   // Guided tour
   "Welcome to DiaMonitor Copilot": { ms: "Selamat Datang ke DiaMonitor Copilot", zh: "欢迎使用 DiaMonitor Copilot" },

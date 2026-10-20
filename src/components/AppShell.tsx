@@ -74,6 +74,23 @@ export function AppShell({ children }: { children: ReactNode }) {
     data?.readings.some((r) => r.source === "sample") ||
     data?.logs.some((log) => log.source === "sample");
   const hasSimulated = data?.readings.some((r) => r.source === "device");
+  const sourceDisclosure =
+    hasSample && hasSimulated
+      ? "Includes generated examples and device simulations."
+      : hasSample
+        ? "Includes generated demonstration records."
+        : hasSimulated
+          ? "Includes device simulation records."
+          : "Your recorded information.";
+  const confirmReplacement = () =>
+    window.confirm(
+      tr(
+        "Replace your current records with demonstration records? This replaces readings, daily logs, care plans and caregiver settings, including records saved to your signed-in account.",
+      ),
+    );
+  const restoreRecords = () => {
+    if (confirmReplacement()) resetDemo();
+  };
   const findings = data
     ? detectPatterns(data.readings, data.thresholds).filter((f) => f.severity !== "info")
     : [];
@@ -129,21 +146,21 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{data.patient.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {tr(hasSample ? "Sample profile" : "Your profile")}
-                </p>
+                <p className="text-xs text-muted-foreground">{tr("My Profile")}</p>
               </div>
             </div>
             <details className="mt-3 border-t pt-2">
               <summary className="min-h-11 cursor-pointer py-2 text-xs font-medium text-muted-foreground">
-                {tr("Preview options")}
+                {tr("Record tools")}
               </summary>
               <div className="mt-2">
+                <p className="mb-2 text-xs text-muted-foreground">{tr(sourceDisclosure)}</p>
                 <p className="mb-1 text-xs font-medium text-muted-foreground">
-                  {tr("Preview scenario")}
+                  {tr("Record scenario")}
                 </p>
                 <Select
                   onValueChange={(v) => {
+                    if (!confirmReplacement()) return;
                     loadScenario(v as DemoScenario);
                     toast.success(
                       tr("Scenario loaded: {name}", {
@@ -152,10 +169,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     );
                   }}
                 >
-                  <SelectTrigger
-                    className="h-11 w-full text-xs"
-                    aria-label={tr("Preview scenario")}
-                  >
+                  <SelectTrigger className="h-11 w-full text-xs" aria-label={tr("Record scenario")}>
                     <SelectValue placeholder={tr("Choose a scenario")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -167,8 +181,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="ghost" size="sm" className="mt-2 w-full text-xs" onClick={resetDemo}>
-                {tr("Reset records to sample data")}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2 w-full text-xs"
+                onClick={restoreRecords}
+              >
+                {tr("Restore demonstration records")}
               </Button>
             </details>
             <div className="mt-2 border-t pt-2 text-xs">
@@ -210,15 +229,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </div>
           <p className="hidden text-sm text-muted-foreground lg:block">
-            {tr(
-              hasSample && hasSimulated
-                ? "Sample & simulated records"
-                : hasSample
-                  ? "Sample records"
-                  : hasSimulated
-                    ? "Simulated records"
-                    : "Your health companion",
-            )}
+            {tr("Your health companion")}
           </p>
           <div className="flex items-center gap-2">
             <Popover>
@@ -227,15 +238,17 @@ export function AppShell({ children }: { children: ReactNode }) {
                   variant="outline"
                   size="icon"
                   className="h-11 w-11 lg:hidden"
-                  aria-label={tr("Preview scenario")}
+                  aria-label={tr("Record scenario")}
                 >
                   <LayoutDashboard className="h-5 w-5" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="start" className="w-64">
-                <p className="mb-2 text-sm font-semibold">{tr("Preview scenario")}</p>
+                <p className="mb-2 text-xs text-muted-foreground">{tr(sourceDisclosure)}</p>
+                <p className="mb-2 text-sm font-semibold">{tr("Record scenario")}</p>
                 <Select
                   onValueChange={(v) => {
+                    if (!confirmReplacement()) return;
                     loadScenario(v as DemoScenario);
                     toast.success(
                       tr("Scenario loaded: {name}", {
@@ -244,10 +257,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     );
                   }}
                 >
-                  <SelectTrigger
-                    className="h-11 w-full text-sm"
-                    aria-label={tr("Preview scenario")}
-                  >
+                  <SelectTrigger className="h-11 w-full text-sm" aria-label={tr("Record scenario")}>
                     <SelectValue placeholder={tr("Choose a scenario")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -262,9 +272,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                   variant="ghost"
                   size="sm"
                   className="mt-2 w-full text-xs"
-                  onClick={resetDemo}
+                  onClick={restoreRecords}
                 >
-                  {tr("Reset records to sample data")}
+                  {tr("Restore demonstration records")}
                 </Button>
               </PopoverContent>
             </Popover>

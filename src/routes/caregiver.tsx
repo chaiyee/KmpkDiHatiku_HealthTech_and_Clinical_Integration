@@ -55,7 +55,7 @@ function CaregiverPage() {
     <div className="space-y-4" data-tour="caregiver-view">
       <PageHeader title={t("Caregiver view")} />
       <p className="rounded-lg border border-dashed bg-secondary px-4 py-3 text-sm">
-        {t("Preview only · no messages sent")}
+        {t("Notification not sent")}
       </p>
       {!sharingOn ? (
         <Card>
@@ -67,7 +67,7 @@ function CaregiverPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-muted-foreground">
-              {t("Enable caregiver previews in My Care Plan.")}
+              {t("Manage caregiver sharing in My Care Plan.")}
             </p>
             <Button asChild className="h-12">
               <Link to="/care-plan">{t("Go to caregiver settings")}</Link>

@@ -9,7 +9,7 @@ export const DEFAULT_CAREGIVER: CaregiverSettings = {
   shareSafety: false,
 };
 export const CAREGIVER_MESSAGE =
-  "Several recent glucose readings are outside the patient's configured reference range. Please review the available records and follow the patient's agreed care instructions.";
+  "Several recent glucose readings are outside the patient's configured glucose range. Please review the available records and follow the patient's agreed care instructions.";
 export const SIMULATION_NOTICE =
   "Alert previews stay in this app. No SMS or WhatsApp is sent, and this preview is not secure caregiver access.";
 export const URGENT_NOTICE =

@@ -693,9 +693,9 @@ export const translations: Record<string, { ms: string; zh: string }> = {
     "ms": "Sumber",
     "zh": "资料来源"
   },
-  "No sources were retrieved — the medical-reference service isn't connected in this demo. Please confirm with your healthcare team.": {
-    "ms": "Tiada sumber diperoleh kerana perkhidmatan rujukan perubatan belum disambungkan dalam demo ini. Sila sahkan dengan pasukan kesihatan anda.",
-    "zh": "未检索资料来源——本演示尚未连接医学参考服务。请向医疗团队核实。"
+  "No sources were retrieved — the medical source service isn't connected in this demo. Please confirm with your healthcare team.": {
+    "ms": "Tiada sumber diperoleh kerana perkhidmatan sumber perubatan belum disambungkan dalam demo ini. Sila sahkan dengan pasukan kesihatan anda.",
+    "zh": "未检索资料来源——本演示尚未连接医学资料服务。请向医疗团队核实。"
   },
   "Sorry, something went wrong. Please try again.": {
     "ms": "Maaf, berlaku ralat. Sila cuba lagi.",
@@ -957,9 +957,9 @@ export const translations: Record<string, { ms: string; zh: string }> = {
     "ms": "Carta bacaan glukosa dalam mmol/L",
     "zh": "血糖读数图表，单位 mmol/L"
   },
-  "Shaded band shows the demo reference range": {
-    "ms": "Jalur berlorek menunjukkan julat rujukan demo",
-    "zh": "阴影区域表示演示参考范围"
+  "Shaded band shows the demo glucose range": {
+    "ms": "Jalur berlorek menunjukkan julat glukosa demo",
+    "zh": "阴影区域表示演示血糖范围"
   },
   "Close": {
     "ms": "Tutup",
@@ -1505,9 +1505,9 @@ export const translations: Record<string, { ms: string; zh: string }> = {
     "ms": "Perkongsian simulasi sahaja. Notifikasi tidak dihantar ke luar aplikasi. Kawalan paparan ini tidak menyediakan akses selamat sebenar kepada data pesakit.",
     "zh": "仅为模拟共享。通知并未发送至外部。这些前端控制不能为患者数据提供真实、安全的访问权限。"
   },
-  "Several recent glucose readings are outside the patient's configured reference range. Please review the available records and follow the patient's agreed care instructions.": {
-    "ms": "Beberapa bacaan glukosa terkini di luar julat rujukan pesakit yang dikonfigurasikan. Sila semak rekod yang tersedia dan ikut arahan penjagaan yang dipersetujui oleh pesakit.",
-    "zh": "近期多条血糖读数超出患者设定的参考范围。请查看现有记录，并遵循患者已约定的护理指示。"
+  "Several recent glucose readings are outside the patient's configured glucose range. Please review the available records and follow the patient's agreed care instructions.": {
+    "ms": "Beberapa bacaan glukosa terkini di luar julat glukosa pesakit yang dikonfigurasikan. Sila semak rekod yang tersedia dan ikut arahan penjagaan yang dipersetujui oleh pesakit.",
+    "zh": "近期多条血糖读数超出患者设定的血糖范围。请查看现有记录，并遵循患者已约定的护理指示。"
   },
   "For potentially urgent symptoms, seek medical assistance immediately; call 999 in Malaysia if needed. Do not wait for caregiver acknowledgement. Follow your clinic's agreed instructions.": {
     "ms": "Untuk gejala yang mungkin memerlukan rawatan segera, dapatkan bantuan perubatan segera; hubungi 999 di Malaysia jika perlu. Jangan tunggu pengesahan penjaga. Ikut arahan yang dipersetujui dengan klinik anda.",

@@ -23,12 +23,12 @@ afterEach(cleanup);
 describe("guided Guardian presentation", () => {
   function reachCheckIn() {
     render(<ConnectedHealth />);
-    fireEvent.click(screen.getByRole("button", { name: "Start Guardian preview" }));
+    fireEvent.click(screen.getByRole("button", { name: "Start Guardian check-in" }));
     expect(screen.getByText("Step 1 of 5")).toBeInTheDocument();
     expect(mocks.add).toHaveBeenCalledOnce();
     fireEvent.click(screen.getByRole("button", { name: "Review the pattern" }));
     expect(
-      screen.queryByText("Three simulated morning readings are ready."),
+      screen.queryByText("Three morning readings from the simulator are ready."),
     ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Continue to check-in" }));
   }

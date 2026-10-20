@@ -76,9 +76,9 @@ export const translationsMeals = {
     ms: "Anggaran tidak lengkap: sesetengah makanan tiada nilai pemakanan.",
     zh: "估算不完整：部分食物尚未输入营养数值。",
   },
-  "Manual estimate — use a food label or a nutritional reference.": {
-    ms: "Anggaran manual — gunakan label makanan atau rujukan pemakanan.",
-    zh: "手动估算——请参考食品标签或营养资料。",
+  "Manual estimate — use a food label or a nutrition source.": {
+    ms: "Anggaran manual — gunakan label makanan atau sumber pemakanan.",
+    zh: "手动估算——请查阅食品标签或营养资料。",
   },
   "AI estimate — ingredients and portions need your review.": {
     ms: "Anggaran AI — semak bahan dan hidangan.",
@@ -189,10 +189,6 @@ export const translationsMeals = {
   "Confirm sweet sauces or toppings; the amount and ingredients may be uncertain.": {
     ms: "Sahkan sos manis atau bahan tambahan; jumlah dan bahan mungkin tidak pasti.",
     zh: "请确认甜酱或配料；用量和食材可能不确定。",
-  },
-  "Look up Malaysian food nutrition (MyFCD)": {
-    ms: "Semak pemakanan makanan Malaysia (MyFCD)",
-    zh: "查询马来西亚食品营养（MyFCD）",
   },
   "Meal date and time": {
     ms: "Tarikh dan masa makan",
@@ -359,9 +355,9 @@ export const translationsMeals = {
     ms: "Menyemak rekod anda…",
     zh: "正在查看您的记录…",
   },
-  "This answer has not been checked against medical references. Confirm guidance with your healthcare team.":
+  "This answer has not been checked against medical sources. Confirm guidance with your healthcare team.":
     {
-      ms: "Jawapan ini belum disemak dengan rujukan perubatan. Sahkan panduan dengan pasukan penjagaan anda.",
+      ms: "Jawapan ini belum disemak dengan sumber perubatan. Sahkan panduan dengan pasukan penjagaan anda.",
       zh: "此回答未经医学资料核查。请向医疗团队确认指引。",
     },
   "Recorded meals and activity can provide context, but cannot establish the cause of a glucose change. Your doctor can help interpret this.":

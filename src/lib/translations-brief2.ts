@@ -34,6 +34,6 @@ export const translationsBrief2: Record<string, { ms: string; zh: string }> = {
   "lighter": { ms: "ringan", zh: "清淡" },
   "heavier": { ms: "berat", zh: "丰盛" },
   "Your past {group} dinners averaged {avg} mmol/L after meals (range {min}–{max}, from {n} readings), against the after-meal limit of {limit} mmol/L.": { ms: "Makan malam {group} anda sebelum ini purata {avg} mmol/L selepas makan (julat {min}–{max}, daripada {n} bacaan), berbanding had selepas makan {limit} mmol/L.", zh: "您过去{group}晚餐后的平均读数为 {avg} mmol/L（范围 {min}–{max}，共 {n} 次读数），餐后上限为 {limit} mmol/L。" },
-  "Based on your own past readings. Not a prediction.": { ms: "Berdasarkan bacaan lalu anda sendiri. Bukan ramalan.", zh: "基于您自己过去的读数，并非预测。" },
+  "Based on your own past readings.": { ms: "Berdasarkan bacaan lalu anda sendiri.", zh: "基于您自己过去的读数。" },
   "See more in Patterns": { ms: "Lihat lagi dalam Corak", zh: "在模式中查看更多" },
 };

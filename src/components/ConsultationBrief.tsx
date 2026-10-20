@@ -96,7 +96,7 @@ export function ConsultationBrief({ data, since, now }: { data: AppData; since: 
           </span>
         </li>
         <li className={row}>
-          <b>{tr("Caregiver alerts (consented, simulated)")}:</b>
+          <b>{tr("Caregiver notifications \u00b7 not sent")}:</b>
           <span>
             {alerts.length
               ? `${alerts.length} · ${alerts.filter((a) => a.acknowledgedAt).length} ${tr("acknowledged")}`

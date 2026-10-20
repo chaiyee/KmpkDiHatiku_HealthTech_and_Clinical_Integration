@@ -3,8 +3,13 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentType, ReactNode } from "react";
 import { generateSampleData } from "@/lib/sample-data";
 import { LanguageProvider, translate } from "@/lib/i18n";
+import { translations } from "@/lib/translations";
+import { Route as DoctorRoute } from "@/routes/doctor";
+import { Route as EmergencyRoute } from "@/routes/emergency";
+import { Route as CopilotRoute } from "@/routes/copilot";
 import { translationsContent } from "@/lib/translations-content";
 import { CaregiverAlerts, CaregiverSupport } from "@/components/CaregiverSupport";
+import { AppShell } from "@/components/AppShell";
 import { MedicationReminders } from "@/components/MedicationReminders";
 import { ActivityCompanion } from "@/components/ActivityCompanion";
 import { EvidenceTable } from "@/components/common";
@@ -26,6 +31,8 @@ vi.mock("@/lib/store", () => ({
     addReading: mocks.change,
     setCheckIn: mocks.change,
     saveCaregiver: mocks.change,
+    resetDemo: mocks.change,
+    loadScenario: mocks.change,
     revokeCaregiver: mocks.change,
     guardianCheckIn: mocks.change,
     addDeviceReadings: mocks.change,
@@ -35,12 +42,14 @@ vi.mock("@/lib/store", () => ({
 vi.mock("@tanstack/react-router", () => ({
   createFileRoute: () => (options: unknown) => ({ options, useSearch: () => ({ tab: "glucose" }) }),
   useNavigate: () => vi.fn(),
+  useRouterState: () => "/",
   Link: ({ children, to, hash }: { children: ReactNode; to: string; hash?: string }) => (
     <a href={`${to}${hash ? `#${hash}` : ""}`}>{children}</a>
   ),
 }));
 vi.mock("@/components/GlucoseChart", () => ({ GlucoseChart: () => <div>Glucose chart</div> }));
 beforeEach(() => {
+  Element.prototype.scrollIntoView = vi.fn();
   vi.stubGlobal(
     "ResizeObserver",
     class {
@@ -58,6 +67,38 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("compact patient content", () => {
+  it("has no obsolete range or source wording in any translation key or value", () => {
+    for (const [key, values] of Object.entries(translations)) {
+      expect([key, values.ms, values.zh].join(" ")).not.toMatch(/\breferences?\b|rujukan|参考/i);
+    }
+  });
+  it.each(["en", "ms", "zh"] as const)(
+    "renders all six pages without obsolete wording in %s",
+    (language) => {
+      localStorage.setItem("diamonitor-language", language);
+      const before = JSON.stringify(mocks.data);
+      for (const route of [
+        OverviewRoute,
+        HealthRoute,
+        CarePlanRoute,
+        DoctorRoute,
+        EmergencyRoute,
+        CopilotRoute,
+      ]) {
+        const Page = route.options.component as ComponentType;
+        const { container, unmount } = render(
+          <LanguageProvider>
+            <Page />
+          </LanguageProvider>,
+        );
+        expect(container.textContent).not.toMatch(/\breferences?\b|rujukan|参考/i);
+        unmount();
+      }
+      expect(JSON.stringify(mocks.data)).toBe(before);
+      expect(mocks.change).not.toHaveBeenCalled();
+    },
+  );
+
   it.each(["en", "ms", "zh"] as const)("translates all new labels into %s", (language) => {
     for (const key of Object.keys(translationsContent)) {
       const text = translate(key, language);
@@ -80,7 +121,7 @@ describe("compact patient content", () => {
         />
       </LanguageProvider>,
     );
-    for (const key of ["Sample", "Simulated", "Patient-entered"])
+    for (const key of ["Not personally measured", "Device simulation", "Manually recorded"])
       expect(screen.getByText(translate(key, language))).toBeInTheDocument();
   });
   it("keeps prescription guidance at the medication entry decision", () => {
@@ -104,7 +145,7 @@ describe("compact patient content", () => {
         <CaregiverSupport />
       </>,
     );
-    expect(screen.queryByText("Caregiver preview history")).toBeNull();
+    expect(screen.queryByText("Caregiver notification history")).toBeNull();
     expect(screen.queryByText(/No caregiver alert previews yet/)).toBeNull();
     expect(screen.queryByText(/Revoke sharing to stop new previews/)).toBeNull();
     expect(screen.getByRole("button", { name: "Revoke sharing consent" })).toBeVisible();
@@ -199,7 +240,7 @@ describe("compact patient content", () => {
       expect(screen.queryByText(heading)).toBeNull();
       expect(screen.getByText("Aisha")).toBeVisible();
       expect(
-        screen.getAllByText(translate("Preview only · no messages sent", language)).length,
+        screen.getAllByText(translate("Notification not sent", language)).length,
       ).toBeGreaterThan(0);
       delete mocks.data.caregiver;
       rerender(view());
@@ -230,6 +271,29 @@ describe("compact patient content", () => {
       window.history.replaceState(null, "", "/");
     }
   });
+  it("discloses generated data in demonstration tools and confirms replacement before resetting", () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    try {
+      render(
+        <AppShell>
+          <p>Dashboard content</p>
+        </AppShell>,
+      );
+      expect(screen.getByText("My Profile")).toBeVisible();
+      fireEvent.click(screen.getByText("Record tools"));
+      expect(screen.getByText("Includes generated demonstration records.")).toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Restore demonstration records" }));
+      expect(confirm).toHaveBeenCalledWith(
+        expect.stringContaining("including records saved to your signed-in account"),
+      );
+      expect(mocks.change).not.toHaveBeenCalled();
+      confirm.mockReturnValue(true);
+      fireEvent.click(screen.getByRole("button", { name: "Restore demonstration records" }));
+      expect(mocks.change).toHaveBeenCalledTimes(1);
+    } finally {
+      confirm.mockRestore();
+    }
+  });
   it("keeps short activity safety guidance visible and medicine risk accessible", () => {
     render(<ActivityCompanion />);
     expect(
@@ -248,7 +312,7 @@ describe("compact patient content", () => {
     const before = JSON.stringify(mocks.data);
     const { container } = render(<Page />);
     expect(container.textContent).not.toContain(
-      "Reference ranges in this workspace are for demonstration",
+      "Glucose Ranges in this workspace are for demonstration",
     );
     expect(container.textContent).not.toContain(
       "Follow your prescription. These are self-reported records",

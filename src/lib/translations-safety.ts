@@ -30,7 +30,7 @@ export const translationsSafety = {
   "Informational estimate only. Do not adjust insulin or oral medications without your doctor's protocol.":
     {
       ms: "Anggaran untuk maklumat sahaja. Jangan ubah insulin atau ubat oral tanpa protokol doktor anda.",
-      zh: "仅供参考。请勿在没有医生方案的情况下调整胰岛素或口服药。",
+      zh: "仅作信息估算。请勿在没有医生方案的情况下调整胰岛素或口服药。",
     },
   "{count} days with fasting readings available.": {
     ms: "{count} hari mempunyai bacaan puasa.",

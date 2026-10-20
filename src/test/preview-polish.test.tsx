@@ -91,6 +91,9 @@ describe("patient-only doctor visit", () => {
     const previouslyClosed = sections.filter((section) => !section.hasAttribute("open"));
     const print = vi.spyOn(window, "print").mockImplementation(() => {
       expect(sections.every((section) => section.hasAttribute("open"))).toBe(true);
+      expect(document.querySelector("article")?.textContent).not.toMatch(
+        /\breferences?\b|rujukan|参考/i,
+      );
     });
     fireEvent.click(screen.getByRole("button", { name: "Print / Save PDF" }));
     expect(print).toHaveBeenCalledOnce();
@@ -114,7 +117,7 @@ describe("graceful Copilot preview", () => {
           name: translate("How many carbohydrates did I eat today?", language),
         }),
       );
-      await screen.findByText(translate("Guided record review", language));
+      await screen.findByText(translate("Guided record review", language), {}, { timeout: 4000 });
       expect(container.textContent).not.toMatch(
         /unavailable|not configured|API key|pre-written|tidak tersedia|不可用/,
       );
@@ -135,7 +138,7 @@ describe("graceful Copilot preview", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "How many carbohydrates did I eat today?" }),
     );
-    await screen.findByText("Guided record review");
+    await screen.findByText("Guided record review", {}, { timeout: 4000 });
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(screen.queryByText("AI-assisted record review")).not.toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unavailable");
@@ -155,7 +158,7 @@ describe("graceful Copilot preview", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "How many carbohydrates did I eat today?" }),
     );
-    await screen.findByText("Reviewed saved records");
+    await screen.findByText("Reviewed saved records", {}, { timeout: 4000 });
     expect(screen.getByText("AI-assisted record review")).toBeInTheDocument();
   });
   it("keeps urgent safety guidance and avoids an online request", async () => {
