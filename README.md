@@ -6,8 +6,14 @@ DiaMonitor Global helps people living with diabetes keep their daily health info
 
 > **Important:** DiaMonitor is a health-support and educational application, not a medical device or a substitute for professional diagnosis, treatment, or emergency services. Automated insights, forecasts, and AI responses must not be used alone to make medication or emergency-care decisions.
 
+## Project resources
+
+- **[Pitching slides](https://drive.google.com/file/d/1Y0bjGUkQ5RJaiGwFEb74CJ5qjp9DVzi6/view?usp=sharing)** — Project presentation and pitch deck.
+- **[Pitching video](https://drive.google.com/file/d/1A4MUSc5pApfk3y4AFvAx7WPTB7n3G3st/view?usp=sharing)** — Video presentation of the project.
+
 ## Contents
 
+- [Project resources](#project-resources)
 - [The problem](#the-problem)
 - [Our solution](#our-solution)
 - [Features](#features)
@@ -280,10 +286,6 @@ Contributions should preserve patient safety, accessibility, multilingual suppor
 5. Run linting, tests, and a build.
 6. Clearly document changes to health-related rules, data sharing, or authentication.
 
-## Project resources
-
-- **[Pitching slides](https://drive.google.com/file/d/1Y0bjGUkQ5RJaiGwFEb74CJ5qjp9DVzi6/view?usp=sharing)** — Project presentation and pitch deck.
-- **[Pitching video](https://drive.google.com/file/d/1A4MUSc5pApfk3y4AFvAx7WPTB7n3G3st/view?usp=sharing)** — Video presentation of the project.
 
 ---
 
